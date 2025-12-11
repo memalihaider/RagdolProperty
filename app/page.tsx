@@ -15,6 +15,7 @@ import {
   StarIcon,
 } from '@heroicons/react/24/outline'
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid'
+// Database types already imported above
 
 export const metadata: Metadata = {
   title: 'RAGDOL - Premium Real Estate in Dubai | Buy, Sell & Rent Properties',
@@ -173,262 +174,181 @@ const mockRentalProperties = [
   },
 ]
 
-// Mock agents data
-const mockAgents = [
-  {
-    id: 'a1',
-    name: 'Sarah Ahmed',
-    title: 'Senior Real Estate Agent',
-    image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&q=80',
-    experience: '8+ years',
-    properties: 150,
-    rating: 4.9,
-    reviews: 89,
-    specialties: ['Luxury Properties', 'Investment Properties'],
-  },
-  {
-    id: 'a2',
-    name: 'Ahmed Hassan',
-    title: 'Commercial Property Specialist',
-    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80',
-    experience: '12+ years',
-    properties: 200,
-    rating: 4.8,
-    reviews: 124,
-    specialties: ['Commercial', 'Office Spaces'],
-  },
-  {
-    id: 'a3',
-    name: 'Fatima Khan',
-    title: 'Luxury Property Consultant',
-    image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&q=80',
-    experience: '6+ years',
-    properties: 95,
-    rating: 5.0,
-    reviews: 67,
-    specialties: ['Luxury Villas', 'High-end Apartments'],
-  },
-  {
-    id: 'a4',
-    name: 'Omar Al-Rashid',
-    title: 'Property Investment Advisor',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80',
-    experience: '10+ years',
-    properties: 180,
-    rating: 4.7,
-    reviews: 98,
-    specialties: ['Investment Properties', 'Off-plan Projects'],
-  },
-]
+// Type helpers
+type AgentRow = Database['public']['Tables']['agents']['Row']
+type ProfileRow = Database['public']['Tables']['profiles']['Row']
+type AgentWithProfile = AgentRow & { profiles?: ProfileRow | null }
 
-// Mock partners data
-const mockPartners = [
-  {
-    id: 'p1',
-    name: 'Dubai Properties',
-    logo: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=200&q=80',
-    description: 'Leading real estate developer in Dubai',
-  },
-  {
-    id: 'p2',
-    name: 'Emaar Properties',
-    logo: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=200&q=80',
-    description: 'Premium property development company',
-  },
-  {
-    id: 'p3',
-    name: 'DAMAC Properties',
-    logo: 'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1f?w=200&q=80',
-    description: 'Luxury lifestyle and real estate developer',
-  },
-  {
-    id: 'p4',
-    name: 'Nakheel Properties',
-    logo: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=200&q=80',
-    description: 'Master developer of Dubai properties',
-  },
-  {
-    id: 'p5',
-    name: 'Dubai Chamber',
-    logo: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=200&q=80',
-    description: 'Business and real estate chamber',
-  },
-  {
-    id: 'p6',
-    name: 'REA Dubai',
-    logo: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=200&q=80',
-    description: 'Real Estate Association of Dubai',
-  },
-]
+// Interface for UI properties
+interface UIProperty {
+  id: string
+  title: string
+  price: number
+  priceLabel: string
+  image: string
+  location: string
+  beds: number
+  baths: number
+  sqft: number
+  type: string
+  featured: boolean
+}
 
-// Mock blogs data
-const mockBlogs = [
-  {
-    id: 'b1',
-    title: 'Dubai Real Estate Market Trends 2024',
-    excerpt: 'Discover the latest trends shaping Dubai\'s property market and what it means for investors.',
-    image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=600&q=80',
-    author: 'Market Analysis Team',
-    date: '2024-12-01',
-    readTime: '5 min read',
-    category: 'Market Insights',
-  },
-  {
-    id: 'b2',
-    title: 'Investment Opportunities in Dubai Marina',
-    excerpt: 'Why Dubai Marina remains one of the most attractive investment destinations in the UAE.',
-    image: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=600&q=80',
-    author: 'Investment Advisors',
-    date: '2024-11-28',
-    readTime: '4 min read',
-    category: 'Investment',
-  },
-  {
-    id: 'b3',
-    title: 'Luxury Living: Dubai\'s Most Exclusive Communities',
-    excerpt: 'Explore Dubai\'s premier luxury residential communities and their unique offerings.',
-    image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&q=80',
-    author: 'Luxury Specialist',
-    date: '2024-11-25',
-    readTime: '6 min read',
-    category: 'Luxury',
-  },
-]
+// Transform database property to UI property
+function transformProperty(dbProperty: Property, isRental: boolean = false): UIProperty {
+  return {
+    id: dbProperty.id || '',
+    title: dbProperty.title || 'Untitled Property',
+    price: dbProperty.price || 0,
+    priceLabel: isRental ? 'per_month' : 'total',
+    image: (dbProperty.images && Array.isArray(dbProperty.images) && dbProperty.images[0]) ? dbProperty.images[0] : '/api/placeholder/400/300',
+    location: dbProperty.address ? `${dbProperty.address}${dbProperty.area ? ', ' + dbProperty.area : ''}` : 'Dubai',
+    beds: dbProperty.beds || 0,
+    baths: dbProperty.baths || 0,
+    sqft: dbProperty.built_up_area || dbProperty.sqft || 0,
+    type: dbProperty.type || 'Property',
+    featured: dbProperty.featured || false,
+  }
+}
 
-async function getFeaturedProperties(): Promise<Property[]> {
+// Fetch featured properties (sale status)
+async function getFeaturedProperties(limit = 6): Promise<UIProperty[]> {
   try {
     const supabase = await createClient()
-    
     const { data, error } = await supabase
       .from('properties')
       .select('*')
-      .eq('published', true)
+      .eq('status', 'sale')
       .eq('featured', true)
       .order('created_at', { ascending: false })
-      .limit(6)
+      .limit(limit)
 
-    if (error) {
-      // Silently fail for development with placeholder credentials
-      return []
-    }
-
-    return data || []
+    if (error || !data) return []
+    return (data as Property[]).map(p => transformProperty(p, false))
   } catch (err) {
-    // Silently fail for development with placeholder credentials
     return []
   }
 }
 
-async function getLatestProperties(): Promise<Property[]> {
+// Fetch rental properties (rent status)
+async function getRentalProperties(limit = 4): Promise<UIProperty[]> {
   try {
     const supabase = await createClient()
-    
     const { data, error } = await supabase
       .from('properties')
       .select('*')
-      .eq('published', true)
+      .eq('status', 'rent')
       .order('created_at', { ascending: false })
-      .limit(8)
+      .limit(limit)
 
-    if (error) {
-      // Silently fail for development with placeholder credentials
-      return []
-    }
-
-    return data || []
+    if (error || !data) return []
+    return (data as Property[]).map(p => transformProperty(p, true))
   } catch (err) {
-    // Silently fail for development with placeholder credentials
     return []
   }
 }
 
-export default async function Home({ searchParams }: { searchParams?: Record<string, string | string[] | undefined> }) {
-  const params = searchParams || {}
-  const initialSearch = (params.search as string) || ''
-  const [featuredProperties, latestProperties] = await Promise.all([
-    getFeaturedProperties(),
-    getLatestProperties(),
-  ])
+// Fetch top agents by rating
+async function getTopAgents(limit = 4): Promise<AgentWithProfile[]> {
+  try {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+      .from('agents')
+      .select('*, profiles:profiles(*)')
+      .order('rating', { ascending: false })
+      .limit(limit)
+
+    if (error || !data) return []
+    return data as AgentWithProfile[]
+  } catch (err) {
+    return []
+  }
+}
+
+export default async function HomePage() {
+  const topAgents = await getTopAgents()
+  const featuredProperties = await getFeaturedProperties()
+  const rentalProperties = await getRentalProperties()
 
   return (
-    <div className="w-full">
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-b from-card to-background py-20 md:py-32">
-        <div className="container-custom">
-          <div className="max-w-4xl mx-auto text-center space-y-8">
-            <h1 className="text-4xl md:text-6xl font-bold leading-tight">
-              Find Your Dream <span className="text-gradient">Property</span>
-              <br />
-              in Dubai
-            </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-              Discover premium apartments, villas, plots, and commercial properties
-              across major cities in Dubai
-            </p>
+    <div>
+      {/* Hero Landing Section */}
+      <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/20 rounded-full blur-3xl"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-primary/10 to-secondary/10 rounded-full blur-3xl"></div>
+        </div>
 
-            {/* Quick Search */}
+        <div className="container-custom relative z-10">
+          <div className="text-center max-w-4xl mx-auto space-y-8">
+            {/* Main Heading */}
+            <div className="space-y-4">
+              <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
+                Find Your <span className="text-gradient bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Dream Property</span>
+              </h1>
+              <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+                Discover premium properties in Dubai's most exclusive locations. From luxury apartments to stunning villas, find your perfect home with expert guidance.
+              </p>
+            </div>
+
+            {/* Search Component */}
             <div className="max-w-3xl mx-auto">
-              {/* Client-side search component */}
-              <HeroSearch initialValue={initialSearch} />
+              <HeroSearch />
+            </div>
 
-              {/* Quick Links */}
-              <div className="flex flex-wrap justify-center gap-3 mt-6">
-                <Link
-                  href="/apartments"
-                  className="px-4 py-2 text-sm bg-muted hover:bg-muted/80 rounded-full transition-colors"
-                >
-                  Apartments
-                </Link>
-                <Link
-                  href="/villas"
-                  className="px-4 py-2 text-sm bg-muted hover:bg-muted/80 rounded-full transition-colors"
-                >
-                  Villas
-                </Link>
-                <Link
-                  href="/townhouses"
-                  className="px-4 py-2 text-sm bg-muted hover:bg-muted/80 rounded-full transition-colors"
-                >
-                  Townhouses
-                </Link>
-                <Link
-                  href="/residential-plots"
-                  className="px-4 py-2 text-sm bg-muted hover:bg-muted/80 rounded-full transition-colors"
-                >
-                  Residential Plots
-                </Link>
-                <Link
-                  href="/furnished-studio"
-                  className="px-4 py-2 text-sm bg-muted hover:bg-muted/80 rounded-full transition-colors"
-                >
-                  Furnished Studios
-                </Link>
-                <Link
-                  href="/plots"
-                  className="px-4 py-2 text-sm bg-muted hover:bg-muted/80 rounded-full transition-colors"
-                >
-                  All Plots
-                </Link>
-                <Link
-                  href="/properties-dubai"
-                  className="px-4 py-2 text-sm bg-muted hover:bg-muted/80 rounded-full transition-colors"
-                >
-                  All Properties
-                </Link>
-                <Link
-                  href="/projects"
-                  className="px-4 py-2 text-sm bg-muted hover:bg-muted/80 rounded-full transition-colors"
-                >
-                  New Projects
-                </Link>
-                <Link
-                  href="/properties?featured=true"
-                  className="px-4 py-2 text-sm bg-primary/10 text-primary hover:bg-primary/20 rounded-full transition-colors"
-                >
-                  ✨ Featured
-                </Link>
+            {/* Quick Action Buttons */}
+            <div className="flex flex-wrap gap-4 justify-center pt-8">
+              <Link
+                href="/properties"
+                className="group px-6 py-3 bg-primary text-primary-foreground rounded-full font-semibold text-sm hover:bg-primary/90 transition-all duration-300 hover:scale-105 hover:shadow-lg"
+              >
+                <HomeIcon className="w-4 h-4 inline mr-2 group-hover:scale-110 transition-transform" />
+                Browse Properties
+              </Link>
+              <Link
+                href="/projects"
+                className="group px-6 py-3 bg-secondary text-secondary-foreground rounded-full font-semibold text-sm hover:bg-secondary/90 transition-all duration-300 hover:scale-105 hover:shadow-lg"
+              >
+                <BuildingOffice2Icon className="w-4 h-4 inline mr-2 group-hover:scale-110 transition-transform" />
+                New Developments
+              </Link>
+              <Link
+                href="/properties?featured=true"
+                className="group px-6 py-3 bg-gradient-to-r from-primary/10 to-secondary/10 text-primary border border-primary/20 rounded-full font-semibold text-sm hover:from-primary/20 hover:to-secondary/20 transition-all duration-300 hover:scale-105 hover:shadow-lg"
+              >
+                <SparklesIcon className="w-4 h-4 inline mr-2 group-hover:scale-110 transition-transform" />
+                Featured Listings
+              </Link>
+            </div>
+
+            {/* Stats or Trust Indicators */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-16 max-w-2xl mx-auto">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary">5000+</div>
+                <div className="text-sm text-muted-foreground">Properties</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary">200+</div>
+                <div className="text-sm text-muted-foreground">Agents</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary">50+</div>
+                <div className="text-sm text-muted-foreground">Projects</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary">10K+</div>
+                <div className="text-sm text-muted-foreground">Happy Clients</div>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+          <div className="w-6 h-10 border-2 border-muted-foreground/30 rounded-full flex justify-center">
+            <div className="w-1 h-3 bg-muted-foreground/50 rounded-full mt-2 animate-pulse"></div>
           </div>
         </div>
       </section>
@@ -561,7 +481,7 @@ export default async function Home({ searchParams }: { searchParams?: Record<str
           </div>
           <PropertySlider 
             title=""
-            properties={mockFeaturedProperties}
+            properties={featuredProperties.length > 0 ? featuredProperties : mockFeaturedProperties}
             showCount={4}
           />
         </div>
@@ -578,9 +498,9 @@ export default async function Home({ searchParams }: { searchParams?: Record<str
               Flexible rental options from furnished studios to luxury villas
             </p>
           </div>
-          <PropertySlider 
+          <PropertySlider
             title=""
-            properties={mockRentalProperties}
+            properties={rentalProperties.length > 0 ? rentalProperties : mockRentalProperties}
             showCount={4}
           />
         </div>
@@ -665,8 +585,8 @@ export default async function Home({ searchParams }: { searchParams?: Record<str
         </div>
       </section>
 
-      {/* Latest Properties */}
-      {latestProperties.length > 0 && (
+      {/* Latest Properties - TODO: Implement with real data */}
+      {/* {mockFeaturedProperties.length > 0 && (
         <section className="section-padding bg-background">
           <div className="container-custom">
             <div className="flex items-center justify-between mb-8">
@@ -687,7 +607,7 @@ export default async function Home({ searchParams }: { searchParams?: Record<str
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {latestProperties.map((property) => (
+              {mockFeaturedProperties.map((property) => (
                 <ListingCard key={property.id} property={property} />
               ))}
             </div>
@@ -699,7 +619,7 @@ export default async function Home({ searchParams }: { searchParams?: Record<str
             </div>
           </div>
         </section>
-      )}
+      )} */}
 
       {/* Top Agents Section */}
       <section className="section-padding bg-background">
@@ -714,15 +634,15 @@ export default async function Home({ searchParams }: { searchParams?: Record<str
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {mockAgents.map((agent) => (
+            {topAgents.map((agent) => (
               <div key={agent.id} className="card-custom group hover:shadow-xl transition-all duration-300">
                 <div className="text-center">
                   {/* Agent Image */}
                   <div className="relative mb-4">
                     <div className="w-24 h-24 mx-auto rounded-full overflow-hidden bg-muted">
                       <img
-                        src={agent.image}
-                        alt={agent.name}
+                        src={agent.profiles?.avatar_url || agent.profile_image || '/api/placeholder/96/96'}
+                        alt={agent.profiles?.full_name || agent.title || 'Agent'}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -731,36 +651,36 @@ export default async function Home({ searchParams }: { searchParams?: Record<str
                         <StarSolidIcon
                           key={i}
                           className={`h-4 w-4 ${
-                            i < Math.floor(agent.rating)
+                            i < Math.floor(agent.rating || 0)
                               ? 'text-yellow-400'
                               : 'text-gray-300'
                           }`}
                         />
                       ))}
                       <span className="text-sm text-muted-foreground ml-1">
-                        ({agent.reviews})
+                        ({agent.review_count ?? 0})
                       </span>
                     </div>
                   </div>
 
                   {/* Agent Info */}
                   <h3 className="font-semibold text-lg mb-1 group-hover:text-primary transition-colors">
-                    {agent.name}
+                    {agent.profiles?.full_name || agent.title || 'Agent'}
                   </h3>
                   <p className="text-sm text-primary font-medium mb-2">{agent.title}</p>
-                  <p className="text-sm text-muted-foreground mb-3">{agent.experience} experience</p>
+                  <p className="text-sm text-muted-foreground mb-3">{agent.experience_years ?? 'N/A'} experience</p>
 
                   {/* Stats */}
-                  <div className="flex justify-center gap-4 text-sm text-muted-foreground mb-4">
+                    <div className="flex justify-center gap-4 text-sm text-muted-foreground mb-4">
                     <div className="text-center">
-                      <div className="font-semibold text-foreground">{agent.properties}</div>
+                      <div className="font-semibold text-foreground">{agent.total_sales ?? agent.total_sales ?? '—'}</div>
                       <div>Properties</div>
                     </div>
                   </div>
 
                   {/* Specialties */}
-                  <div className="flex flex-wrap gap-1 justify-center">
-                    {agent.specialties.map((specialty, index) => (
+                    <div className="flex flex-wrap gap-1 justify-center">
+                    {(agent.specializations || []).map((specialty, index) => (
                       <span
                         key={index}
                         className="px-2 py-1 text-xs bg-primary/10 text-primary rounded-full"
@@ -790,8 +710,8 @@ export default async function Home({ searchParams }: { searchParams?: Record<str
         </div>
       </section>
 
-      {/* Partners Section */}
-      <section className="section-padding bg-card">
+      {/* Partners Section - TODO: Implement with real data */}
+      {/* <section className="section-padding bg-card">
         <div className="container-custom">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -825,80 +745,9 @@ export default async function Home({ searchParams }: { searchParams?: Record<str
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
-      {/* Blog Section */}
-      <section className="section-padding bg-background">
-        <div className="container-custom">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Latest <span className="text-gradient">Insights</span>
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Stay informed with the latest real estate news, market trends, and expert advice
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {mockBlogs.map((blog) => (
-              <article key={blog.id} className="card-custom group overflow-hidden hover:shadow-xl transition-all duration-300">
-                {/* Blog Image */}
-                <div className="relative h-48 overflow-hidden bg-muted">
-                  <img
-                    src={blog.image}
-                    alt={blog.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute top-3 left-3">
-                    <span className="px-3 py-1 text-xs font-semibold bg-primary text-primary-foreground rounded-full">
-                      {blog.category}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Blog Content */}
-                <div className="p-6">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-                    <span>{blog.author}</span>
-                    <span>•</span>
-                    <span>{blog.readTime}</span>
-                  </div>
-
-                  <h3 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors line-clamp-2">
-                    {blog.title}
-                  </h3>
-
-                  <p className="text-muted-foreground mb-4 line-clamp-3">
-                    {blog.excerpt}
-                  </p>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">
-                      {new Date(blog.date).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
-                    </span>
-                    <Link
-                      href={`/blog/${blog.id}`}
-                      className="text-primary hover:text-primary/80 font-medium text-sm transition-colors"
-                    >
-                      Read More →
-                    </Link>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-
-          <div className="text-center mt-8">
-            <Link href="/blog" className="btn-outline">
-              View All Articles
-            </Link>
-          </div>
-        </div>
-      </section>
+      {/* Blog Section - TODO: Implement with real data */}
 
       {/* CTA Section */}
       <section className="section-padding bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10">

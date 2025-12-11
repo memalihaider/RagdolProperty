@@ -41,6 +41,7 @@ type NormalizedProperty = Property & {
   features?: string[] | null
 }
 import PropertyCard, { PropertyCardProperty } from '@/components/PropertyCard'
+import PropertyAgents from '@/components/PropertyAgents'
 import {
   ViewColumnsIcon,
   QueueListIcon,
@@ -1080,6 +1081,9 @@ export default async function PropertiesPage({ searchParams }: { searchParams?: 
           </div>
         </div>
       </div>
+
+      {/* Featured Agents Section */}
+      <PropertyAgents />
     </div>
   )
 }

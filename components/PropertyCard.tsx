@@ -21,6 +21,17 @@ export interface PropertyCardProperty {
   status?: string
   area?: string
   city?: string
+  agent_id?: string | null
+  agent?: {
+    id: string
+    title?: string
+    brokerage?: string
+    profile_image?: string | null
+    whatsapp?: string | null
+    profiles?: {
+      full_name?: string
+    } | null
+  } | null
 }
 
 export interface PropertyCardProps {
@@ -127,6 +138,37 @@ export default function PropertyCard({ property, isSaved = false, onSaveToggle }
           <div className="text-sm font-medium text-primary capitalize">
             {property.type || 'Property'}
           </div>
+
+          {/* Agent Section */}
+          {property.agent && (
+            <div className="mt-4 pt-4 border-t border-border">
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-muted overflow-hidden border border-border">
+                  {property.agent.profile_image ? (
+                    <Image
+                      src={property.agent.profile_image}
+                      alt={property.agent.profiles?.full_name || 'Agent'}
+                      width={40}
+                      height={40}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-primary/20 flex items-center justify-center text-xs font-semibold text-primary">
+                      {(property.agent.profiles?.full_name || 'A')[0]}
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground truncate">
+                    {property.agent.profiles?.full_name || 'Agent'}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {property.agent.title || property.agent.brokerage || 'Real Estate Agent'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </Link>

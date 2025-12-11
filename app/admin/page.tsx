@@ -398,6 +398,13 @@ export default function AdminPanel() {
               <WrenchScrewdriverIcon className="w-5 h-5" />
               Settings
             </button>
+            <a
+              href="/admin/agents"
+              className="w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center gap-3 hover:bg-primary hover:text-primary-foreground text-foreground"
+            >
+              <BriefcaseIcon className="w-5 h-5" />
+              Manage Agents
+            </a>
             <button
               onClick={() => setActiveTab('system')}
               className={`w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center gap-3 ${

@@ -126,6 +126,34 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to create enquiry' }, { status: 500 })
     }
 
+    // Send confirmation emails asynchronously (don't wait for them)
+    if (enquiry && enquiry.email) {
+      try {
+        const { sendInquiryConfirmation, sendAdminNotification } = await import('@/lib/email')
+        
+        // Send customer confirmation
+        await sendInquiryConfirmation(
+          enquiry.email,
+          enquiry.name,
+          enquiry.properties?.title || 'Property',
+          enquiry.properties?.address || 'Dubai'
+        )
+
+        // Send admin notification
+        const adminEmail = process.env.ADMIN_EMAIL || 'admin@ragdol.com'
+        await sendAdminNotification(adminEmail, 'inquiry', {
+          name: enquiry.name,
+          email: enquiry.email,
+          phone: enquiry.phone,
+          propertyTitle: enquiry.properties?.title || 'Property',
+          message: enquiry.message
+        })
+      } catch (emailError) {
+        console.error('Email sending error:', emailError)
+        // Don't fail the request if email fails
+      }
+    }
+
     return NextResponse.json({ enquiry }, { status: 201 })
 
   } catch (error) {

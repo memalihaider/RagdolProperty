@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase-server'
 import { Database } from '@/lib/database.types'
 import PropertyImageGallery from '@/components/PropertyImageGallery'
 import PropertySlider from '@/components/PropertySlider'
+import PropertyAgents from '@/components/PropertyAgents'
 import {
   MapPinIcon,
   HomeIcon,
@@ -616,6 +617,13 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                       <EnvelopeIcon className="w-4 h-4 inline mr-2" />
                       Email
                     </button>
+                    {/* View Profile Button */}
+                    <Link
+                      href={`/agents/${property.agent?.agent_details?.id || property.agent?.id}`}
+                      className="w-full block text-center py-3 px-4 rounded-lg font-semibold text-sm bg-yellow-600 hover:bg-yellow-700 text-white transition-colors"
+                    >
+                      View Profile
+                    </Link>
                   </div>
 
                   {/* Bio */}
@@ -777,6 +785,9 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
             />
           </section>
         )}
+
+        {/* Featured Agents Section */}
+        <PropertyAgents />
       </div>
     </div>
   )
