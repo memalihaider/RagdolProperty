@@ -470,6 +470,48 @@ export type Database = {
           },
         ]
       }
+      customer_questions: {
+        Row: {
+          admin_id: string | null
+          admin_response: string | null
+          admin_response_at: string | null
+          category: string
+          created_at: string | null
+          id: string
+          message: string
+          status: string
+          subject: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          admin_id?: string | null
+          admin_response?: string | null
+          admin_response_at?: string | null
+          category?: string
+          created_at?: string | null
+          id?: string
+          message: string
+          status?: string
+          subject: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          admin_id?: string | null
+          admin_response?: string | null
+          admin_response_at?: string | null
+          category?: string
+          created_at?: string | null
+          id?: string
+          message?: string
+          status?: string
+          subject?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       dashboard_metrics: {
         Row: {
           created_at: string | null
@@ -1087,7 +1129,7 @@ export type Database = {
           phone: string | null
           phone_verified: boolean | null
           preferences: Json | null
-          role: string | null
+          role: string
           social_links: Json | null
           updated_at: string | null
         }
@@ -1104,7 +1146,7 @@ export type Database = {
           phone?: string | null
           phone_verified?: boolean | null
           preferences?: Json | null
-          role?: string | null
+          role?: string
           social_links?: Json | null
           updated_at?: string | null
         }
@@ -1121,19 +1163,11 @@ export type Database = {
           phone?: string | null
           phone_verified?: boolean | null
           preferences?: Json | null
-          role?: string | null
+          role?: string
           social_links?: Json | null
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       projects: {
         Row: {
@@ -1467,6 +1501,75 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      property_valuations: {
+        Row: {
+          additional_features: string | null
+          admin_notes: string | null
+          bathrooms: number | null
+          bedrooms: number | null
+          condition: string | null
+          contact_method: string | null
+          created_at: string | null
+          estimated_value: number | null
+          id: string
+          location: string
+          property_type: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          size_sqm: number | null
+          status: string
+          updated_at: string | null
+          urgency: string | null
+          user_id: string | null
+          valuation_notes: string | null
+          year_built: number | null
+        }
+        Insert: {
+          additional_features?: string | null
+          admin_notes?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          condition?: string | null
+          contact_method?: string | null
+          created_at?: string | null
+          estimated_value?: number | null
+          id?: string
+          location: string
+          property_type: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          size_sqm?: number | null
+          status?: string
+          updated_at?: string | null
+          urgency?: string | null
+          user_id?: string | null
+          valuation_notes?: string | null
+          year_built?: number | null
+        }
+        Update: {
+          additional_features?: string | null
+          admin_notes?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          condition?: string | null
+          contact_method?: string | null
+          created_at?: string | null
+          estimated_value?: number | null
+          id?: string
+          location?: string
+          property_type?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          size_sqm?: number | null
+          status?: string
+          updated_at?: string | null
+          urgency?: string | null
+          user_id?: string | null
+          valuation_notes?: string | null
+          year_built?: number | null
+        }
+        Relationships: []
       }
       property_views: {
         Row: {
