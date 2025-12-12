@@ -71,6 +71,7 @@ export async function POST(req: NextRequest) {
         features: body.features || [],
         amenities: body.amenities || [],
         agent_id: body.agent_id,
+        category_id: body.category_id,
         published: body.published !== false,
         featured: body.featured || false,
         verified: body.verified !== false,

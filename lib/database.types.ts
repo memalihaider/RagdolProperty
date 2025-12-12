@@ -470,6 +470,56 @@ export type Database = {
           },
         ]
       }
+      categories: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          parent_id: string | null
+          slug: string | null
+          sort_order: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          parent_id?: string | null
+          slug?: string | null
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          parent_id?: string | null
+          slug?: string | null
+          sort_order?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_questions: {
         Row: {
           admin_id: string | null
@@ -1313,6 +1363,7 @@ export type Database = {
           beds: number | null
           built_up_area: number | null
           city: string | null
+          category_id: string | null
           coords: Json | null
           created_at: string | null
           currency: string | null
@@ -1371,6 +1422,7 @@ export type Database = {
           beds?: number | null
           built_up_area?: number | null
           city?: string | null
+          category_id?: string | null
           coords?: Json | null
           created_at?: string | null
           currency?: string | null
@@ -1429,6 +1481,7 @@ export type Database = {
           beds?: number | null
           built_up_area?: number | null
           city?: string | null
+          category_id?: string | null
           coords?: Json | null
           created_at?: string | null
           currency?: string | null
@@ -1484,6 +1537,13 @@ export type Database = {
             columns: ["agent_id"]
             isOneToOne: false
             referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
             referencedColumns: ["id"]
           },
           {

@@ -69,7 +69,8 @@ export default function AdminPanel() {
   const [selectedPropertyDetails, setSelectedPropertyDetails] = useState<any>(null)
 
   // Categories Management State
-  const [categories, setCategories] = useState<any[]>(propertyCategories)
+  const [categories, setCategories] = useState<any[]>([])
+  const [agents, setAgents] = useState<any[]>([])
   const [showAddCategory, setShowAddCategory] = useState(false)
   const [editingCategory, setEditingCategory] = useState<any>(null)
   const [showCategoryDetails, setShowCategoryDetails] = useState(false)
@@ -205,6 +206,33 @@ export default function AdminPanel() {
     }
   }, [user, profile, loading, router])
 
+  // Fetch categories and agents data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch categories
+        const categoriesResponse = await fetch('/api/admin/categories')
+        if (categoriesResponse.ok) {
+          const categoriesData = await categoriesResponse.json()
+          setCategories(categoriesData)
+        }
+
+        // Fetch agents
+        const agentsResponse = await fetch('/api/admin/agents')
+        if (agentsResponse.ok) {
+          const agentsData = await agentsResponse.json()
+          setAgents(agentsData)
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error)
+      }
+    }
+
+    if (user && profile?.role === 'admin') {
+      fetchData()
+    }
+  }, [user, profile])
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -221,45 +249,60 @@ export default function AdminPanel() {
   }
 
   const handlePropertySubmit = async (propertyData: any) => {
-    if (editingProperty) {
-      // Update existing property
-      setProperties(prev => prev.map(p =>
-        p.id === editingProperty.id ? { ...p, ...propertyData, updatedAt: new Date().toISOString().split('T')[0] } : p
-      ))
-    } else {
-      // Create new property
-      const newProperty = {
-        id: Date.now().toString(),
-        ...propertyData,
-        status: 'available',
-        createdAt: new Date().toISOString().split('T')[0],
-        updatedAt: new Date().toISOString().split('T')[0],
-        views: 0,
-        inquiries: 0
+    try {
+      const response = await fetch('/api/admin/properties', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(propertyData),
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        // Refresh properties list or add to local state
+        console.log('Property created:', result.property)
+        // You might want to refresh the properties list here
+      } else {
+        console.error('Failed to create property')
       }
-      setProperties(prev => [...prev, newProperty])
+    } catch (error) {
+      console.error('Error submitting property:', error)
     }
     setShowAddProperty(false)
     setEditingProperty(null)
   }
+    setEditingProperty(null)
+  }
 
   const handleCategorySubmit = async (categoryData: any) => {
-    if (editingCategory) {
-      // Update existing category
-      setCategories(prev => prev.map(c =>
-        c.id === editingCategory.id ? { ...c, ...categoryData, updatedAt: new Date().toISOString().split('T')[0] } : c
-      ))
-    } else {
-      // Create new category
-      const newCategory = {
-        id: Date.now().toString(),
-        ...categoryData,
-        createdAt: new Date().toISOString().split('T')[0],
-        updatedAt: new Date().toISOString().split('T')[0]
+    try {
+      if (editingCategory) {
+        // Update existing category - for now, we'll recreate since we don't have an update API
+        console.log('Category update not implemented yet')
+      } else {
+        // Create new category
+        const response = await fetch('/api/admin/categories', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(categoryData),
+        })
+
+        if (response.ok) {
+          const newCategory = await response.json()
+          setCategories(prev => [...prev, newCategory])
+        } else {
+          console.error('Failed to create category')
+        }
       }
-      setCategories(prev => [...prev, newCategory])
+    } catch (error) {
+      console.error('Error submitting category:', error)
     }
     setShowAddCategory(false)
+    setEditingCategory(null)
+  }
     setEditingCategory(null)
   }
 
@@ -1119,6 +1162,8 @@ export default function AdminPanel() {
           onSubmit={handlePropertySubmit}
           initialData={editingProperty}
           mode={editingProperty ? 'edit' : 'create'}
+          agents={agents}
+          categories={categories}
         />
       )}
 

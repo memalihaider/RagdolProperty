@@ -7,7 +7,7 @@ interface PropertyFormData {
   title: string
   slug: string
   description: string
-  category: string
+  category_id?: string
   type: string
   status: string
   property_status: string
@@ -104,7 +104,7 @@ export default function PropertyForm({
     title: initialData?.title || '',
     slug: initialData?.slug || '',
     description: initialData?.description || '',
-    category: initialData?.category || '',
+    category_id: initialData?.category_id || '',
     type: initialData?.type || 'apartment',
     status: initialData?.status || 'sale',
     property_status: initialData?.property_status || 'ready',
@@ -428,13 +428,13 @@ export default function PropertyForm({
                     Category
                   </label>
                   <select
-                    value={formData.category}
-                    onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                    value={formData.category_id || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, category_id: e.target.value || undefined }))}
                     className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-foreground"
                   >
                     <option value="">Select a category...</option>
-                    {categories.filter(category => category.isActive).map((category) => (
-                      <option key={category.id} value={category.name}>
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>
                         {category.name}
                       </option>
                     ))}
@@ -486,9 +486,9 @@ export default function PropertyForm({
                     className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-foreground"
                   >
                     <option value="">Select an agent...</option>
-                    {agents.filter(agent => agent.isActive).map((agent) => (
+                    {agents.map((agent) => (
                       <option key={agent.id} value={agent.id}>
-                        {agent.name}
+                        {agent.title || agent.profiles?.full_name || 'Unnamed Agent'}
                       </option>
                     ))}
                   </select>
