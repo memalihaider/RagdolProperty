@@ -29,9 +29,9 @@ export class DatabaseAuth {
   static generateToken(user: AuthUser): string {
     return jwt.sign(
       {
-        id: user.id,
-        email: user.email,
-        role: user.role,
+        id: (user as any).id,
+        email: (user as any).email,
+        role: (user as any).role,
       },
       JWT_SECRET,
       { expiresIn: JWT_EXPIRES_IN }
@@ -79,7 +79,7 @@ export class DatabaseAuth {
         .single();
 
       if (userError) {
-        return { user: null, error: userError.message };
+        return { user: null, error: (userError as any)?.message || 'Unknown error' };
       }
 
       // Create profile
@@ -98,7 +98,7 @@ export class DatabaseAuth {
       if (profileError) {
         // Clean up user record if profile creation fails
         await supabase.from('users').delete().eq('id', newUser.id);
-        return { user: null, error: profileError.message };
+        return { user: null, error: (profileError as any)?.message || 'Unknown error' };
       }
 
       const authUser: AuthUser = {
@@ -128,7 +128,7 @@ export class DatabaseAuth {
       }
 
       // Verify password
-      const isValidPassword = await this.verifyPassword(password, user.encrypted_password || '');
+      const isValidPassword = await this.verifyPassword(password, (user as any).encrypted_password || '');
       if (!isValidPassword) {
         return { user: null, error: 'Invalid credentials' };
       }
@@ -137,17 +137,21 @@ export class DatabaseAuth {
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', user.id)
+        .eq('id', (user as any).id)
         .single();
 
       if (profileError) {
         return { user: null, error: 'Profile not found' };
       }
 
+      if (!profile) {
+        return { user: null, error: 'Profile not found' };
+      }
+
       const authUser: AuthUser = {
-        id: user.id,
-        email: user.email,
-        role: profile.role || 'customer',
+        id: (user as any).id,
+        email: (user as any).email,
+        role: (profile as any)?.role || 'customer',
         profile,
       };
 
@@ -183,7 +187,7 @@ export class DatabaseAuth {
         .eq('email', email)
         .single();
 
-      if (userError && userError.code === 'PGRST116') {
+      if (userError && (userError as any).code === 'PGRST116') {
         // Create admin user if doesn't exist
         const hashedPassword = await this.hashPassword(password);
 
@@ -198,12 +202,12 @@ export class DatabaseAuth {
           .single();
 
         if (createError) {
-          return { user: null, error: createError.message };
+          return { user: null, error: (createError as any)?.message || 'Unknown error' };
         }
 
         user = newUser;
       } else if (userError) {
-        return { user: null, error: userError.message };
+        return { user: null, error: (userError as any)?.message || 'Unknown error' };
       }
 
       if (!user) {
@@ -214,15 +218,15 @@ export class DatabaseAuth {
       let { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', user.id)
+        .eq('id', (user as any).id)
         .single();
 
-      if (profileError && profileError.code === 'PGRST116') {
+      if (profileError && (profileError as any).code === 'PGRST116') {
         // Create admin profile if doesn't exist
         const { data: newProfile, error: createProfileError } = await supabase
           .from('profiles')
           .insert({
-            id: user.id,
+            id: (user as any).id,
             email,
             full_name: 'Admin User',
             role: 'admin',
@@ -232,12 +236,12 @@ export class DatabaseAuth {
           .single();
 
         if (createProfileError) {
-          return { user: null, error: createProfileError.message };
+          return { user: null, error: (createProfileError as any)?.message || 'Unknown error' };
         }
 
         profile = newProfile;
       } else if (profileError) {
-        return { user: null, error: profileError.message };
+        return { user: null, error: (profileError as any)?.message || 'Unknown error' };
       }
 
       if (!profile) {
@@ -245,9 +249,9 @@ export class DatabaseAuth {
       }
 
       const authUser: AuthUser = {
-        id: user.id,
-        email: user.email,
-        role: profile.role || 'customer',
+        id: (user as any).id,
+        email: (user as any).email,
+        role: (profile as any)?.role || 'customer',
         profile,
       };
 
@@ -279,10 +283,14 @@ export class DatabaseAuth {
         return { user: null, error: 'Profile not found' };
       }
 
+      if (!profile) {
+        return { user: null, error: 'Profile not found' };
+      }
+
       const authUser: AuthUser = {
-        id: user.id,
-        email: user.email,
-        role: profile.role || 'customer',
+        id: (user as any).id,
+        email: (user as any).email,
+        role: (profile as any)?.role || 'customer',
         profile,
       };
 
@@ -301,7 +309,7 @@ export class DatabaseAuth {
         .single();
 
       if (error) {
-        return { profile: null, error: error.message };
+        return { profile: null, error: (error as any)?.message || 'Unknown error' };
       }
 
       return { profile, error: null };

@@ -22,6 +22,7 @@ export interface PropertyCardProperty {
   area?: string
   city?: string
   agent_id?: string | null
+  video_url?: string | null
   agent?: {
     id: string
     title?: string
@@ -59,26 +60,46 @@ export default function PropertyCard({ property, isSaved = false, onSaveToggle }
   const imageSrc = getValidImageSrc(property.image)
 
   return (
-    <Link href={`/properties/${property.id}`} className="group block">
-      <div className="card-custom overflow-hidden hover:shadow-xl transition-shadow duration-300">
-        {/* Image */}
+    <Link href={`/properties/${property.id}`} className="group block h-full">
+      <div className="card-custom overflow-hidden hover:shadow-xl transition-all duration-500 h-full flex flex-col">
+        {/* Image with Background */}
         <div className="relative h-48 md:h-56 overflow-hidden bg-muted">
+          {/* Background Image */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-500"
+            style={{
+              backgroundImage: `url(${getValidImageSrc(property.image)})`,
+            }}
+          />
+          
+          {/* Overlay Gradient */}
+          <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          
+          {/* Next Image for fallback */}
           <Image
-            src={imageSrc}
+            src={getValidImageSrc(property.image)}
             alt={property.title}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            className="object-cover opacity-0 group-hover:opacity-0 transition-opacity duration-300"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
 
           {/* Badges */}
-          <div className="absolute top-3 left-3 flex gap-2">
-            <span className="px-2 py-1 text-xs font-semibold bg-primary text-primary-foreground rounded">
+          <div className="absolute top-3 left-3 flex gap-2 z-10">
+            <span className="px-2 py-1 text-xs font-semibold bg-primary text-primary-foreground rounded animate-fade-in">
               {property.status === 'sale' ? 'For Sale' : property.status === 'rent' ? 'For Rent' : property.priceLabel === 'total' ? 'For Sale' : 'For Rent'}
             </span>
             {property.featured && (
-              <span className="px-2 py-1 text-xs font-semibold bg-accent text-accent-foreground rounded">
+              <span className="px-2 py-1 text-xs font-semibold bg-accent text-accent-foreground rounded animate-fade-in">
                 Featured
+              </span>
+            )}
+            {property.video_url && (
+              <span className="px-2 py-1 text-xs font-semibold bg-red-500 text-white rounded animate-fade-in flex items-center gap-1">
+                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z"/>
+                </svg>
+                Video
               </span>
             )}
           </div>
@@ -90,7 +111,7 @@ export default function PropertyCard({ property, isSaved = false, onSaveToggle }
                 e.preventDefault()
                 onSaveToggle(property.id)
               }}
-              className="absolute top-3 right-3 p-2 rounded-full bg-white/80 hover:bg-white transition-colors"
+              className="absolute top-3 right-3 p-2 rounded-full bg-white/80 hover:bg-white transition-all duration-300 z-10"
             >
               {isSaved ? (
                 <HeartSolidIcon className="h-5 w-5 text-red-500" />
@@ -102,19 +123,19 @@ export default function PropertyCard({ property, isSaved = false, onSaveToggle }
         </div>
 
         {/* Content */}
-        <div className="p-4 space-y-3">
+        <div className="p-4 space-y-3 transition-all duration-300 flex flex-col flex-1">
           {/* Price */}
-          <div className="text-xl font-bold text-primary">
+          <div className="text-xl font-bold text-primary group-hover:text-primary/80 transition-colors duration-300">
             {property.currency || 'AED'} {property.price.toLocaleString()}
           </div>
 
           {/* Title */}
-          <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">
+          <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors duration-300 line-clamp-1">
             {property.title}
           </h3>
 
           {/* Location */}
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+          <div className="flex items-center gap-1 text-sm text-muted-foreground group-hover:text-foreground transition-colors duration-300">
             <MapPinIcon className="h-4 w-4" />
             <span>{property.location || `${property.area}, ${property.city}`}</span>
           </div>
@@ -141,9 +162,9 @@ export default function PropertyCard({ property, isSaved = false, onSaveToggle }
 
           {/* Agent Section */}
           {property.agent && (
-            <div className="mt-4 pt-4 border-t border-border">
+            <div className="mt-auto pt-4 border-t border-border">
               <div className="flex items-center gap-3">
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-muted overflow-hidden border border-border">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-muted overflow-hidden border border-border">
                   {property.agent.profile_image ? (
                     <Image
                       src={property.agent.profile_image}

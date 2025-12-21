@@ -3,7 +3,6 @@
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
 import { UserIcon, PhoneIcon, MapPinIcon, CalendarIcon, PencilIcon } from '@heroicons/react/24/outline'
 
 interface ProfileData {
@@ -45,71 +44,28 @@ export default function CustomerProfile() {
     }
   }, [profile])
 
-  // Realtime subscriptions: profile updates and enquiries (applications)
-  const [recentActivity, setRecentActivity] = useState<any[]>([])
-  useEffect(() => {
-    if (!user) return
-
-    // Initial load of recent enquiries/applications for this customer
-    let isMounted = true
-    ;(async () => {
-      try {
-        const { data } = await supabase
-          .from('enquiries')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(20)
-        if (isMounted && data) setRecentActivity(data)
-      } catch (err) {
-        console.error('Failed to load recent activity:', err)
-      }
-    })()
-
-    // Subscribe to profile updates of this user
-    const profileChannel = supabase
-      .channel(`public:profiles:id=eq.${user.id}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` }, (payload) => {
-        // payload.eventType e.g., INSERT, UPDATE, DELETE
-        const newProfile = payload?.new as any
-        if (newProfile) {
-          setFormData(prev => ({
-            ...prev,
-            full_name: newProfile.full_name || prev.full_name,
-            phone: newProfile.phone || prev.phone,
-            location: newProfile.location || prev.location,
-            bio: newProfile.bio || prev.bio,
-            preferences: newProfile.preferences || prev.preferences
-          }))
-        }
-      })
-      .subscribe()
-
-    // Subscribe to enquiries (applications) for this user
-    const enquiriesChannel = supabase
-      .channel(`public:enquiries:user_id=eq.${user.id}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'enquiries', filter: `user_id=eq.${user.id}` }, (payload) => {
-        const newRecord = payload?.new as any
-        const oldRecord = payload?.old as any
-        setRecentActivity(prev => {
-          if (payload.eventType === 'INSERT' && newRecord) {
-            return [newRecord, ...prev].slice(0, 20)
-          } else if (payload.eventType === 'UPDATE' && newRecord) {
-            return prev.map(item => item.id === newRecord.id ? newRecord : item)
-          } else if (payload.eventType === 'DELETE' && oldRecord) {
-            return prev.filter(item => item.id !== oldRecord.id)
-          }
-          return prev
-        })
-      })
-      .subscribe()
-
-    return () => {
-      isMounted = false
-      // Remove channels
-      try { supabase.removeChannel(profileChannel) } catch (e) { /* ignore */ }
-      try { supabase.removeChannel(enquiriesChannel) } catch (e) { /* ignore */ }
+  // Mock recent activity data
+  const [recentActivity, setRecentActivity] = useState<any[]>([
+    {
+      id: '1',
+      property_id: 'prop-1',
+      message: 'Interested in luxury penthouse in Downtown Dubai',
+      status: 'pending',
+      created_at: new Date().toISOString(),
+      property: { title: 'Luxury Penthouse in Downtown Dubai' }
+    },
+    {
+      id: '2',
+      property_id: 'prop-2',
+      message: 'Question about payment plans for Palm Jumeirah villa',
+      status: 'responded',
+      created_at: new Date(Date.now() - 86400000).toISOString(),
+      property: { title: 'Modern Villa with Private Beach' }
     }
+  ])
+
+  useEffect(() => {
+    // Mock loading - no need for Supabase
   }, [user])
 
   const handleSave = async () => {
@@ -117,30 +73,16 @@ export default function CustomerProfile() {
 
     setSaving(true)
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          full_name: formData.full_name,
-          phone: formData.phone,
-          location: formData.location,
-          bio: formData.bio,
-          preferences: formData.preferences,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', user.id)
+      // Mock update - just simulate success
+      await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API call
 
-      if (error) {
-        console.error('Error updating profile:', error)
-        alert('Failed to update profile. Please try again.')
-      } else {
-        // Refresh profile from server and keep client in sync
-        try {
-          await refreshProfile()
-        } catch (err) {
-          console.error('Error refreshing profile after save:', err)
-        }
-        setIsEditing(false)
+      // Refresh profile from server and keep client in sync
+      try {
+        await refreshProfile()
+      } catch (err) {
+        console.error('Error refreshing profile after save:', err)
       }
+      setIsEditing(false)
     } catch (error) {
       console.error('Error updating profile:', error)
       alert('Failed to update profile. Please try again.')

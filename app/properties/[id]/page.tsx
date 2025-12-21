@@ -1,11 +1,16 @@
+'use client'
+
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase-server'
 import { Database } from '@/lib/database.types'
 import PropertyImageGallery from '@/components/PropertyImageGallery'
 import PropertySlider from '@/components/PropertySlider'
 import PropertyAgents from '@/components/PropertyAgents'
+import MortgageCalculator from '@/components/MortgageCalculator'
+import DownloadInterestForm, { DownloadInterestData } from '@/components/DownloadInterestForm'
+import { useState, use } from 'react'
+import dynamic from 'next/dynamic'
 import {
   MapPinIcon,
   HomeIcon,
@@ -23,8 +28,23 @@ import {
   HeartIcon,
   PhotoIcon,
   DocumentTextIcon,
+  SparklesIcon,
+  ChartBarIcon,
 } from '@heroicons/react/24/outline'
 import { StarIcon as StarSolidIcon, HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid'
+
+// Dynamically import LocationPicker to avoid SSR issues with Leaflet
+const LocationPicker = dynamic(() => import('@/components/LocationPicker'), {
+  ssr: false,
+  loading: () => (
+    <div className="h-[400px] w-full bg-slate-100 animate-pulse rounded-[2.5rem] flex items-center justify-center border border-slate-100">
+      <div className="text-slate-400 flex flex-col items-center gap-2">
+        <MapPinIcon className="w-8 h-8 animate-bounce" />
+        <p className="text-sm font-bold uppercase tracking-widest">Loading Map...</p>
+      </div>
+    </div>
+  )
+})
 
 type Property = Database['public']['Tables']['properties']['Row'] & {
   agent?: Database['public']['Tables']['profiles']['Row'] & {
@@ -196,13 +216,15 @@ const mockRelatedProperties = [
     type: 'villa',
     status: 'sale',
     featured: true,
+    area: 'Palm Jumeirah',
+    city: 'Dubai',
   },
   {
     id: '3',
     title: 'Contemporary Apartment Marina View',
     price: 3200000,
     currency: 'AED',
-    images: ['https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80'],
+    images: ['https://images.unsplash.com/photo-1545324418-cc1a3fa00?w=800&q=80'],
     location: 'Dubai Marina, Dubai',
     beds: 3,
     baths: 3,
@@ -210,6 +232,8 @@ const mockRelatedProperties = [
     type: 'apartment',
     status: 'sale',
     featured: false,
+    area: 'Dubai Marina',
+    city: 'Dubai',
   },
   {
     id: '4',
@@ -224,111 +248,37 @@ const mockRelatedProperties = [
     type: 'townhouse',
     status: 'sale',
     featured: false,
+    area: 'Emirates Hills',
+    city: 'Dubai',
   },
 ]
 
 async function getProperty(id: string): Promise<Property | null> {
-  try {
-    const supabase = await createClient()
-
-    const { data, error } = await supabase
-      .from('properties')
-      .select(`
-        *,
-        agent:profiles!agent_id(
-          *,
-          agent_details:agents(*)
-        ),
-        project:projects(*)
-      `)
-      .eq('id', id)
-      .eq('published', true)
-      .single()
-
-    if (error) {
-      // Return mock data for development
-      return { ...mockProperty, agent: mockAgent } as unknown as Property
-    }
-
-    return data as unknown as Property
-  } catch (err) {
-    // Return mock data for development
-    return { ...mockProperty, agent: mockAgent } as unknown as Property
-  }
+  // Always return mock data
+  return { ...mockProperty, agent: mockAgent } as unknown as Property
 }
 
 async function getRelatedProperties(currentPropertyId: string): Promise<RelatedProperty[]> {
-  try {
-    const supabase = await createClient()
-
-    const { data, error } = await supabase
-      .from('properties')
-      .select('*')
-      .eq('published', true)
-      .neq('id', currentPropertyId)
-      .limit(3)
-
-    if (error) {
-      // Return mock data for development
-      return mockRelatedProperties as unknown as RelatedProperty[]
-    }
-
-    return data || []
-  } catch (err) {
-    // Return mock data for development
-    return [
-      {
-        id: '2',
-        title: 'Modern Villa with Private Beach',
-        description: undefined,
-        price: 8900000,
-        currency: 'AED',
-        location: 'Palm Jumeirah, Dubai',
-        beds: 5,
-        baths: 6,
-        sqft: 5500,
-        type: 'Villa',
-        status: 'sale',
-        featured: true,
-        image_url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-      {
-        id: '3',
-        title: 'Contemporary Apartment Marina View',
-        description: undefined,
-        price: 3200000,
-        currency: 'AED',
-        location: 'Dubai Marina, Dubai',
-        beds: 3,
-        baths: 3,
-        sqft: 2100,
-        type: 'Apartment',
-        status: 'sale',
-        featured: true,
-        image_url: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }
-    ] as unknown as RelatedProperty[]
-  }
+  // Always return mock data
+  return mockRelatedProperties as unknown as RelatedProperty[]
 }
 
 interface PropertyPageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
-export default async function PropertyPage({ params }: PropertyPageProps) {
-  const { id } = await params
-  const property = await getProperty(id)
-  const relatedProperties = await getRelatedProperties(id)
+export default function PropertyPage({ params }: PropertyPageProps) {
+  const { id } = use(params)
 
-  if (!property) {
-    notFound()
-  }
+  // Form state
+  const [showFloorPlanForm, setShowFloorPlanForm] = useState(false)
+  const [showBrochureForm, setShowBrochureForm] = useState(false)
+
+  // Mock property data (in real app, this would be fetched)
+  const property = { ...mockProperty, agent: mockAgent }
+  const relatedProperties = mockRelatedProperties
 
   const formatPrice = (price: number, currency: string = 'AED') => {
     return `${currency} ${price.toLocaleString()}`
@@ -342,118 +292,165 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
     })
   }
 
-  return (
-    <div className="w-full min-h-screen bg-background">
-      {/* Breadcrumbs */}
-      <div className="border-b border-border bg-muted/50">
-        <div className="container-custom py-4">
-          <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Link href="/" className="hover:text-primary transition-colors">Home</Link>
-            <span>/</span>
-            <Link href="/properties" className="hover:text-primary transition-colors">Properties</Link>
-            <span>/</span>
-            <span className="text-foreground font-medium truncate">{property.title}</span>
-          </nav>
-        </div>
-      </div>
+  const handleDownloadInterest = async (data: DownloadInterestData, downloadType: 'floor_plan' | 'brochure') => {
+    try {
+      const response = await fetch('/api/download-interests', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...data,
+          property_id: id,
+          download_type: downloadType,
+        }),
+      })
 
-      {/* Property Header */}
-      <section className="bg-gradient-to-r from-card to-background border-b border-border">
-        <div className="container-custom py-6 sm:py-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <Link
-              href="/properties"
-              className="flex items-center gap-2 text-gray-400 hover:text-yellow-600 transition-colors w-fit group"
-            >
-              <ArrowLeftIcon className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-              <span className="font-medium">Back to Properties</span>
-            </Link>
+      if (!response.ok) {
+        throw new Error('Failed to submit form')
+      }
+
+      // In a real app, you would trigger the actual download here
+      alert(`${downloadType === 'floor_plan' ? 'Floor plan' : 'Brochure'} download link sent to your email!`)
+    } catch (error) {
+      console.error('Error submitting download interest:', error)
+      alert('Failed to submit form. Please try again.')
+    }
+  }
+
+  const handleFloorPlanSubmit = (data: DownloadInterestData) => {
+    return handleDownloadInterest(data, 'floor_plan')
+  }
+
+  const handleBrochureSubmit = (data: DownloadInterestData) => {
+    return handleDownloadInterest(data, 'brochure')
+  }
+
+  return (
+    <div className="w-full min-h-screen bg-slate-50/50">
+      {/* Breadcrumbs & Navigation */}
+      <div className="bg-white border-b border-slate-100 sticky top-20 z-30">
+        <div className="container-custom py-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <nav className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400">
+              <Link href="/" className="hover:text-primary transition-colors">Home</Link>
+              <span className="text-slate-200">/</span>
+              <Link href="/properties" className="hover:text-primary transition-colors">Properties</Link>
+              <span className="text-slate-200">/</span>
+              <span className="text-slate-900 truncate max-w-[200px]">{property.title}</span>
+            </nav>
+            
             <div className="flex items-center gap-3">
-              <button className="flex items-center gap-2 px-4 py-2 bg-secondary hover:bg-secondary/80 text-secondary-foreground border border-border rounded-lg font-medium text-sm transition-colors">
-                <ShareIcon className="w-4 h-4" />
-                <span className="hidden sm:inline">Share</span>
+              <Link
+                href="/properties"
+                className="flex items-center gap-2 text-slate-400 hover:text-primary transition-colors group text-xs font-bold uppercase tracking-widest"
+              >
+                <ArrowLeftIcon className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                Back to Search
+              </Link>
+              <div className="h-4 w-[1px] bg-slate-200 mx-2" />
+              <button className="p-2 text-slate-400 hover:text-primary transition-colors">
+                <ShareIcon className="w-5 h-5" />
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-secondary hover:bg-secondary/80 text-secondary-foreground border border-border rounded-lg font-medium text-sm transition-colors">
-                <HeartIcon className="w-4 h-4" />
-                <span className="hidden sm:inline">Save</span>
+              <button className="p-2 text-slate-400 hover:text-red-500 transition-colors">
+                <HeartIcon className="w-5 h-5" />
               </button>
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      <div className="container-custom pb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="container-custom pt-20 pb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           {/* Main Content */}
-          <div className="lg:col-span-3 space-y-8">
+          <div className="lg:col-span-8 space-y-12">
             {/* Image Gallery */}
-            <PropertyImageGallery
-              images={property.images || []}
-              title={property.title}
-              status={property.status || 'sale'}
-              property_status={property.property_status || 'ready'}
-              featured={property.featured || false}
-            />
+            <div className="rounded-[2.5rem] overflow-hidden shadow-2xl shadow-slate-200/50">
+              <PropertyImageGallery
+                images={property.images || []}
+                title={property.title}
+                status={property.status || 'sale'}
+                property_status={property.property_status || 'ready'}
+                featured={property.featured || false}
+                video_url={property.video_url}
+              />
+            </div>
 
-            {/* Property Details */}
-            <div className="bg-black-800 border border-gray-700 rounded-2xl p-6 sm:p-8 shadow-lg text-white">
-              <div className="space-y-6">
-                {/* Title and Price */}
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-yellow-600 mb-3">{property.title}</h1>
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 mb-4">
-                    <div className="flex items-center gap-2 text-gray-300 mb-2 sm:mb-0">
-                      <MapPinIcon className="w-5 h-5 text-yellow-600 flex-shrink-0" />
-                      <span className="text-base sm:text-lg font-medium text-white">{property.address}, {property.city}</span>
+            {/* Property Details Card */}
+            <div className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-xl shadow-slate-200/50 border border-slate-100">
+              <div className="space-y-10">
+                {/* Header Info */}
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <span className="px-4 py-1 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-[0.2em] rounded-full">
+                        {property.type}
+                      </span>
+                      <span className="px-4 py-1 bg-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] rounded-full">
+                        {property.property_status?.replace('-', ' ')}
+                      </span>
+                    </div>
+                    <h1 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+                      {property.title}
+                    </h1>
+                    <div className="flex items-center gap-2 text-slate-500 font-medium">
+                      <MapPinIcon className="w-5 h-5 text-primary" />
+                      <span>{property.address}, {property.city}</span>
                     </div>
                   </div>
-                  <div className="text-3xl sm:text-4xl font-bold text-yellow-600 mb-2">
-                    {formatPrice(property.price, property.currency || 'AED')}
-                  </div>
-                  <div className="text-sm text-gray-300">
-                    {property.status === 'sale' ? 'For Sale' : 'For Rent'}
+                  <div className="text-right">
+                    <div className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">Price</div>
+                    <div className="text-4xl md:text-5xl font-black text-primary">
+                      {formatPrice(property.price, property.currency || 'AED')}
+                    </div>
                   </div>
                 </div>
 
-                {/* Key Stats */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-6 bg-gray-700 rounded-xl border border-gray-600">
-                  <div className="text-center">
-                    <div className="flex items-center justify-center gap-2 text-gray-300 mb-2">
-                      <HomeIcon className="w-5 h-5 text-yellow-600" />
-                      <span className="text-sm font-medium text-white">Beds</span>
+                {/* Key Stats Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 p-8 bg-slate-50 rounded-[2rem] border border-slate-100">
+                  <div className="space-y-1">
+                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Bedrooms</div>
+                    <div className="flex items-center gap-2">
+                      <HomeIcon className="w-5 h-5 text-primary" />
+                      <span className="text-2xl font-black text-slate-900">{property.beds || 'N/A'}</span>
                     </div>
-                    <div className="text-2xl font-bold text-white">{property.beds || 'N/A'}</div>
                   </div>
-                  <div className="text-center">
-                    <div className="flex items-center justify-center gap-2 text-gray-300 mb-2">
-                      <Square3Stack3DIcon className="w-5 h-5 text-yellow-600" />
-                      <span className="text-sm font-medium text-white">Baths</span>
+                  <div className="space-y-1">
+                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Bathrooms</div>
+                    <div className="flex items-center gap-2">
+                      <Square3Stack3DIcon className="w-5 h-5 text-primary" />
+                      <span className="text-2xl font-black text-slate-900">{property.baths || 'N/A'}</span>
                     </div>
-                    <div className="text-2xl font-bold text-white">{property.baths || 'N/A'}</div>
                   </div>
-                  <div className="text-center">
-                    <div className="flex items-center justify-center gap-2 text-gray-300 mb-2">
-                      <HomeIcon className="w-5 h-5 text-yellow-600" />
-                      <span className="text-sm font-medium text-white">Area</span>
+                  <div className="space-y-1">
+                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Area</div>
+                    <div className="flex items-center gap-2">
+                      <Square3Stack3DIcon className="w-5 h-5 text-primary" />
+                      <span className="text-2xl font-black text-slate-900">
+                        {property.sqft?.toLocaleString() || 'N/A'}
+                        <span className="text-xs font-bold text-slate-400 ml-1 uppercase">sqft</span>
+                      </span>
                     </div>
-                    <div className="text-2xl font-bold text-white">{property.sqft?.toLocaleString() || 'N/A'}<span className="text-sm font-normal ml-1">sqft</span></div>
                   </div>
-                  <div className="text-center">
-                    <div className="flex items-center justify-center gap-2 text-gray-300 mb-2">
-                      <EyeIcon className="w-5 h-5 text-yellow-600" />
-                      <span className="text-sm font-medium text-white">Views</span>
+                  <div className="space-y-1">
+                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Views</div>
+                    <div className="flex items-center gap-2">
+                      <EyeIcon className="w-5 h-5 text-primary" />
+                      <span className="text-2xl font-black text-slate-900">{property.views_count?.toLocaleString() || 0}</span>
                     </div>
-                    <div className="text-2xl font-bold text-white">{property.views_count?.toLocaleString() || 0}</div>
                   </div>
                 </div>
 
                 {/* Description */}
-                <div className="border-t border-gray-600 pt-6">
-                  <h2 className="text-2xl font-bold text-yellow-600 mb-4 flex items-center gap-2">
-                    📝 Description
+                <div className="space-y-6">
+                  <h2 className="text-2xl font-black text-slate-900 flex items-center gap-3">
+                    <span className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+                      <DocumentTextIcon className="w-5 h-5" />
+                    </span>
+                    Description
                   </h2>
-                  <div className="prose prose-lg max-w-none">
-                    <p className="text-gray-200 leading-relaxed text-base whitespace-pre-line">
+                  <div className="prose prose-slate max-w-none">
+                    <p className="text-slate-600 leading-relaxed text-lg whitespace-pre-line font-medium">
                       {property.description}
                     </p>
                   </div>
@@ -461,310 +458,240 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
 
                 {/* Features */}
                 {property.features && property.features.length > 0 && (
-                  <div className="border-t border-gray-600 pt-6">
-                    <h2 className="text-2xl font-bold text-yellow-600 mb-4 flex items-center gap-2">
-                      ✨ Features & Amenities
+                  <div className="space-y-6 pt-10 border-t border-slate-100">
+                    <h2 className="text-2xl font-black text-slate-900 flex items-center gap-3">
+                      <span className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+                        <SparklesIcon className="w-5 h-5" />
+                      </span>
+                      Features & Amenities
                     </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {property.features.map((feature, index) => (
-                        <div key={index} className="flex items-center gap-3 p-3 bg-gray-700 rounded-lg border border-gray-600">
-                          <CheckCircleIcon className="w-5 h-5 text-yellow-600 flex-shrink-0" />
-                          <span className="text-gray-200 font-medium">{feature}</span>
+                        <div key={index} className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100 group hover:bg-white hover:shadow-md transition-all duration-300">
+                          <CheckCircleIcon className="w-5 h-5 text-primary shrink-0" />
+                          <span className="text-slate-700 font-bold text-sm">{feature}</span>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {/* Floor Plans */}
-                {property.floorplans && property.floorplans.length > 0 && (
-                  <div className="border-t border-gray-600 pt-6">
-                    <h2 className="text-2xl font-bold text-yellow-600 mb-4 flex items-center gap-2">
-                      <DocumentTextIcon className="w-6 h-6" />
-                      Floor Plans
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {property.floorplans.map((floorplan, index) => (
-                        <div key={index} className="relative aspect-[4/3] rounded-xl overflow-hidden bg-gray-700 border border-gray-600 group cursor-pointer">
-                          <Image
-                            src={floorplan}
-                            alt={`Floor plan ${index + 1}`}
-                            fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
-                            <span className="text-white font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                              View Full Size
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Property Details */}
-                <div className="border-t border-gray-600 pt-6">
-                  <h2 className="text-2xl font-bold text-yellow-600 mb-4 flex items-center gap-2">
-                    📊 Property Details
+                {/* Property Details Table */}
+                <div className="space-y-6 pt-10 border-t border-slate-100">
+                  <h2 className="text-2xl font-black text-slate-900 flex items-center gap-3">
+                    <span className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+                      <ChartBarIcon className="w-5 h-5" />
+                    </span>
+                    Property Details
                   </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center py-3 px-4 bg-gray-700 rounded-lg border border-gray-600">
-                        <span className="text-gray-300 font-medium">Property Type</span>
-                        <span className="text-white font-semibold capitalize">{property.type}</span>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
+                    {[
+                      { label: 'Property Type', value: property.type, icon: HomeIcon },
+                      { label: 'Status', value: property.property_status?.replace('-', ' '), icon: CheckCircleIcon },
+                      { label: 'Area', value: property.area, icon: MapPinIcon },
+                      { label: 'City', value: property.city, icon: MapPinIcon },
+                      { label: 'Listed On', value: property.created_at ? formatDate(property.created_at) : 'N/A', icon: CalendarDaysIcon },
+                      { label: 'Reference ID', value: property.id.slice(0, 8).toUpperCase(), icon: DocumentTextIcon },
+                    ].map((item, i) => (
+                      <div key={i} className="flex items-center justify-between py-4 border-b border-slate-50">
+                        <div className="flex items-center gap-3">
+                          <item.icon className="w-4 h-4 text-slate-400" />
+                          <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">{item.label}</span>
+                        </div>
+                        <span className="text-sm font-black text-slate-900 capitalize">{item.value}</span>
                       </div>
-                      <div className="flex justify-between items-center py-3 px-4 bg-gray-700 rounded-lg border border-gray-600">
-                        <span className="text-gray-300 font-medium">Status</span>
-                        <span className="text-white font-semibold capitalize">{property.property_status?.replace('-', ' ')}</span>
-                      </div>
-                      <div className="flex justify-between items-center py-3 px-4 bg-gray-700 rounded-lg border border-gray-600">
-                        <span className="text-gray-300 font-medium">Area</span>
-                        <span className="text-white font-semibold">{property.area}</span>
-                      </div>
-                      <div className="flex justify-between items-center py-3 px-4 bg-gray-700 rounded-lg border border-gray-600">
-                        <span className="text-gray-300 font-medium">City</span>
-                        <span className="text-white font-semibold">{property.city}</span>
-                      </div>
-                    </div>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center py-3 px-4 bg-gray-700 rounded-lg border border-gray-600">
-                        <span className="text-gray-300 font-medium">Listed</span>
-                        <span className="text-white font-semibold">{property.created_at ? formatDate(property.created_at) : 'Not available'}</span>
-                      </div>
-                      <div className="flex justify-between items-center py-3 px-4 bg-gray-700 rounded-lg border border-gray-600">
-                        <span className="text-gray-300 font-medium">Updated</span>
-                        <span className="text-white font-semibold">{property.updated_at ? formatDate(property.updated_at) : 'Not available'}</span>
-                      </div>
-                      <div className="flex justify-between items-center py-3 px-4 bg-gray-700 rounded-lg border border-gray-600">
-                        <span className="text-gray-300 font-medium">Reference ID</span>
-                        <span className="text-white font-semibold font-mono text-sm">{property.id.slice(0, 8)}</span>
-                      </div>
-                    </div>
+                    ))}
                   </div>
+                </div>
+
+                {/* Map Location */}
+                <div className="space-y-6 pt-10 border-t border-slate-100">
+                  <h2 className="text-2xl font-black text-slate-900 flex items-center gap-3">
+                    <span className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+                      <MapPinIcon className="w-5 h-5" />
+                    </span>
+                    Location Map
+                  </h2>
+                  <div className="rounded-[2.5rem] overflow-hidden border border-slate-100 shadow-xl shadow-slate-200/50">
+                    <LocationPicker 
+                      lat={property.coords?.lat || 25.2048} 
+                      lng={property.coords?.lng || 55.2708} 
+                      onChange={() => {}} // Read-only on details page
+                    />
+                  </div>
+                  <p className="text-sm font-bold text-slate-400 flex items-center gap-2 px-4">
+                    <MapPinIcon className="w-4 h-4 text-primary" />
+                    {property.address || property.location}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Download Buttons */}
+            <div className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-xl shadow-slate-200/50 border border-slate-100">
+              <div className="space-y-6">
+                <h2 className="text-2xl font-black text-slate-900 flex items-center gap-3">
+                  <span className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+                    <DocumentTextIcon className="w-5 h-5" />
+                  </span>
+                  Download Resources
+                </h2>
+                <p className="text-slate-600 text-lg">
+                  Get detailed information about this property. Fill out the form to download floor plans and brochures.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <button
+                    onClick={() => setShowFloorPlanForm(true)}
+                    className="group p-6 bg-slate-50 hover:bg-primary hover:text-white border border-slate-200 hover:border-primary rounded-2xl transition-all duration-300 text-left"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-primary/10 group-hover:bg-white/20 rounded-xl flex items-center justify-center">
+                        <DocumentTextIcon className="w-6 h-6 text-primary group-hover:text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-black text-slate-900 group-hover:text-white">Floor Plan</h3>
+                        <p className="text-sm text-slate-600 group-hover:text-white/80">Detailed layout and dimensions</p>
+                      </div>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => setShowBrochureForm(true)}
+                    className="group p-6 bg-slate-50 hover:bg-primary hover:text-white border border-slate-200 hover:border-primary rounded-2xl transition-all duration-300 text-left"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-primary/10 group-hover:bg-white/20 rounded-xl flex items-center justify-center">
+                        <DocumentTextIcon className="w-6 h-6 text-primary group-hover:text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-black text-slate-900 group-hover:text-white">Brochure</h3>
+                        <p className="text-sm text-slate-600 group-hover:text-white/80">Complete property information</p>
+                      </div>
+                    </div>
+                  </button>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="lg:sticky lg:top-24 space-y-6">
-            {/* Agent Card */}
-            {property.agent && (
-              <div className="bg-black-800 border border-gray-700 rounded-2xl p-6 shadow-lg min-h-[400px]">
-                <div className="text-center">
-                  {/* Agent Photo */}
-                  <div className="relative w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden border-4 border-yellow-600 shadow-lg">
-                    <Image
-                      src={property.agent.avatar_url || 'https://via.placeholder.com/96x96?text=Agent'}
-                      alt={property.agent.full_name || 'Agent'}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-
-                  {/* Agent Info */}
-                  <h3 className="text-lg font-bold text-white mb-1">
-                    {property.agent.full_name}
-                  </h3>
-                  <p className="text-yellow-600 font-semibold mb-3 text-sm">
-                    {property.agent.agent_details?.office || 'Real Estate Agent'}
-                  </p>
-
-                  {/* Rating */}
-                  <div className="flex items-center justify-center gap-1 mb-4">
-                    {[...Array(5)].map((_, i) => (
-                      <StarSolidIcon
-                        key={i}
-                        className={`w-4 h-4 ${
-                          i < 4 ? 'text-yellow-400' : 'text-gray-600'
-                        }`}
-                      />
-                    ))}
-                    <span className="text-xs text-gray-400 ml-1">
-                      4.9 (89 reviews)
-                    </span>
-                  </div>
-
-                  {/* Stats */}
-                  <div className="grid grid-cols-2 gap-3 mb-6">
-                    <div className="bg-black-700 rounded-lg p-3">
-                      <div className="text-lg font-bold text-white">
-                        8
+          <aside className="lg:col-span-4 space-y-8">
+            <div className="sticky top-32 space-y-8">
+              {/* Agent Card */}
+              {property.agent && (
+                <div className="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative">
+                  <div className="absolute top-0 left-0 w-full h-2 bg-primary" />
+                  <div className="text-center space-y-6">
+                    <div className="relative inline-block">
+                      <div className="w-24 h-24 mx-auto rounded-full overflow-hidden ring-4 ring-slate-50 shadow-lg">
+                        <Image
+                          src={property.agent.avatar_url || 'https://via.placeholder.com/96x96?text=Agent'}
+                          alt={property.agent.full_name || 'Agent'}
+                          fill
+                          className="object-cover"
+                        />
                       </div>
-                      <div className="text-xs text-gray-400">Years Exp.</div>
-                    </div>
-                    <div className="bg-black-700 rounded-lg p-3">
-                      <div className="text-lg font-bold text-white">
-                        150
+                      <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-white px-3 py-1 rounded-full shadow-md flex items-center gap-1">
+                        <StarSolidIcon className="h-3 w-3 text-yellow-400" />
+                        <span className="text-[10px] font-black text-slate-900">4.9</span>
                       </div>
-                      <div className="text-xs text-gray-400">Properties</div>
                     </div>
-                  </div>
 
-                  {/* Contact Buttons */}
-                  <div className="space-y-3">
-                    <button className="w-full bg-gray-700 hover:bg-gray-600 text-white py-3 px-4 rounded-lg font-medium text-sm transition-colors border border-gray-600">
-                      <PhoneIcon className="w-4 h-4 inline mr-2" />
-                      Call Agent
-                    </button>
-                    <button className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-medium text-sm transition-colors">
-                      <ChatBubbleLeftRightIcon className="w-4 h-4 inline mr-2" />
-                      WhatsApp
-                    </button>
-                    <button className="w-full bg-gray-700 hover:bg-gray-600 text-white py-3 px-4 rounded-lg font-medium text-sm transition-colors border border-gray-600">
-                      <EnvelopeIcon className="w-4 h-4 inline mr-2" />
-                      Email
-                    </button>
-                    {/* View Profile Button */}
-                    <Link
-                      href={`/agents/${property.agent?.agent_details?.id || property.agent?.id}`}
-                      className="w-full block text-center py-3 px-4 rounded-lg font-semibold text-sm bg-yellow-600 hover:bg-yellow-700 text-white transition-colors"
-                    >
-                      View Profile
-                    </Link>
-                  </div>
-
-                  {/* Bio */}
-                  {property.agent.agent_details?.bio && (
-                    <div className="mt-6 pt-4 border-t border-gray-600">
-                      <p className="text-xs text-gray-400 leading-relaxed">
-                        {property.agent.agent_details.bio}
+                    <div>
+                      <h3 className="text-xl font-black text-slate-900 mb-1">
+                        {property.agent.full_name}
+                      </h3>
+                      <p className="text-xs font-bold text-primary uppercase tracking-[0.2em]">
+                        {property.agent.agent_details?.office || 'Senior Consultant'}
                       </p>
                     </div>
-                  )}
 
-                  {/* Specialties */}
-                  {property.agent.agent_details?.areas && property.agent.agent_details.areas.length > 0 && (
-                    <div className="mt-4">
-                      <h4 className="text-xs font-semibold text-white mb-2 uppercase tracking-wide">Specialties</h4>
-                      <div className="flex flex-wrap gap-1">
-                        {property.agent.agent_details.areas.slice(0, 3).map((area, index) => (
-                          <span
-                            key={index}
-                            className="px-2 py-1 text-xs bg-yellow-600/20 text-yellow-600 rounded-full font-medium"
-                          >
-                            {area}
-                          </span>
-                        ))}
+                    <div className="grid grid-cols-2 gap-4 py-6 border-y border-slate-50">
+                      <div className="text-center">
+                        <div className="text-lg font-black text-slate-900">8+</div>
+                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Years Exp.</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-lg font-black text-slate-900">150+</div>
+                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Properties</div>
                       </div>
                     </div>
-                  )}
+
+                    <div className="space-y-3">
+                      <button className="btn-primary !w-full !rounded-2xl !py-4 flex items-center justify-center gap-3 shadow-lg shadow-primary/20">
+                        <PhoneIcon className="w-5 h-5" />
+                        Call Agent
+                      </button>
+                      <button className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all flex items-center justify-center gap-3 shadow-lg shadow-green-500/20">
+                        <ChatBubbleLeftRightIcon className="w-5 h-5" />
+                        WhatsApp
+                      </button>
+                      <Link
+                        href={`/agents/${property.agent?.agent_details?.id || property.agent?.id}`}
+                        className="w-full block text-center py-4 rounded-2xl font-black text-sm uppercase tracking-widest text-slate-400 hover:text-primary transition-colors"
+                      >
+                        View Profile
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Quick Inquiry Form */}
+              <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-2xl shadow-slate-900/20 relative overflow-hidden">
+                <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl" />
+                <div className="relative z-10 space-y-6">
+                  <h3 className="text-2xl font-black tracking-tight">Interested?</h3>
+                  <p className="text-slate-400 text-sm font-medium leading-relaxed">
+                    Fill out the form below and our team will contact you shortly.
+                  </p>
+                  <form className="space-y-4">
+                    <input
+                      type="text"
+                      placeholder="Full Name"
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder:text-slate-500 focus:ring-2 focus:ring-primary/50 outline-none transition-all font-medium"
+                    />
+                    <input
+                      type="email"
+                      placeholder="Email Address"
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder:text-slate-500 focus:ring-2 focus:ring-primary/50 outline-none transition-all font-medium"
+                    />
+                    <textarea
+                      rows={3}
+                      placeholder="Your Message"
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder:text-slate-500 focus:ring-2 focus:ring-primary/50 outline-none transition-all font-medium resize-none"
+                    />
+                    <button
+                      type="submit"
+                      className="btn-primary !w-full !rounded-2xl !py-4 shadow-xl shadow-primary/20"
+                    >
+                      Send Inquiry
+                    </button>
+                  </form>
                 </div>
               </div>
-            )}
 
-            {/* Quick Actions */}
-            <div className="bg-black-800 border border-gray-700 rounded-2xl p-6 shadow-lg text-white min-h-[400px]">
-              <h3 className="text-lg font-bold text-yellow-600 mb-4">Quick Actions</h3>
-              <div className="grid grid-cols-1 gap-3">
-                <Link
-                  href={`/inquire/${property.id}`}
-                  className="bg-yellow-600 hover:bg-yellow-700 text-white py-3 px-4 rounded-lg font-medium text-sm transition-colors text-center block"
-                >
-                  💬 Ask Questions
-                </Link>
-                <Link
-                  href={`/apply/${property.id}`}
-                  className="bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-medium text-sm transition-colors text-center block"
-                >
-                  📝 Apply for Property
-                </Link>
-                <button className="bg-black-700 hover:bg-black-600 text-white py-3 px-4 rounded-lg font-medium text-sm transition-colors border border-gray-600">
-                  📅 Schedule Viewing
-                </button>
-                <button className="bg-black-700 hover:bg-black-600 text-white py-3 px-4 rounded-lg font-medium text-sm transition-colors border border-gray-600">
-                  📋 Request More Info
-                </button>
-                <button className="bg-black-700 hover:bg-black-600 text-white py-3 px-4 rounded-lg font-medium text-sm transition-colors border border-gray-600">
-                  ⚖️ Compare Properties
-                </button>
-                <button className="bg-black-700 hover:bg-black-600 text-white py-3 px-4 rounded-lg font-medium text-sm transition-colors border border-gray-600">
-                  🖨️ Print Details
-                </button>
-              </div>
+              {/* Mortgage Calculator */}
+              <MortgageCalculator defaultPrice={property.price} />
             </div>
-
-            {/* Contact Form */}
-            <div className="bg-black-800 border border-gray-700 rounded-2xl p-6 shadow-lg min-h-[400px]">
-              <h3 className="text-lg font-bold text-yellow-600 mb-4">Get In Touch</h3>
-              <form className="space-y-4">
-                <div>
-                  <input
-                    type="text"
-                    placeholder="Your Name"
-                    className="w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-yellow-600 focus:border-transparent outline-none transition-colors bg-gray-700 text-white placeholder-gray-400"
-                  />
-                </div>
-                <div>
-                  <input
-                    type="email"
-                    placeholder="Your Email"
-                    className="w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-yellow-600 focus:border-transparent outline-none transition-colors bg-gray-700 text-white placeholder-gray-400"
-                  />
-                </div>
-                <div>
-                  <input
-                    type="tel"
-                    placeholder="Your Phone"
-                    className="w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-yellow-600 focus:border-transparent outline-none transition-colors bg-gray-700 text-white placeholder-gray-400"
-                  />
-                </div>
-                <div>
-                  <textarea
-                    rows={3}
-                    placeholder="Message (optional)"
-                    className="w-full px-4 py-3 border border-gray-600 rounded-lg focus:ring-2 focus:ring-yellow-600 focus:border-transparent outline-none transition-colors resize-none bg-gray-700 text-white placeholder-gray-400"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="w-full bg-yellow-600 hover:bg-yellow-700 text-white py-3 px-4 rounded-lg font-semibold text-sm transition-all shadow-md"
-                >
-                  📤 Send Message
-                </button>
-              </form>
-              <p className="text-xs text-gray-400 mt-3 text-center">
-                We'll get back to you within 24 hours
-              </p>
-            </div>
-
-            {/* Property Value Calculator */}
-            <div className="bg-black-800 border border-gray-700 rounded-2xl p-6 shadow-lg text-white min-h-[400px]">
-              <h3 className="text-lg font-bold text-yellow-600 mb-4">Property Value</h3>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center py-2 border-b border-gray-600">
-                  <span className="text-gray-300 text-sm">Price per sqft</span>
-                  <span className="text-white font-semibold">
-                    {property.sqft ? formatPrice(Math.round(property.price / property.sqft), property.currency || 'AED') : 'N/A'}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-gray-600">
-                  <span className="text-gray-300 text-sm">Estimated Value</span>
-                  <span className="text-white font-semibold">
-                    {formatPrice(property.price, property.currency || 'AED')}
-                  </span>
-                </div>
-                <button className="w-full bg-black-700 hover:bg-black-600 text-white py-3 px-4 rounded-lg font-medium text-sm transition-colors border border-gray-600">
-                  📊 Get Full Valuation Report
-                </button>
-              </div>
-            </div>
-            </div>
-          </div>
+          </aside>
         </div>
 
         {/* Related Properties */}
         {relatedProperties.length > 0 && (
-          <section className="mt-16">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold mb-4 text-white">
-                Similar <span className="text-yellow-600">Properties</span>
-              </h2>
-              <p className="text-lg text-gray-300">
-                Discover more properties you might be interested in
-              </p>
+          <section className="mt-24 pt-24 border-t border-slate-100">
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+              <div className="max-w-2xl">
+                <h2 className="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4">
+                  Similar Options
+                </h2>
+                <h3 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
+                  You Might Also Like
+                </h3>
+              </div>
+              <Link href="/properties" className="btn-outline !rounded-full !px-8">
+                View All Properties
+              </Link>
             </div>
             <PropertySlider
               title=""
@@ -787,8 +714,27 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
         )}
 
         {/* Featured Agents Section */}
-        <PropertyAgents />
+        <section className="mt-24">
+          <PropertyAgents />
+        </section>
       </div>
+
+      {/* Download Interest Forms */}
+      <DownloadInterestForm
+        isOpen={showFloorPlanForm}
+        onClose={() => setShowFloorPlanForm(false)}
+        onSubmit={handleFloorPlanSubmit}
+        downloadType="floor_plan"
+        propertyTitle={property.title}
+      />
+
+      <DownloadInterestForm
+        isOpen={showBrochureForm}
+        onClose={() => setShowBrochureForm(false)}
+        onSubmit={handleBrochureSubmit}
+        downloadType="brochure"
+        propertyTitle={property.title}
+      />
     </div>
   )
 }

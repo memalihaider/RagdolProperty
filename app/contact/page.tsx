@@ -1,7 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { EnvelopeIcon, PhoneIcon, MapPinIcon, ClockIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline'
+import { EnvelopeIcon, PhoneIcon, MapPinIcon, ClockIcon, PaperAirplaneIcon, ChatBubbleLeftRightIcon, SparklesIcon } from '@heroicons/react/24/outline'
+import Image from 'next/image'
+import AgentSlider from '@/components/AgentSlider'
+import { getTopAgents } from '@/lib/mock-data'
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -42,45 +45,39 @@ export default function ContactPage() {
   const contactInfo = [
     {
       icon: PhoneIcon,
-      title: 'Phone',
+      title: 'Direct Line',
       details: ['+971 50 123 4567', '+971 55 765 4321'],
-      description: 'Mon-Fri 9AM-6PM'
+      description: 'Available 24/7 for VIP clients'
     },
     {
       icon: EnvelopeIcon,
-      title: 'Email',
-      details: ['info@ragdol.com', 'support@ragdol.com'],
-      description: 'We respond within 24 hours'
+      title: 'Email Inquiry',
+      details: ['concierge@ragdol.com', 'invest@ragdol.com'],
+      description: 'Priority response within 2 hours'
     },
     {
       icon: MapPinIcon,
-      title: 'Office',
-      details: ['123 Business Bay Tower', 'Business Bay, Dubai, UAE'],
-      description: 'Visit us for consultation'
+      title: 'Global Headquarters',
+      details: ['Level 45, Burj Daman', 'DIFC, Dubai, UAE'],
+      description: 'Private consultations by appointment'
     },
-    {
-      icon: ClockIcon,
-      title: 'Business Hours',
-      details: ['Monday - Friday: 9AM - 6PM', 'Saturday: 10AM - 4PM'],
-      description: 'Sunday: Closed'
-    }
   ]
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-[#0d0d0d] flex items-center justify-center px-4 py-12">
+      <div className="min-h-screen bg-white flex items-center justify-center px-4 py-12">
         <div className="max-w-md w-full text-center">
-          <div className="bg-[#141414] rounded-lg border border-[#333333] p-8">
-            <div className="w-16 h-16 bg-[#d4af37] rounded-full flex items-center justify-center mx-auto mb-6">
-              <PaperAirplaneIcon className="h-8 w-8 text-[#1a1a1a]" />
+          <div className="bg-white rounded-[2rem] shadow-2xl shadow-slate-200 p-12 border border-slate-100">
+            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-8">
+              <PaperAirplaneIcon className="h-10 w-10 text-primary" />
             </div>
-            <h2 className="text-2xl font-bold text-[#f5f5f5] mb-4">Message Sent!</h2>
-            <p className="text-[#a3a3a3] mb-6">
-              Thank you for contacting us. We'll get back to you within 24 hours.
+            <h2 className="text-3xl font-serif text-secondary mb-4">Inquiry Received</h2>
+            <p className="text-slate-500 mb-8 leading-relaxed">
+              Thank you for reaching out to RAGDOL. One of our senior property advisors will contact you shortly to discuss your requirements.
             </p>
             <button
               onClick={() => setSubmitted(false)}
-              className="bg-[#d4af37] hover:bg-[#b8941f] text-[#1a1a1a] font-semibold py-3 px-6 rounded-lg transition-colors"
+              className="w-full bg-secondary hover:bg-primary text-white hover:text-secondary font-bold py-4 rounded-xl transition-all duration-300 shadow-lg shadow-secondary/20"
             >
               Send Another Message
             </button>
@@ -91,189 +88,208 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0d0d0d] text-[#f5f5f5]">
+    <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#d4af37]/10 to-transparent"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Contact <span className="text-[#d4af37]">Us</span>
-            </h1>
-            <p className="text-xl md:text-2xl text-[#a3a3a3] max-w-3xl mx-auto leading-relaxed">
-              Get in touch with our expert team. We're here to help you find your dream property
-              or answer any questions you may have.
+      <section className="relative h-[50vh] flex items-center justify-center overflow-hidden bg-secondary">
+        <div className="absolute inset-0">
+          <Image 
+            src="https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg?auto=compress&cs=tinysrgb&w=1600"
+            alt="Dubai Contact"
+            fill
+            className="object-cover opacity-30"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-secondary/60 via-secondary/40 to-white"></div>
+        </div>
+        
+        <div className="container-custom relative z-10 text-center">
+          <span className="inline-block px-4 py-1 bg-primary/20 text-primary text-sm font-bold tracking-widest uppercase rounded-full mb-6">
+            Get In Touch
+          </span>
+          <h1 className="text-5xl md:text-7xl font-serif text-white mb-6">
+            Connect with <span className="text-primary italic">Excellence</span>
+          </h1>
+          <p className="text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed">
+            Whether you're looking to invest, sell, or find your dream home, our elite team is here to provide bespoke guidance.
+          </p>
+        </div>
+      </section>
+
+      {/* Top Agents Section */}
+      <section className="py-24 bg-slate-50/50">
+        <div className="container-custom">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-serif text-secondary mb-6">
+              Meet Your <span className="text-primary italic">Personal Agent</span>
+            </h2>
+            <p className="text-xl text-slate-500 max-w-2xl mx-auto">
+              Our expert agents are ready to provide personalized guidance for all your real estate needs in Dubai.
             </p>
           </div>
+          <AgentSlider agents={getTopAgents(4)} showCount={4} />
         </div>
-      </div>
+      </section>
 
-      {/* Contact Info & Form */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid lg:grid-cols-2 gap-12">
-          {/* Contact Information */}
-          <div>
-            <h2 className="text-3xl font-bold mb-8">Get In Touch</h2>
-            <p className="text-[#a3a3a3] text-lg mb-8">
-              Have questions about buying, selling, or renting property? Our team of experts
-              is ready to assist you. Reach out to us through any of the channels below.
-            </p>
-
-            <div className="space-y-6">
+      <section className="py-24 -mt-24 relative z-20">
+        <div className="container-custom">
+          <div className="grid lg:grid-cols-3 gap-12">
+            {/* Contact Info Cards */}
+            <div className="lg:col-span-1 space-y-8">
               {contactInfo.map((info, index) => (
-                <div key={index} className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-[#d4af37] rounded-lg flex items-center justify-center flex-shrink-0">
-                    <info.icon className="h-6 w-6 text-[#1a1a1a]" />
+                <div key={index} className="bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 group hover:border-primary/30 transition-all duration-500">
+                  <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-primary/10 transition-colors">
+                    <info.icon className="h-7 w-7 text-primary" />
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">{info.title}</h3>
+                  <h3 className="text-xl font-serif text-secondary mb-4">{info.title}</h3>
+                  <div className="space-y-2 mb-4">
                     {info.details.map((detail, idx) => (
-                      <p key={idx} className="text-[#a3a3a3]">{detail}</p>
+                      <p key={idx} className="text-slate-600 font-medium">{detail}</p>
                     ))}
-                    <p className="text-[#737373] text-sm mt-1">{info.description}</p>
                   </div>
+                  <p className="text-sm text-slate-400 italic">{info.description}</p>
                 </div>
               ))}
+
+              {/* Social/Live Chat Card */}
+              <div className="bg-secondary p-8 rounded-3xl shadow-xl shadow-secondary/20 text-white relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-700"></div>
+                <ChatBubbleLeftRightIcon className="h-10 w-10 text-primary mb-6" />
+                <h3 className="text-2xl font-serif mb-4">Live Concierge</h3>
+                <p className="text-slate-300 mb-6 leading-relaxed">
+                  Need immediate assistance? Our digital concierge is available for instant property queries.
+                </p>
+                <button className="px-6 py-3 bg-primary text-secondary font-bold rounded-xl hover:bg-white transition-colors">
+                  Start Live Chat
+                </button>
+              </div>
+            </div>
+
+            {/* Contact Form */}
+            <div className="lg:col-span-2">
+              <div className="bg-white p-10 md:p-16 rounded-[3rem] shadow-2xl shadow-slate-200 border border-slate-100">
+                <div className="flex items-center gap-3 mb-10">
+                  <SparklesIcon className="h-6 w-6 text-primary" />
+                  <h2 className="text-3xl font-serif text-secondary">Send a Private Inquiry</h2>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-8">
+                  <div className="grid md:grid-cols-2 gap-8">
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-secondary uppercase tracking-wider ml-1">Full Name</label>
+                      <input
+                        type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        required
+                        placeholder="John Doe"
+                        className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-slate-300"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-secondary uppercase tracking-wider ml-1">Email Address</label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        required
+                        placeholder="john@example.com"
+                        className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-slate-300"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-8">
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-secondary uppercase tracking-wider ml-1">Phone Number</label>
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        placeholder="+971 50 000 0000"
+                        className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-slate-300"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-secondary uppercase tracking-wider ml-1">Inquiry Type</label>
+                      <select
+                        name="subject"
+                        value={formData.subject}
+                        onChange={handleInputChange}
+                        className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-primary/50 transition-all text-slate-600"
+                      >
+                        <option value="">Select Interest</option>
+                        <option value="buying">Buying Property</option>
+                        <option value="selling">Selling Property</option>
+                        <option value="investment">Investment Advice</option>
+                        <option value="other">Other Inquiry</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-secondary uppercase tracking-wider ml-1">Your Message</label>
+                    <textarea
+                      name="message"
+                      value={formData.message}
+                      onChange={handleInputChange}
+                      required
+                      rows={6}
+                      placeholder="Tell us about your property requirements..."
+                      className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-slate-300 resize-none"
+                    ></textarea>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full py-5 bg-secondary text-white font-bold rounded-2xl hover:bg-primary hover:text-secondary transition-all duration-500 shadow-xl shadow-secondary/20 flex items-center justify-center gap-3 disabled:opacity-70"
+                  >
+                    {isSubmitting ? (
+                      <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      <>
+                        <PaperAirplaneIcon className="h-5 w-5" />
+                        Submit Inquiry
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
-
-          {/* Contact Form */}
-          <div className="bg-[#141414] rounded-lg border border-[#333333] p-8">
-            <h3 className="text-2xl font-bold mb-6">Send us a Message</h3>
-
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium mb-2">
-                    Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 bg-[#262626] border border-[#333333] rounded-lg text-[#f5f5f5] placeholder-[#737373] focus:ring-2 focus:ring-[#d4af37] focus:border-transparent transition-colors"
-                    placeholder="Your full name"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium mb-2">
-                    Email Address *
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 bg-[#262626] border border-[#333333] rounded-lg text-[#f5f5f5] placeholder-[#737373] focus:ring-2 focus:ring-[#d4af37] focus:border-transparent transition-colors"
-                    placeholder="your@email.com"
-                  />
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label htmlFor="phone" className="block text-sm font-medium mb-2">
-                    Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-[#262626] border border-[#333333] rounded-lg text-[#f5f5f5] placeholder-[#737373] focus:ring-2 focus:ring-[#d4af37] focus:border-transparent transition-colors"
-                    placeholder="+92 300 1234567"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="subject" className="block text-sm font-medium mb-2">
-                    Subject *
-                  </label>
-                  <select
-                    id="subject"
-                    name="subject"
-                    value={formData.subject}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 bg-[#262626] border border-[#333333] rounded-lg text-[#f5f5f5] focus:ring-2 focus:ring-[#d4af37] focus:border-transparent transition-colors"
-                  >
-                    <option value="">Select a subject</option>
-                    <option value="buying">Buying Property</option>
-                    <option value="selling">Selling Property</option>
-                    <option value="renting">Renting Property</option>
-                    <option value="valuation">Property Valuation</option>
-                    <option value="investment">Investment Advice</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium mb-2">
-                  Message *
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleInputChange}
-                  required
-                  rows={6}
-                  className="w-full px-4 py-3 bg-[#262626] border border-[#333333] rounded-lg text-[#f5f5f5] placeholder-[#737373] focus:ring-2 focus:ring-[#d4af37] focus:border-transparent transition-colors resize-none"
-                  placeholder="Tell us how we can help you..."
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-[#d4af37] hover:bg-[#b8941f] text-[#1a1a1a] font-semibold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-              >
-                {isSubmitting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#1a1a1a] mr-2"></div>
-                    Sending...
-                  </>
-                ) : (
-                  <>
-                    <PaperAirplaneIcon className="h-5 w-5 mr-2" />
-                    Send Message
-                  </>
-                )}
-              </button>
-            </form>
-          </div>
         </div>
-      </div>
+      </section>
 
       {/* Map Section */}
-      <div className="bg-[#141414] py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-4">Visit Our Office</h2>
-            <p className="text-[#a3a3a3] text-lg">
-              Located in the heart of Lahore's business district
-            </p>
-          </div>
-
-          <div className="bg-[#262626] rounded-lg overflow-hidden">
-            <div className="aspect-video bg-gradient-to-br from-[#d4af37]/20 to-[#d4af37]/5 flex items-center justify-center">
-              <div className="text-center">
-                <MapPinIcon className="h-16 w-16 text-[#d4af37] mx-auto mb-4" />
-                <p className="text-[#a3a3a3]">Interactive Map Coming Soon</p>
-                <p className="text-[#737373] text-sm mt-2">
-                  123 Business Avenue, Gulberg, Lahore, Pakistan
-                </p>
+      <section className="py-24 bg-slate-50">
+        <div className="container-custom">
+          <div className="rounded-[3rem] overflow-hidden shadow-2xl h-[500px] relative border-8 border-white">
+            <iframe 
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m13!1m1!1s0x3e5f682826185c6d:0x5629ef87a1744e1!2zQnVyaiBEYW1hbiAtIERpZmMgLSBEdWJhaSAtINCf0L7RgdC10LvQvtC6INCU0L7QvNCw0L0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3e5f682826185c6d%3A0x5629ef87a1744e1!2sBurj%20Daman!5e0!3m2!1sen!2sae!4v1710345678901!5m2!1sen!2sae" 
+              width="100%" 
+              height="100%" 
+              style={{ border: 0 }} 
+              allowFullScreen 
+              loading="lazy" 
+              referrerPolicy="no-referrer-when-downgrade"
+              className="grayscale contrast-125"
+            ></iframe>
+            <div className="absolute bottom-10 left-10 bg-white p-8 rounded-3xl shadow-2xl max-w-xs hidden md:block">
+              <h4 className="text-xl font-serif text-secondary mb-2">Visit Our Office</h4>
+              <p className="text-slate-500 text-sm leading-relaxed">
+                Burj Daman, Level 45<br />
+                DIFC, Dubai, UAE
+              </p>
+              <div className="mt-4 flex items-center gap-2 text-primary font-bold text-sm">
+                <MapPinIcon className="h-4 w-4" />
+                Get Directions
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   )
 }

@@ -3,897 +3,698 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import type { RealtimeChannel } from '@supabase/realtime-js'
-import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { cn } from '@/lib/utils'
+import ValuationModal, { ValuationData } from './ValuationModal'
+import { useTranslation } from 'react-i18next'
 import {
-  HomeIcon,
-  BuildingOfficeIcon,
-  UsersIcon,
-  NewspaperIcon,
-  UserCircleIcon,
   Bars3Icon,
   XMarkIcon,
-  ArrowRightOnRectangleIcon,
-  HeartIcon,
-  ChatBubbleLeftRightIcon,
-  Cog6ToothIcon,
-  BellIcon,
+  UserIcon,
+  StarIcon,
   ChevronDownIcon,
-  PlusIcon,
+  CalculatorIcon
 } from '@heroicons/react/24/outline'
 
-interface DropdownLink {
-  href: string
+const dubaiAreas = [
+  { name: 'Dubai Marina', image: 'https://images.unsplash.com/photo-1582672060674-bc2bd808a8b5?w=400&q=80' },
+  { name: 'Downtown Dubai', image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&q=80' },
+  { name: 'Palm Jumeirah', image: 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=400&q=80' },
+  { name: 'Business Bay', image: 'https://images.unsplash.com/photo-1549944850-84e00be4203b?w=400&q=80' },
+  { name: 'Jumeirah', image: 'https://images.unsplash.com/photo-1528702748617-c64d49f918af?w=400&q=80' },
+  { name: 'Dubai Hills Estate', image: 'https://images.unsplash.com/photo-1518684079-3c830dcef090?w=400&q=80' },
+  { name: 'Dubai Creek Harbour', image: 'https://images.unsplash.com/photo-1614605242014-c6419091c3fd?w=400&q=80' },
+  { name: 'Emirates Hills', image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&q=80' },
+  { name: 'Arabian Ranches', image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400&q=80' },
+  { name: 'Dubai South', image: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=400&q=80' },
+  { name: 'Al Barsha', image: 'https://images.unsplash.com/photo-1540518614846-7eded433c457?w=400&q=80' },
+  { name: 'Dubai Silicon Oasis', image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&q=80' },
+  { name: 'Deira', image: 'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=400&q=80' },
+  { name: 'Jumeirah Beach Residence', image: 'https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=400&q=80' },
+  { name: 'Dubai Islands', image: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=400&q=80' },
+]
+
+interface NavSubItem {
   label: string
-  icon?: typeof HomeIcon
-  description?: string
+  href: string
 }
 
-interface SubCategory {
+interface NavItem {
   label: string
   href: string
+  subItems?: NavSubItem[]
 }
 
-interface Category {
+interface NavSection {
   label: string
+  hasDropdown: boolean
   href?: string
-  subcategories?: SubCategory[]
-}
-
-interface NavDropdown {
-  label: string
-  categories: Category[]
+  items?: NavItem[]
+  isValuation?: boolean
 }
 
 export default function Header() {
-  const { user, profile, signOut } = useAuth()
+  const { user, profile } = useAuth()
   const pathname = usePathname()
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
-  const [newEnquiriesCount, setNewEnquiriesCount] = useState<number>(0)
-  const [unreadMessagesCount, setUnreadMessagesCount] = useState<number>(0)
-  const [pendingPropertiesCount, setPendingPropertiesCount] = useState<number>(0)
-  const [pendingAgentsCount, setPendingAgentsCount] = useState<number>(0)
-  const [userNotificationsCount, setUserNotificationsCount] = useState<number>(0)
+  const { t } = useTranslation()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isBuyOpen, setIsBuyOpen] = useState(false)
+  const [isRentOpen, setIsRentOpen] = useState(false)
+  const [isLuxeOpen, setIsLuxeOpen] = useState(false)
+  const [isCommercialOpen, setIsCommercialOpen] = useState(false)
+  const [isServicesOpen, setIsServicesOpen] = useState(false)
+  const [isMoreOpen, setIsMoreOpen] = useState(false)
+  const [isValuationModalOpen, setIsValuationModalOpen] = useState(false)
 
-  // Main navigation dropdowns with hierarchical categories
-  const navDropdowns: Record<string, NavDropdown> = {
-    buy: {
-      label: 'Buy',
-      categories: [
-        { label: 'All Properties for Sale', href: '/properties?action=buy' },
-        { 
-          label: 'By Type',
-          subcategories: [
-            { label: 'Apartments', href: '/properties?action=buy&type=apartment' },
-            { label: 'Villas', href: '/properties?action=buy&type=villa' },
-            { label: 'Townhouses', href: '/properties?action=buy&type=townhouse' },
-            { label: 'Plots', href: '/properties?action=buy&type=plot' },
-            { label: 'Commercial', href: '/properties?action=buy&type=commercial' },
-            { label: 'Penthouses', href: '/properties?action=buy&type=penthouse' },
-          ]
-        },
-        {
-          label: 'By Location',
-          subcategories: [
-            { label: 'Dubai Marina', href: '/properties?action=buy&area=Dubai Marina' },
-            { label: 'Palm Jumeirah', href: '/properties?action=buy&area=Palm Jumeirah' },
-            { label: 'Jumeirah Beach Residence', href: '/properties?action=buy&area=Jumeirah Beach Residence' },
-            { label: 'Dubai Hills Estate', href: '/properties?action=buy&area=Dubai Hills Estate' },
-            { label: 'Business Bay', href: '/properties?action=buy&area=Business Bay' },
-            { label: 'Downtown Dubai', href: '/properties?action=buy&area=Downtown Dubai' },
-          ]
-        },
-        {
-          label: 'By Price Range',
-          subcategories: [
-            { label: 'Under AED 1M', href: '/properties?action=buy&maxPrice=1000000' },
-            { label: 'AED 1M - 3M', href: '/properties?action=buy&minPrice=1000000&maxPrice=3000000' },
-            { label: 'AED 3M - 5M', href: '/properties?action=buy&minPrice=3000000&maxPrice=5000000' },
-            { label: 'AED 5M - 10M', href: '/properties?action=buy&minPrice=5000000&maxPrice=10000000' },
-            { label: 'Above AED 10M', href: '/properties?action=buy&minPrice=10000000' },
-          ]
-        },
-        {
-          label: 'Furnished Properties',
-          subcategories: [
-            { label: 'Furnished Studios', href: '/properties?action=buy&type=studio&furnished=true' },
-            { label: 'Furnished 1-bed', href: '/properties?action=buy&beds=1&furnished=true' },
-            { label: 'Furnished 2-bed', href: '/properties?action=buy&beds=2&furnished=true' },
-            { label: 'Furnished 3-bed', href: '/properties?action=buy&beds=3&furnished=true' },
-          ]
-        },
-      ],
+  // Hide header on login pages
+  const isAuthPage = pathname?.includes('/login') || pathname?.includes('/signup') || pathname?.includes('/auth/')
+
+  if (isAuthPage) return null
+
+  const navigation: NavSection[] = [
+    {
+      label: t('header.navigation.newProjects'),
+      hasDropdown: false,
+      href: '/projects'
     },
-    rent: {
-      label: 'Rent',
-      categories: [
-        { label: 'All Properties for Rent', href: '/properties?action=rent' },
+    {
+      label: t('header.navigation.buy'),
+      hasDropdown: true,
+      items: [
         {
-          label: 'By Type',
-          subcategories: [
-            { label: 'Apartments', href: '/properties?action=rent&type=apartment' },
-            { label: 'Villas', href: '/properties?action=rent&type=villa' },
-            { label: 'Townhouses', href: '/properties?action=rent&type=townhouse' },
-            { label: 'Commercial', href: '/properties?action=rent&type=commercial' },
+          label: t('header.navigation.propertyTypes'),
+          href: '/properties?action=buy',
+          subItems: [
+            { label: t('header.navigation.apartmentsInDubai'), href: '/properties?action=buy&type=apartment&area=dubai' },
+            { label: t('header.navigation.villasInDubai'), href: '/properties?action=buy&type=villa&area=dubai' },
+            { label: t('header.navigation.townhousesInDubai'), href: '/properties?action=buy&type=townhouse&area=dubai' },
+            { label: t('header.navigation.penthouses'), href: '/properties?action=buy&type=penthouse' },
+            { label: t('header.navigation.studios'), href: '/properties?action=buy&type=studio' }
           ]
         },
         {
-          label: 'By Location',
-          subcategories: [
+          label: t('header.navigation.popularAreas'),
+          href: '/properties?action=buy&area=dubai',
+          subItems: [
+            { label: t('header.navigation.dubaiMarina'), href: '/properties?action=buy&area=Dubai Marina' },
+            { label: t('header.navigation.jumeirah'), href: '/properties?action=buy&area=Jumeirah' },
+            { label: t('header.navigation.dubaiSiliconOasis'), href: '/properties?action=buy&area=Dubai Silicon Oasis' },
+            { label: t('header.navigation.alBarsha'), href: '/properties?action=buy&area=Al Barsha' },
+            { label: t('header.navigation.downtownDubai'), href: '/properties?action=buy&area=Downtown Dubai' },
+            { label: t('header.navigation.businessBay'), href: '/properties?action=buy&area=Business Bay' },
+            { label: t('header.navigation.emiratesHills'), href: '/properties?action=buy&area=Emirates Hills' },
+            { label: t('header.navigation.arabianRanches'), href: '/properties?action=buy&area=Arabian Ranches' },
+            { label: t('header.navigation.palmJumeirah'), href: '/properties?action=buy&area=Palm Jumeirah' },
+            { label: t('header.navigation.jumeirahBeachResidence'), href: '/properties?action=buy&area=Jumeirah Beach Residence' },
+            { label: t('header.navigation.dubaiCreekHarbour'), href: '/properties?action=buy&area=Dubai Creek Harbour' },
+            { label: t('header.navigation.dubaiSouth'), href: '/properties?action=buy&area=Dubai South' },
+            { label: t('header.navigation.deira'), href: '/properties?action=buy&area=Deira' },
+            { label: t('header.navigation.dubaiHillsEstate'), href: '/properties?action=buy&area=Dubai Hills Estate' },
+            { label: t('header.navigation.dubaiIslands'), href: '/properties?action=buy&area=Dubai Islands' }
+          ]
+        },
+        {
+          label: t('header.navigation.specialCollections'),
+          href: '/properties?action=buy',
+          subItems: [
+            { label: t('header.navigation.furnishedProperties'), href: '/properties?action=buy&furnished=true' },
+            { label: t('header.navigation.readyToMove'), href: '/properties?action=buy&completion=ready' },
+            { label: t('header.navigation.offPlanProjects'), href: '/properties?action=buy&completion=off-plan' },
+            { label: t('header.navigation.investmentDeals'), href: '/properties?action=buy&sortBy=price-low' },
+            { label: t('header.navigation.luxurySelection'), href: '/properties?action=buy&category=luxe' }
+          ]
+        }
+      ]
+    },
+    {
+      label: t('header.navigation.rent'),
+      hasDropdown: true,
+      items: [
+        {
+          label: t('header.navigation.propertyTypes'),
+          href: '/properties?action=rent',
+          subItems: [
+            { label: t('header.navigation.apartmentsForRent'), href: '/properties?action=rent&type=apartment&area=dubai' },
+            { label: t('header.navigation.villasForRent'), href: '/properties?action=rent&type=villa&area=dubai' },
+            { label: t('header.navigation.townhousesForRent'), href: '/properties?action=rent&type=townhouse&area=dubai' },
+            { label: t('header.navigation.shortTermRentals'), href: '/properties?action=rent&furnished=true' },
+            { label: t('header.navigation.studioApartments'), href: '/properties?action=rent&type=studio' }
+          ]
+        },
+        {
+          label: 'Popular Areas',
+          href: '/properties?action=rent&area=dubai',
+          subItems: [
             { label: 'Dubai Marina', href: '/properties?action=rent&area=Dubai Marina' },
-            { label: 'Palm Jumeirah', href: '/properties?action=rent&area=Palm Jumeirah' },
-            { label: 'Jumeirah Beach Residence', href: '/properties?action=rent&area=Jumeirah Beach Residence' },
-            { label: 'Business Bay', href: '/properties?action=rent&area=Business Bay' },
-            { label: 'Dubai Hills Estate', href: '/properties?action=rent&area=Dubai Hills Estate' },
+            { label: 'Jumeirah', href: '/properties?action=rent&area=Jumeirah' },
+            { label: t('header.navigation.dubaiSiliconOasis'), href: '/properties?action=rent&area=Dubai Silicon Oasis' },
+            { label: t('header.navigation.alBarsha'), href: '/properties?action=rent&area=Al Barsha' },
+            { label: t('header.navigation.downtownDubai'), href: '/properties?action=rent&area=Downtown Dubai' },
+            { label: t('header.navigation.businessBay'), href: '/properties?action=rent&area=Business Bay' },
+            { label: t('header.navigation.emiratesHills'), href: '/properties?action=rent&area=Emirates Hills' },
+            { label: t('header.navigation.arabianRanches'), href: '/properties?action=rent&area=Arabian Ranches' },
+            { label: t('header.navigation.palmJumeirah'), href: '/properties?action=rent&area=Palm Jumeirah' },
+            { label: t('header.navigation.jumeirahBeachResidence'), href: '/properties?action=rent&area=Jumeirah Beach Residence' },
+            { label: t('header.navigation.dubaiCreekHarbour'), href: '/properties?action=rent&area=Dubai Creek Harbour' },
+            { label: t('header.navigation.dubaiSouth'), href: '/properties?action=rent&area=Dubai South' },
+            { label: t('header.navigation.deira'), href: '/properties?action=rent&area=Deira' },
+            { label: t('header.navigation.dubaiHillsEstate'), href: '/properties?action=rent&area=Dubai Hills Estate' },
+            { label: t('header.navigation.dubaiIslands'), href: '/properties?action=rent&area=Dubai Islands' }
           ]
         },
         {
-          label: 'Furnished Properties',
-          subcategories: [
-            { label: 'Furnished Studios', href: '/properties?action=rent&type=studio&furnished=true' },
-            { label: 'Furnished 1-bed', href: '/properties?action=rent&beds=1&furnished=true' },
-            { label: 'Furnished 2-bed', href: '/properties?action=rent&beds=2&furnished=true' },
-            { label: 'Furnished 3-bed', href: '/properties?action=rent&beds=3&furnished=true' },
-            { label: 'Furnished 4-bed', href: '/properties?action=rent&beds=4&furnished=true' },
+          label: t('header.navigation.specialCollections'),
+          href: '/guides',
+          subItems: [
+            { label: t('header.navigation.furnishedProperties'), href: '/guides/tenant' },
+            { label: t('header.navigation.readyToMove'), href: '/guides/laws' },
+            { label: t('header.navigation.offPlanProjects'), href: '/guides/areas' },
+            { label: t('header.navigation.investmentDeals'), href: '/guides/moving' },
+            { label: t('header.navigation.luxurySelection'), href: '/services#property-management' }
           ]
-        },
-      ],
+        }
+      ]
     },
-    luxe: {
-      label: 'Luxe',
-      categories: [
-        { label: 'All Luxury Properties', href: '/properties?category=luxe' },
+    {
+      label: t('header.navigation.luxury'),
+      hasDropdown: true,
+      items: [
         {
-          label: 'Luxury Properties for Sale',
-          subcategories: [
-            { label: 'Apartments', href: '/properties?action=buy&category=luxe&type=apartment' },
-            { label: 'Villas', href: '/properties?action=buy&category=luxe&type=villa' },
-            { label: 'Homes', href: '/properties?action=buy&category=luxe&beds=3' },
-            { label: 'Penthouses', href: '/properties?action=buy&category=luxe&type=penthouse' },
-            { label: 'Mansions', href: '/properties?action=buy&category=luxe&type=villa&minPrice=20000000' },
-            { label: 'Townhouses', href: '/properties?action=buy&category=luxe&type=townhouse' },
+          label: t('header.navigation.luxuryCollections'),
+          href: '/properties?category=luxe',
+          subItems: [
+            { label: t('header.navigation.luxuryProducts'), href: '/properties?category=luxe' },
+            { label: t('header.navigation.ultraLuxuryProducts'), href: '/properties?category=ultra-luxe' },
+            { label: t('header.navigation.dubaiBrandedResidences'), href: '/properties?category=branded' }
           ]
         },
         {
-          label: 'Luxury Properties for Rent',
-          subcategories: [
-            { label: 'Luxury Apartments', href: '/properties?action=rent&category=luxe&type=apartment' },
-            { label: 'Luxury Villas', href: '/properties?action=rent&category=luxe&type=villa' },
-            { label: 'Penthouse Rentals', href: '/properties?action=rent&category=luxe&type=penthouse' },
-            { label: 'Mansion Rentals', href: '/properties?action=rent&category=luxe&type=villa&minPrice=500000' },
+          label: t('header.navigation.luxuryProperties'),
+          href: '/properties?action=buy&category=luxe',
+          subItems: [
+            { label: t('header.navigation.luxuryApartments'), href: '/properties?action=buy&category=luxe&type=apartment' },
+            { label: t('header.navigation.luxuryVillas'), href: '/properties?action=buy&category=luxe&type=villa' },
+            { label: t('header.navigation.luxuryHomes'), href: '/properties?action=buy&category=luxe&type=home' },
+            { label: t('header.navigation.luxuryPenthouses'), href: '/properties?action=buy&category=luxe&type=penthouse' }
           ]
-        },
-        {
-          label: 'By Luxury Price Range',
-          subcategories: [
-            { label: 'AED 2M - 5M', href: '/properties?category=luxe&minPrice=2000000&maxPrice=5000000' },
-            { label: 'AED 5M - 10M', href: '/properties?category=luxe&minPrice=5000000&maxPrice=10000000' },
-            { label: 'AED 10M - 20M', href: '/properties?category=luxe&minPrice=10000000&maxPrice=20000000' },
-            { label: 'AED 20M - 50M', href: '/properties?category=luxe&minPrice=20000000&maxPrice=50000000' },
-            { label: 'Above AED 50M', href: '/properties?category=luxe&minPrice=50000000' },
-          ]
-        },
-        {
-          label: 'Premium Locations',
-          subcategories: [
-            { label: 'Palm Jumeirah', href: '/properties?category=luxe&area=Palm Jumeirah' },
-            { label: 'Dubai Marina', href: '/properties?category=luxe&area=Dubai Marina' },
-            { label: 'Jumeirah Beach Residence', href: '/properties?category=luxe&area=Jumeirah Beach Residence' },
-            { label: 'Emirates Hills', href: '/properties?category=luxe&area=Emirates Hills' },
-            { label: 'Dubai Hills Estate', href: '/properties?category=luxe&area=Dubai Hills Estate' },
-            { label: 'Downtown Dubai', href: '/properties?category=luxe&area=Downtown Dubai' },
-            { label: 'Business Bay', href: '/properties?category=luxe&area=Business Bay' },
-          ]
-        },
-        {
-          label: 'Dubai Branded Residences',
-          subcategories: [
-            { label: 'DAMAC Properties', href: '/properties?category=luxe&developer=DAMAC' },
-            { label: 'Emaar Properties', href: '/properties?category=luxe&developer=Emaar' },
-            { label: 'Nakheel Properties', href: '/properties?category=luxe&developer=Nakheel' },
-            { label: 'Dubai Properties', href: '/properties?category=luxe&developer=Dubai Properties' },
-          ]
-        },
-        {
-          label: 'Luxury Features',
-          subcategories: [
-            { label: 'Beachfront', href: '/properties?category=luxe&features=beachfront' },
-            { label: 'Private Pool', href: '/properties?category=luxe&features=private_pool' },
-            { label: 'Marina View', href: '/properties?category=luxe&features=marina_view' },
-            { label: 'Golf Course', href: '/properties?category=luxe&features=golf_course' },
-          ]
-        },
-      ],
+        }
+      ]
     },
-    commercial: {
-      label: 'Commercial',
-      categories: [
-        { label: 'All Commercial Properties', href: '/properties?type=commercial' },
+    {
+      label: t('header.navigation.commercial'),
+      hasDropdown: true,
+      items: [
         {
-          label: 'Offices',
-          subcategories: [
-            { label: 'Offices for Sale', href: '/properties?action=buy&type=commercial&subtype=office' },
-            { label: 'Offices for Rent', href: '/properties?action=rent&type=commercial&subtype=office' },
+          label: t('header.navigation.offices'),
+          href: '/properties?type=office',
+          subItems: [
+            { label: t('header.navigation.officesForSale'), href: '/properties?action=buy&type=office' },
+            { label: t('header.navigation.officesForRent'), href: '/properties?action=rent&type=office' }
           ]
         },
         {
-          label: 'Retail & Shops',
-          subcategories: [
-            { label: 'Shops for Sale', href: '/properties?action=buy&type=commercial&subtype=shop' },
-            { label: 'Shops for Rent', href: '/properties?action=rent&type=commercial&subtype=shop' },
+          label: t('header.navigation.retailAndShops'),
+          href: '/properties?type=shop',
+          subItems: [
+            { label: t('header.navigation.shopsForSale'), href: '/properties?action=buy&type=shop' },
+            { label: t('header.navigation.shopsForRent'), href: '/properties?action=rent&type=shop' }
           ]
         },
         {
-          label: 'Commercial Plots',
-          subcategories: [
-            { label: 'Plots for Sale', href: '/properties?action=buy&type=plot&category=commercial' },
+          label: t('header.navigation.otherCommercial'),
+          href: '/properties?type=commercial',
+          subItems: [
+            { label: t('header.navigation.plotsForSale'), href: '/properties?action=buy&type=plot' },
+            { label: t('header.navigation.warehouses'), href: '/properties?type=warehouse' },
+            { label: t('header.navigation.commercialBuildings'), href: '/properties?type=building' }
           ]
-        },
-        {
-          label: 'Warehouses & Industrial',
-          subcategories: [
-            { label: 'Warehouses for Sale', href: '/properties?action=buy&type=commercial&subtype=warehouse' },
-            { label: 'Warehouses for Rent', href: '/properties?action=rent&type=commercial&subtype=warehouse' },
-          ]
-        },
-      ],
+        }
+      ]
     },
-    sell: {
-      label: 'Sell',
-      categories: [
-        { label: 'List Your Property', href: '/sell' },
-      ],
+    { label: t('header.navigation.sell'), href: '/sell', hasDropdown: false },
+    { label: t('header.navigation.agents'), href: '/agents', hasDropdown: false },
+    {
+      label: t('header.navigation.services'),
+      hasDropdown: true,
+      items: [
+        { label: t('header.navigation.propertyManagementService'), href: '/services#property-management' },
+        { label: t('header.navigation.snaggingAndHandover'), href: '/services#snagging' },
+        { label: t('header.navigation.allServices'), href: '/services' }
+      ]
     },
-    projects: {
-      label: 'Projects',
-      categories: [
-        { label: 'All Projects', href: '/projects' },
-        {
-          label: 'By Status',
-          subcategories: [
-            { label: 'Off-Plan Projects', href: '/projects?status=off-plan' },
-            { label: 'Under Construction', href: '/projects?status=in-progress' },
-            { label: 'Ready Projects', href: '/projects?status=completed' },
-          ]
-        },
-        {
-          label: 'By Developer',
-          subcategories: [
-            { label: 'Emaar Projects', href: '/projects?developer=Emaar' },
-            { label: 'DAMAC Projects', href: '/projects?developer=DAMAC' },
-            { label: 'Nakheel Projects', href: '/projects?developer=Nakheel' },
-            { label: 'Dubai Properties', href: '/projects?developer=Dubai Properties' },
-          ]
-        },
-      ],
-    },
-    agents: {
-      label: 'Agents',
-      categories: [
-        { label: 'Find an Agent', href: '/agents' },
-      ],
-    },
-    services: {
-      label: 'Services',
-      categories: [
-        {
-          label: 'Property Management',
-          subcategories: [
-            { label: 'Residential Property Management', href: '/services/property-management' },
-            // { label: 'Commercial Property Management', href: '/services/commercial-property-management' },
-            // { label: 'Vacation Rental Management', href: '/services/vacation-rental-management' },
-            // { label: 'Property Maintenance', href: '/services/property-maintenance' },
-          ]
-        },
-        {
-          label: 'Property Inspection & Handover',
-          subcategories: [
-            { label: 'Snagging & Handover Services', href: '/services/snagging-handover' },
-            // { label: 'Pre-Purchase Inspection', href: '/services/pre-purchase-inspection' },
-            // { label: 'Property Valuation', href: '/services/property-valuation' },
-            // { label: 'Building Inspection', href: '/services/building-inspection' },
-          ]
-        },
-        // {
-        //   label: 'Real Estate Consulting',
-        //   subcategories: [
-        //     { label: 'Investment Consulting', href: '/services/investment-consulting' },
-        //     { label: 'Market Analysis', href: '/services/market-analysis' },
-        //     { label: 'Legal Services', href: '/services/legal-services' },
-        //     { label: 'Mortgage Advisory', href: '/services/mortgage-advisory' },
-        //   ]
-        // },
-        // {
-        //   label: 'Additional Services',
-        //   subcategories: [
-        //     { label: 'Interior Design', href: '/services/interior-design' },
-        //     { label: 'Property Photography', href: '/services/property-photography' },
-        //     { label: 'Virtual Tours', href: '/services/virtual-tours' },
-        //     { label: 'All Services', href: '/services' },
-        //   ]
-        // },
-      ],
-    },
-    more: {
-      label: 'More',
-      categories: [
-        { label: 'Career', href: '/careers' },
-        { label: 'News', href: '/news' },
-        { label: 'Guides', href: '/guides' },
-        { label: 'FAQs', href: '/faq' },
-        { label: 'Why Invest in Dubai', href: '/why-invest-dubai' },
-      ],
-    },
+    {
+      label: t('header.navigation.more'),
+      hasDropdown: true,
+      items: [
+        { label: t('header.navigation.career'), href: '/careers' },
+        { label: t('header.navigation.news'), href: '/news' },
+        { label: t('header.navigation.guides'), href: '/guides' },
+        { label: t('header.navigation.faqs'), href: '/faq' },
+        { label: t('header.navigation.whyInvestInDubai'), href: '/why-invest-dubai' }
+      ]
+    }
+  ]
+
+  const handleValuationSubmit = async (data: ValuationData) => {
+    // For now, just log the data. In a real implementation, this would send to an API
+    console.log('Valuation request:', data)
+    // You could add a toast notification here or redirect to a thank you page
+    alert('Thank you for your valuation request! Our team will contact you soon.')
   }
-
-  const mainNavItems = [
-    { key: 'buy', label: 'Buy', isDropdown: true },
-    { key: 'rent', label: 'Rent', isDropdown: true },
-    { key: 'luxe', label: 'Luxe', isDropdown: true },
-    { key: 'commercial', label: 'Commercial', isDropdown: true },
-  ]
-
-  const publicLinks = [
-    { key: 'sell', label: 'Sell', isDropdown: true },
-    { key: 'agents', label: 'Agents', isDropdown: true },
-    { key: 'services', label: 'Services', isDropdown: true },
-    { key: 'more', label: 'More', isDropdown: true },
-  ]
-
-  const userLinks = [
-    { href: '/account', label: 'Dashboard', icon: UserCircleIcon },
-    { href: '/account/saved', label: 'Saved', icon: HeartIcon },
-    { href: '/account/enquiries', label: 'Enquiries', icon: ChatBubbleLeftRightIcon },
-    { href: '/account/notifications', label: 'Notifications', icon: BellIcon },
-    { href: '/account/settings', label: 'Settings', icon: Cog6ToothIcon },
-  ]
-
-  const isActive = (path: string) => pathname === path || pathname.startsWith(path + '/')
-
-  const NavDropdownMenu = ({ item }: { item: (typeof mainNavItems)[0] | (typeof publicLinks)[0] }) => {
-    if (!('key' in item) || !item.isDropdown) return null
-
-    const dropdown = navDropdowns[item.key]
-    if (!dropdown) return null
-
-    return (
-      <div className="absolute left-0 mt-0 min-w-max bg-background border border-border rounded-md shadow-lg py-2 z-50 max-h-[500px] overflow-y-auto">
-        {dropdown.categories.map((category, categoryIdx) => (
-          <div key={categoryIdx}>
-            {category.subcategories ? (
-              // Category with subcategories
-              <div className="px-4 py-3 border-b border-border last:border-b-0">
-                <div className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">
-                  {category.label}
-                </div>
-                <div className="space-y-1">
-                  {category.subcategories.map((sub) => (
-                    <Link
-                      key={sub.href}
-                      href={sub.href}
-                      onClick={() => setOpenDropdown(null)}
-                      className="block px-3 py-1.5 text-sm text-muted-foreground hover:text-primary hover:bg-muted transition-colors rounded"
-                    >
-                      {sub.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              // Simple category link
-              <Link
-                href={category.href || '#'}
-                onClick={() => setOpenDropdown(null)}
-                className="block px-4 py-2 text-sm font-medium text-muted-foreground hover:text-primary hover:bg-muted transition-colors"
-              >
-                {category.label}
-              </Link>
-            )}
-          </div>
-        ))}
-      </div>
-    )
-  }
-
-  // Fetch initial counts and subscribe to realtime updates
-  useEffect(() => {
-    let enquiriesChannel: RealtimeChannel | null = null
-    let messagesChannel: RealtimeChannel | null = null
-    let propertiesChannel: RealtimeChannel | null = null
-    let agentsChannel: RealtimeChannel | null = null
-    let notificationsChannel: RealtimeChannel | null = null
-
-    const fetchNewEnquiries = async () => {
-      try {
-        const { count } = await supabase
-          .from('enquiries')
-          .select('id', { count: 'exact', head: true })
-          .eq('status', 'new')
-
-        setNewEnquiriesCount(count ?? 0)
-      } catch (err) {
-        console.error('Failed to fetch new enquiries count', err)
-      }
-    }
-
-    const fetchPendingProperties = async () => {
-      try {
-        const { count } = await supabase
-          .from('properties')
-          .select('id', { count: 'exact', head: true })
-          .eq('published', false)
-
-        setPendingPropertiesCount(count ?? 0)
-      } catch (err) {
-        console.error('Failed to fetch pending properties count', err)
-      }
-    }
-
-    const fetchPendingAgents = async () => {
-      try {
-        const { count } = await supabase
-          .from('agents')
-          .select('id', { count: 'exact', head: true })
-          .eq('approved', false)
-
-        setPendingAgentsCount(count ?? 0)
-      } catch (err) {
-        console.error('Failed to fetch pending agents count', err)
-      }
-    }
-
-    const fetchUnreadMessages = async (profileId?: string) => {
-      try {
-        if (!profileId) {
-          setUnreadMessagesCount(0)
-          return
-        }
-        // Get list of enquiry ids belonging to this user
-        const { data: userEnquiries } = await supabase.from('enquiries').select('id').eq('user_id', profileId)
-        const ids = (Array.isArray(userEnquiries) ? userEnquiries : []).map((e: { id: string }) => e.id)
-        if (!ids.length) {
-          setUnreadMessagesCount(0)
-          return
-        }
-        const { count } = await supabase
-          .from('enquiry_messages')
-          .select('id', { count: 'exact', head: true })
-          .is('read_at', null)
-          .in('enquiry_id', ids)
-          .neq('sender_type', 'customer')
-
-        setUnreadMessagesCount(count ?? 0)
-      } catch (err) {
-        console.error('Failed to fetch unread messages count', err)
-      }
-    }
-
-    const fetchUserNotifications = async (profileId?: string) => {
-      try {
-        if (!profileId) {
-          return setUserNotificationsCount(0)
-        }
-        const { count } = await supabase
-          .from('notifications')
-          .select('id', { count: 'exact', head: true })
-          .is('read_at', null)
-          .eq('user_id', profileId)
-
-        setUserNotificationsCount(count ?? 0)
-      } catch (err) {
-        console.error('Failed to fetch notifications count', err)
-      }
-    }
-
-    if (profile?.role === 'admin') {
-      // initial fetch and subscription for admin enquiries
-      fetchNewEnquiries()
-      fetchPendingProperties()
-      fetchPendingAgents()
-      enquiriesChannel = supabase
-        .channel('public:enquiries')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'enquiries' }, (payload) => {
-          // re-fetch counts whenever enquiries change (INSERT or UPDATE)
-          fetchNewEnquiries()
-        })
-        .subscribe()
-      propertiesChannel = supabase
-        .channel('public:properties')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'properties' }, () => {
-          fetchPendingProperties()
-        })
-        .subscribe()
-      agentsChannel = supabase
-        .channel('public:agents')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'agents' }, () => {
-          fetchPendingAgents()
-        })
-        .subscribe()
-    }
-
-    // For normal users we fetch unread messages for their enquiries and subscribe to message changes
-    if (profile?.id) {
-      fetchUnreadMessages(profile.id)
-      fetchUserNotifications(profile.id)
-      messagesChannel = supabase
-        .channel(`public:enquiry_messages:user:${profile.id}`)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'enquiry_messages' }, (payload) => {
-          // Re-fetch unread messages count to keep UI consistent
-          fetchUnreadMessages(profile.id)
-        })
-        .subscribe()
-      notificationsChannel = supabase
-        .channel(`public:notifications:user:${profile.id}`)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, (payload) => {
-          fetchUserNotifications(profile.id)
-        })
-        .subscribe()
-    }
-
-    return () => {
-      // Unsubscribe channels on cleanup
-      const chs = [enquiriesChannel, messagesChannel, propertiesChannel, agentsChannel, notificationsChannel]
-      chs.forEach((ch) => {
-        if (ch) {
-          try { supabase.removeChannel(ch) } catch (e) { /* ignore */ }
-        }
-      })
-    }
-  }, [profile])
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      <nav className="container-custom">
-        <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="text-2xl font-bold text-gradient">RAGDOL</div>
-          </Link>
-
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex lg:items-center lg:space-x-1">
-            {mainNavItems.map((item) => {
-              if (item.isDropdown && 'key' in item) {
-                return (
-                  <div
-                    key={item.key}
-                    className="relative group"
-                    onMouseEnter={() => setOpenDropdown(item.key)}
-                    onMouseLeave={() => setOpenDropdown(null)}
-                  >
-                    <button className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors group-hover:text-primary">
-                      <span>{item.label}</span>
-                      <ChevronDownIcon className="h-4 w-4" />
-                    </button>
-                    {openDropdown === item.key && <NavDropdownMenu item={item} />}
-                  </div>
-                )
-              }
-              return null
-            })}
-
-            {/* Divider */}
-            <div className="mx-4 h-6 w-px bg-border" />
-
-            {/* Right dropdowns */}
-            {publicLinks.map((link) => {
-              if (link.isDropdown && 'key' in link) {
-                return (
-                  <div
-                    key={link.key}
-                    className="relative group"
-                    onMouseEnter={() => setOpenDropdown(link.key)}
-                    onMouseLeave={() => setOpenDropdown(null)}
-                  >
-                    <button className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors group-hover:text-primary">
-                      <span>{link.label}</span>
-                      <ChevronDownIcon className="h-4 w-4" />
-                    </button>
-                    {openDropdown === link.key && <NavDropdownMenu item={link} />}
-                  </div>
-                )
-              }
-              return null
-            })}
+    <header 
+      className={cn(
+        "fixed top-0 left-0 right-0 z-[100] transition-all duration-500",
+        "bg-white/95 backdrop-blur-lg py-5"
+      )}
+    >
+      {/* Backdrop Overlay for Mega Menu */}
+      {(isBuyOpen || isRentOpen || isLuxeOpen || isCommercialOpen || isServicesOpen || isMoreOpen) && (
+        <div className="fixed inset-0 bg-secondary/20 backdrop-blur-sm z-[-1]" />
+      )}
+      <div className="container-custom flex items-center justify-between">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2 group">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500 bg-secondary">
+            <StarIcon className="h-6 w-6 transition-colors text-primary" />
           </div>
+          <span className="text-2xl font-serif tracking-tighter transition-colors text-secondary">
+            RAGDOLL
+          </span>
+        </Link>
 
-          {/* Right side */}
-          <div className="flex items-center space-x-4">
-            {user ? (
-              <>
-                {/* User dropdown */}
-                <div className="hidden lg:flex items-center space-x-4">
-                  {profile?.role === 'admin' && (
-                    <>
-                      <Link
-                        href="/admin"
-                        className="relative text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-                      >
-                        Admin
-                        {newEnquiriesCount > 0 && (
-                          <span className="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold text-white bg-red-600 rounded-full">
-                            {newEnquiriesCount}
-                          </span>
-                        )}
-                        {pendingPropertiesCount > 0 && (
-                          <span className="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold text-white bg-yellow-600 rounded-full">
-                            {pendingPropertiesCount}
-                          </span>
-                        )}
-                        {pendingAgentsCount > 0 && (
-                          <span className="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold text-white bg-indigo-600 rounded-full">
-                            {pendingAgentsCount}
-                          </span>
-                        )}
-                      </Link>
-                      <Link
-                        href="/sell"
-                        className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-                      >
-                        List Property
-                      </Link>
-                    </>
-                  )}
-                  {profile?.role === 'agent' && (
-                    <Link
-                      href="/agent"
-                      className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      Agent Portal
-                    </Link>
-                  )}
-                  <Link
-                    href="/account"
-                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    {profile?.full_name || 'Account'}
-                  </Link>
-                  {/* Notifications */}
-                  <Link
-                    href="/account/notifications"
-                    className="relative inline-flex items-center px-2 py-1 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    <BellIcon className="h-5 w-5" />
-                    {userNotificationsCount > 0 && (
-                      <span className="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold text-white bg-red-600 rounded-full">
-                        {userNotificationsCount}
-                      </span>
-                    )}
-                  </Link>
-                  {/* Desktop quick link to user's enquiries with unread badge */}
-                  <Link
-                    href="/account/enquiries"
-                    className="relative inline-flex items-center px-2 py-1 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    <ChatBubbleLeftRightIcon className="h-5 w-5" />
-                    {unreadMessagesCount > 0 && (
-                      <span className="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold text-white bg-red-600 rounded-full">
-                        {unreadMessagesCount}
-                      </span>
-                    )}
-                  </Link>
+        {/* Desktop Navigation */}
+        <nav className="hidden lg:flex items-center gap-3">
+          {navigation.map((item) => (
+            <div key={item.label} className="relative">
+              {item.hasDropdown ? (
+                <div
+                  className="relative"
+                  onMouseEnter={() => {
+                    if (item.label === 'Buy') setIsBuyOpen(true)
+                    else if (item.label === 'Rent') setIsRentOpen(true)
+                    else if (item.label === 'Luxe') setIsLuxeOpen(true)
+                    else if (item.label === 'Commercial') setIsCommercialOpen(true)
+                    else if (item.label === 'Services') setIsServicesOpen(true)
+                    else if (item.label === 'More') setIsMoreOpen(true)
+                  }}
+                  onMouseLeave={() => {
+                    if (item.label === 'Buy') setIsBuyOpen(false)
+                    else if (item.label === 'Rent') setIsRentOpen(false)
+                    else if (item.label === 'Luxe') setIsLuxeOpen(false)
+                    else if (item.label === 'Commercial') setIsCommercialOpen(false)
+                    else if (item.label === 'Services') setIsServicesOpen(false)
+                    else if (item.label === 'More') setIsMoreOpen(false)
+                  }}
+                >
                   <button
-                    onClick={signOut}
-                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                    className="flex items-center gap-1 text-sm font-bold uppercase tracking-widest transition-all hover:text-primary cursor-pointer text-secondary"
+                    onClick={() => {
+                      if (item.label === 'Buy') setIsBuyOpen(!isBuyOpen)
+                      else if (item.label === 'Rent') setIsRentOpen(!isRentOpen)
+                      else if (item.label === 'Luxe') setIsLuxeOpen(!isLuxeOpen)
+                      else if (item.label === 'Commercial') setIsCommercialOpen(!isCommercialOpen)
+                      else if (item.label === 'Services') setIsServicesOpen(!isServicesOpen)
+                      else if (item.label === 'More') setIsMoreOpen(!isMoreOpen)
+                    }}
                   >
-                    Sign Out
+                    {item.label}
+                    <ChevronDownIcon className={cn("h-4 w-4 transition-transform", 
+                      ((item.label === 'Buy' && isBuyOpen) ||
+                      (item.label === 'Rent' && isRentOpen) ||
+                      (item.label === 'Luxe' && isLuxeOpen) ||
+                      (item.label === 'Commercial' && isCommercialOpen) ||
+                      (item.label === 'Services' && isServicesOpen) ||
+                      (item.label === 'More' && isMoreOpen)) && "rotate-180"
+                    )} />
                   </button>
+
+                  {/* Dropdown Menu */}
+                  <div className={cn(
+                    "bg-white shadow-2xl transition-all duration-300 z-50 top-full",
+                    // Compact dropdown for Services and More
+                    (item.label === 'Services' || item.label === 'More') 
+                      ? "absolute right-0 w-64 py-4 rounded-xl mt-2"
+                      : "fixed left-0 right-0 w-screen py-12",
+                    (item.label === 'Buy' && isBuyOpen) ||
+                    (item.label === 'Rent' && isRentOpen) ||
+                    (item.label === 'Luxe' && isLuxeOpen) ||
+                    (item.label === 'Commercial' && isCommercialOpen) ||
+                    (item.label === 'Services' && isServicesOpen) ||
+                    (item.label === 'More' && isMoreOpen)
+                      ? "opacity-100 scale-100 translate-y-0 visible" 
+                      : "opacity-0 scale-95 -translate-y-2 invisible"
+                  )}>
+                    <div className={cn(
+                      (item.label === 'Services' || item.label === 'More') 
+                        ? "px-4" 
+                        : "container-custom mx-auto grid grid-cols-12 gap-12"
+                    )}>
+                      {/* Compact dropdown for Services and More */}
+                      {(item.label === 'Services' || item.label === 'More') ? (
+                        <div className="space-y-1">
+                          {item.items?.map((navItem) => (
+                            <Link
+                              key={navItem.label}
+                              href={navItem.href}
+                              className="block px-4 py-2.5 text-sm font-medium text-secondary hover:text-primary hover:bg-slate-50 rounded-lg transition-all"
+                              onClick={() => {
+                                if (item.label === 'Services') setIsServicesOpen(false)
+                                else if (item.label === 'More') setIsMoreOpen(false)
+                              }}
+                            >
+                              {navItem.label}
+                            </Link>
+                          ))}
+                        </div>
+                      ) : (
+                        // Full mega menu for Buy, Rent, Luxe, Commercial
+                        item.items?.map((navItem, index) => {
+                          const isAreaList = navItem.label === 'Popular Areas';
+                          
+                          return (
+                            <div 
+                              key={navItem.label} 
+                              className={cn(
+                                isAreaList ? "col-span-6" : "col-span-3"
+                              )}
+                            >
+                              <Link
+                                href={navItem.href}
+                                className="block text-lg font-bold text-secondary hover:text-primary transition-all border-b border-slate-100 pb-3 mb-6"
+                                onClick={() => {
+                                  if (item.label === 'Buy') setIsBuyOpen(false)
+                                  else if (item.label === 'Rent') setIsRentOpen(false)
+                                  else if (item.label === 'Luxe') setIsLuxeOpen(false)
+                                  else if (item.label === 'Commercial') setIsCommercialOpen(false)
+                                }}
+                              >
+                                {navItem.label}
+                              </Link>
+                              {navItem.subItems && (
+                                <div className={cn(
+                                  isAreaList ? "grid grid-cols-3 gap-x-6 gap-y-4" : "space-y-3"
+                                )}>
+                                  {navItem.subItems.map((subItem, subIndex) => {
+                                    const areaInfo = dubaiAreas.find(a => a.name === subItem.label);
+                                    return (
+                                      <Link
+                                        key={subItem.label}
+                                        href={subItem.href}
+                                        className="group flex items-center gap-3 transition-all p-1 rounded-xl hover:bg-slate-50"
+                                        onClick={() => {
+                                          if (item.label === 'Buy') setIsBuyOpen(false)
+                                          else if (item.label === 'Rent') setIsRentOpen(false)
+                                          else if (item.label === 'Luxe') setIsLuxeOpen(false)
+                                          else if (item.label === 'Commercial') setIsCommercialOpen(false)
+                                        }}
+                                      >
+                                        {areaInfo && isAreaList && (
+                                          <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border border-slate-100 shadow-sm">
+                                            <img 
+                                              src={areaInfo.image} 
+                                              alt={subItem.label} 
+                                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                                            />
+                                          </div>
+                                        )}
+                                        <span className={cn(
+                                          isAreaList ? "text-xs font-bold text-secondary group-hover:text-primary leading-tight" : "text-sm text-slate-600 hover:text-primary font-medium"
+                                        )}>
+                                          {subItem.label}
+                                        </span>
+                                      </Link>
+                                    )
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          )
+                        })
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </>
-            ) : (
-              <div className="hidden lg:flex items-center space-x-4">
-                <Link href="/auth/login" className="btn-outline">
-                  Sign In
-                </Link>
-              </div>
-            )}
-
-            {/* Mobile menu button */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden text-foreground"
-            >
-              {mobileMenuOpen ? (
-                <XMarkIcon className="h-6 w-6" />
+              ) : item.isValuation ? (
+                <button
+                  onClick={() => setIsValuationModalOpen(true)}
+                  className="text-sm font-bold uppercase tracking-widest transition-all hover:text-primary relative group text-secondary"
+                >
+                  {item.label}
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+                </button>
               ) : (
-                <Bars3Icon className="h-6 w-6" />
+                <Link
+                  href={item.href!}
+                  className="text-sm font-bold uppercase tracking-widest transition-all hover:text-primary relative group text-secondary"
+                >
+                  {item.label}
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+                </Link>
               )}
-            </button>
-          </div>
+            </div>
+          ))}
+        </nav>
+
+        {/* Actions */}
+        <div className="flex items-center gap-4">
+          {/* Valuation Button */}
+          <button
+            onClick={() => setIsValuationModalOpen(true)}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all bg-primary text-white hover:bg-primary/90 hover:scale-105 shadow-lg hover:shadow-xl"
+          >
+            <CalculatorIcon className="h-4 w-4" />
+            Valuation
+          </button>
+
+          {user ? (
+            <Link 
+              href={profile?.role === 'admin' ? '/admin' : profile?.role === 'agent' ? '/agent/dashboard' : '/customer/dashboard'}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all bg-secondary text-white hover:bg-primary hover:text-secondary"
+            >
+              <UserIcon className="h-4 w-4" />
+              Portal
+            </Link>
+          ) : (
+            <Link 
+              href="/admin/login"
+              className="px-6 py-2.5 rounded-xl font-bold text-sm transition-all bg-secondary text-white hover:bg-primary hover:text-secondary"
+            >
+              Sign In
+            </Link>
+          )}
+
+          {/* Mobile Menu Toggle */}
+          <button 
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="lg:hidden p-2 rounded-xl transition-colors text-secondary"
+          >
+            {isMobileMenuOpen ? <XMarkIcon className="h-7 w-7" /> : <Bars3Icon className="h-7 w-7" />}
+          </button>
         </div>
+      </div>
 
-        {/* Mobile menu */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden py-4 border-t border-border max-h-[calc(100vh-4rem)] overflow-y-auto">
-            <div className="flex flex-col space-y-2">
-              {mainNavItems.map((item) => {
-                if (item.isDropdown && 'key' in item) {
-                  const dropdown = navDropdowns[item.key]
-                  return (
-                    <div key={item.key} className="border-b border-border pb-3">
-                      <div className="px-3 py-2 text-sm font-bold text-primary uppercase tracking-wider">{item.label}</div>
-                      <div className="space-y-1 ml-3">
-                        {dropdown?.categories.map((category, categoryIdx) => (
-                          <div key={categoryIdx} className="space-y-1">
-                            {category.subcategories ? (
-                              <>
-                                <div className="text-xs font-semibold text-muted-foreground uppercase px-2 py-1 mt-2">
-                                  {category.label}
-                                </div>
-                                {category.subcategories.map((sub) => (
-                                  <Link
-                                    key={sub.href}
-                                    href={sub.href}
-                                    onClick={() => setMobileMenuOpen(false)}
-                                    className="block px-4 py-1.5 text-sm text-muted-foreground hover:text-primary hover:bg-muted transition-colors rounded"
-                                  >
-                                    {sub.label}
-                                  </Link>
-                                ))}
-                              </>
-                            ) : (
-                              <Link
-                                href={category.href || '#'}
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="block px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-primary hover:bg-muted transition-colors rounded"
-                              >
-                                {category.label}
-                              </Link>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )
-                }
-                return null
-              })}
+      {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden fixed inset-0 top-[88px] bg-white z-50 animate-slideDown overflow-y-auto">
+          <nav className="flex flex-col p-6 gap-8 max-h-full">
+            {/* Main Navigation Items */}
+            <div className="space-y-6">
+              {/* New Projects - Simple Link */}
+              <Link
+                href="/projects"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center justify-between py-4 px-4 rounded-2xl bg-slate-50 hover:bg-primary hover:text-white transition-all group"
+              >
+                <span className="text-lg font-bold text-secondary group-hover:text-white">
+                  {t('header.navigation.newProjects')}
+                </span>
+                <ChevronDownIcon className="h-5 w-5 text-slate-400 group-hover:text-white rotate-[-90deg]" />
+              </Link>
 
-              <div className="my-4 h-px bg-border" />
-
-              {publicLinks.map((link) => {
-                if (link.isDropdown && 'key' in link) {
-                  const dropdown = navDropdowns[link.key]
-                  return (
-                    <div key={link.key} className="border-b border-border pb-3">
-                      <div className="px-3 py-2 text-sm font-bold text-primary uppercase tracking-wider">{link.label}</div>
-                      <div className="space-y-1 ml-3">
-                        {dropdown?.categories.map((category, categoryIdx) => (
-                          <div key={categoryIdx} className="space-y-1">
-                            {category.subcategories ? (
-                              <>
-                                <div className="text-xs font-semibold text-muted-foreground uppercase px-2 py-1 mt-2">
-                                  {category.label}
-                                </div>
-                                {category.subcategories.map((sub) => (
-                                  <Link
-                                    key={sub.href}
-                                    href={sub.href}
-                                    onClick={() => setMobileMenuOpen(false)}
-                                    className="block px-4 py-1.5 text-sm text-muted-foreground hover:text-primary hover:bg-muted transition-colors rounded"
-                                  >
-                                    {sub.label}
-                                  </Link>
-                                ))}
-                              </>
-                            ) : (
-                              <Link
-                                href={category.href || '#'}
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="block px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-primary hover:bg-muted transition-colors rounded"
-                              >
-                                {category.label}
-                              </Link>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )
-                }
-                return null
-              })}
-
-              <div className="border-t border-border pt-4">
-                {user ? (
-                  <>
-                    {userLinks.map((link) => {
-                      const Icon = link.icon
-                      return (
-                        <Link
-                          key={link.href}
-                          href={link.href}
-                          onClick={() => setMobileMenuOpen(false)}
-                          className={cn(
-                            'flex items-center space-x-3 text-sm font-medium transition-colors hover:text-primary px-2 py-2',
-                            isActive(link.href) ? 'text-primary' : 'text-muted-foreground'
-                          )}
-                        >
-                          <Icon className="h-5 w-5" />
-                          <span>{link.label}</span>
-                          {link.href === '/account/enquiries' && unreadMessagesCount > 0 && (
-                            <span className="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold text-white bg-red-600 rounded-full">
-                              {unreadMessagesCount}
-                            </span>
-                          )}
-                        </Link>
-                      )
-                    })}
-                    {profile?.role === 'admin' && (
-                      <>
-                        <Link
-                          href="/admin"
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center space-x-3 text-sm font-medium text-muted-foreground hover:text-primary px-2 py-2"
-                        >
-                          <Cog6ToothIcon className="h-5 w-5" />
-                          <span>Admin</span>
-                          {newEnquiriesCount > 0 && (
-                            <span className="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold text-white bg-red-600 rounded-full">
-                              {newEnquiriesCount}
-                            </span>
-                          )}
-                          {pendingPropertiesCount > 0 && (
-                            <span className="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold text-white bg-yellow-600 rounded-full">
-                              {pendingPropertiesCount}
-                            </span>
-                          )}
-                          {pendingAgentsCount > 0 && (
-                            <span className="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold text-white bg-indigo-600 rounded-full">
-                              {pendingAgentsCount}
-                            </span>
-                          )}
-                        </Link>
-                        <Link
-                          href="/sell"
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center space-x-3 text-sm font-medium text-muted-foreground hover:text-primary px-2 py-2"
-                        >
-                          <PlusIcon className="h-5 w-5" />
-                          <span>List Property</span>
-                        </Link>
-                      </>
-                    )}
-                    {profile?.role === 'agent' && (
-                      <Link
-                        href="/agent"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center space-x-3 text-sm font-medium text-muted-foreground hover:text-primary px-2 py-2"
-                      >
-                        <UsersIcon className="h-5 w-5" />
-                        <span>Agent Portal</span>
-                      </Link>
-                    )}
-                    <button
-                      onClick={() => {
-                        signOut()
-                        setMobileMenuOpen(false)
-                      }}
-                      className="flex items-center space-x-3 text-sm font-medium text-muted-foreground hover:text-primary px-2 py-2 w-full text-left"
-                    >
-                      <ArrowRightOnRectangleIcon className="h-5 w-5" />
-                      <span>Sign Out</span>
-                    </button>
-                  </>
-                ) : (
-                  <div className="flex flex-col space-y-3 px-2">
-                    <Link
-                      href="/auth/login"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="btn-outline text-center"
-                    >
-                      Sign In
+              {/* Buy Section */}
+              <div className="space-y-4">
+                <div className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] px-4">
+                  {t('header.navigation.buy')}
+                </div>
+                <div className="space-y-2">
+                  <Link
+                    href="/properties?action=buy"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center justify-between py-3 px-4 rounded-xl hover:bg-slate-50 transition-all"
+                  >
+                    <span className="text-base font-bold text-secondary">{t('header.navigation.allProperties')}</span>
+                    <ChevronDownIcon className="h-4 w-4 text-slate-400 rotate-[-90deg]" />
+                  </Link>
+                  <div className="ml-6 space-y-1">
+                    <Link href="/properties?action=buy&type=apartment&area=dubai" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 px-3 text-sm text-slate-600 hover:text-primary transition-colors rounded-lg hover:bg-slate-50">
+                      {t('header.navigation.apartmentsInDubai')}
+                    </Link>
+                    <Link href="/properties?action=buy&type=villa&area=dubai" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 px-3 text-sm text-slate-600 hover:text-primary transition-colors rounded-lg hover:bg-slate-50">
+                      {t('header.navigation.villasInDubai')}
+                    </Link>
+                    <Link href="/properties?action=buy&type=townhouse&area=dubai" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 px-3 text-sm text-slate-600 hover:text-primary transition-colors rounded-lg hover:bg-slate-50">
+                      {t('header.navigation.townhousesInDubai')}
+                    </Link>
+                    <Link href="/properties?action=buy&type=penthouse" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 px-3 text-sm text-slate-600 hover:text-primary transition-colors rounded-lg hover:bg-slate-50">
+                      {t('header.navigation.penthouses')}
+                    </Link>
+                    <Link href="/properties?action=buy&type=studio" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 px-3 text-sm text-slate-600 hover:text-primary transition-colors rounded-lg hover:bg-slate-50">
+                      {t('header.navigation.studios')}
                     </Link>
                   </div>
-                )}
+                </div>
+              </div>
+
+              {/* Rent Section */}
+              <div className="space-y-4">
+                <div className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] px-4">
+                  {t('header.navigation.rent')}
+                </div>
+                <div className="space-y-2">
+                  <Link
+                    href="/properties?action=rent"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center justify-between py-3 px-4 rounded-xl hover:bg-slate-50 transition-all"
+                  >
+                    <span className="text-base font-bold text-secondary">{t('header.navigation.allProperties')}</span>
+                    <ChevronDownIcon className="h-4 w-4 text-slate-400 rotate-[-90deg]" />
+                  </Link>
+                  <div className="ml-6 space-y-1">
+                    <Link href="/properties?action=rent&type=apartment&area=dubai" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 px-3 text-sm text-slate-600 hover:text-primary transition-colors rounded-lg hover:bg-slate-50">
+                      {t('header.navigation.apartmentsInDubai')}
+                    </Link>
+                    <Link href="/properties?action=rent&type=villa&area=dubai" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 px-3 text-sm text-slate-600 hover:text-primary transition-colors rounded-lg hover:bg-slate-50">
+                      {t('header.navigation.villasInDubai')}
+                    </Link>
+                    <Link href="/properties?action=rent&type=townhouse&area=dubai" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 px-3 text-sm text-slate-600 hover:text-primary transition-colors rounded-lg hover:bg-slate-50">
+                      {t('header.navigation.townhousesInDubai')}
+                    </Link>
+                  </div>
+                </div>
+              </div>
+
+              {/* Luxe Section */}
+              <div className="space-y-4">
+                <div className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] px-4">
+                  {t('header.navigation.luxe')}
+                </div>
+                <div className="space-y-2">
+                  <Link
+                    href="/properties?category=luxe"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center justify-between py-3 px-4 rounded-xl hover:bg-slate-50 transition-all"
+                  >
+                    <span className="text-base font-bold text-secondary">{t('header.navigation.allLuxury')}</span>
+                    <ChevronDownIcon className="h-4 w-4 text-slate-400 rotate-[-90deg]" />
+                  </Link>
+                </div>
+              </div>
+
+              {/* Commercial Section */}
+              <div className="space-y-4">
+                <div className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] px-4">
+                  {t('header.navigation.commercial')}
+                </div>
+                <div className="space-y-2">
+                  <Link
+                    href="/properties?action=buy&type=commercial"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center justify-between py-3 px-4 rounded-xl hover:bg-slate-50 transition-all"
+                  >
+                    <span className="text-base font-bold text-secondary">{t('header.navigation.allCommercial')}</span>
+                    <ChevronDownIcon className="h-4 w-4 text-slate-400 rotate-[-90deg]" />
+                  </Link>
+                </div>
+              </div>
+
+              {/* Services Section */}
+              <div className="space-y-4">
+                <div className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] px-4">
+                  {t('header.navigation.services')}
+                </div>
+                <div className="space-y-2">
+                  <Link href="/services/property-management" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between py-3 px-4 rounded-xl hover:bg-slate-50 transition-all">
+                    <span className="text-base font-bold text-secondary">{t('header.navigation.propertyManagement')}</span>
+                    <ChevronDownIcon className="h-4 w-4 text-slate-400 rotate-[-90deg]" />
+                  </Link>
+                  <Link href="/services/consultation" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between py-3 px-4 rounded-xl hover:bg-slate-50 transition-all">
+                    <span className="text-base font-bold text-secondary">{t('header.navigation.consultation')}</span>
+                    <ChevronDownIcon className="h-4 w-4 text-slate-400 rotate-[-90deg]" />
+                  </Link>
+                  <Link href="/services/investment" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between py-3 px-4 rounded-xl hover:bg-slate-50 transition-all">
+                    <span className="text-base font-bold text-secondary">{t('header.navigation.investment')}</span>
+                    <ChevronDownIcon className="h-4 w-4 text-slate-400 rotate-[-90deg]" />
+                  </Link>
+                </div>
+              </div>
+
+              {/* More Section */}
+              <div className="space-y-4">
+                <div className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] px-4">
+                  {t('header.navigation.more')}
+                </div>
+                <div className="space-y-2">
+                  <Link href="/about" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between py-3 px-4 rounded-xl hover:bg-slate-50 transition-all">
+                    <span className="text-base font-bold text-secondary">{t('header.navigation.about')}</span>
+                    <ChevronDownIcon className="h-4 w-4 text-slate-400 rotate-[-90deg]" />
+                  </Link>
+                  <Link href="/blog" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between py-3 px-4 rounded-xl hover:bg-slate-50 transition-all">
+                    <span className="text-base font-bold text-secondary">{t('header.navigation.blog')}</span>
+                    <ChevronDownIcon className="h-4 w-4 text-slate-400 rotate-[-90deg]" />
+                  </Link>
+                  <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between py-3 px-4 rounded-xl hover:bg-slate-50 transition-all">
+                    <span className="text-base font-bold text-secondary">{t('header.navigation.contact')}</span>
+                    <ChevronDownIcon className="h-4 w-4 text-slate-400 rotate-[-90deg]" />
+                  </Link>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-      </nav>
+
+            {/* Action Buttons */}
+            <div className="space-y-4 pt-6 border-t border-slate-100">
+              <button
+                onClick={() => {
+                  setIsValuationModalOpen(true)
+                  setIsMobileMenuOpen(false)
+                }}
+                className="w-full py-4 bg-primary text-white text-center font-bold rounded-2xl flex items-center justify-center gap-3 hover:bg-primary/90 transition-all shadow-lg"
+              >
+                <CalculatorIcon className="h-5 w-5" />
+                {t('header.navigation.valuation')}
+              </button>
+
+              {user ? (
+                <Link
+                  href={profile?.role === 'admin' ? '/admin' : profile?.role === 'agent' ? '/agent/dashboard' : '/customer/dashboard'}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-full py-4 bg-secondary text-white text-center font-bold rounded-2xl flex items-center justify-center gap-3 hover:bg-primary hover:text-secondary transition-all shadow-lg block"
+                >
+                  <UserIcon className="h-5 w-5" />
+                  Portal
+                </Link>
+              ) : (
+                <Link
+                  href="/admin/login"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-full py-4 bg-secondary text-white text-center font-bold rounded-2xl flex items-center justify-center gap-3 hover:bg-primary hover:text-secondary transition-all shadow-lg block"
+                >
+                  <UserIcon className="h-5 w-5" />
+                  Sign In
+                </Link>
+              )}
+            </div>
+          </nav>
+        </div>
+      )}
+
+      {/* Valuation Modal */}
+      <ValuationModal
+        isOpen={isValuationModalOpen}
+        onClose={() => setIsValuationModalOpen(false)}
+        onSubmit={handleValuationSubmit}
+      />
     </header>
   )
 }

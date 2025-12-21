@@ -1,362 +1,196 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronDownIcon, QuestionMarkCircleIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+import { ChevronDownIcon, QuestionMarkCircleIcon, MagnifyingGlassIcon, SparklesIcon, ShieldCheckIcon, BanknotesIcon, ScaleIcon } from '@heroicons/react/24/outline'
+import Image from 'next/image'
 
 const faqCategories = [
   {
-    title: 'Buying Property',
-    icon: '🏠',
+    title: 'Acquisition & Buying',
+    icon: ShieldCheckIcon,
     questions: [
       {
-        question: 'What documents do I need to buy property in Dubai?',
-        answer: 'To buy property in Dubai, you\'ll need: passport copy, visa copy, Emirates ID, proof of income/funds, bank statements, and property purchase agreement. Additional requirements may apply for off-plan purchases.'
+        question: 'What documents are required for a luxury property acquisition?',
+        answer: 'For a seamless transaction, we require a passport copy, proof of residence, and proof of funds. For international investors, we also facilitate the process of obtaining a Dubai Golden Visa through property investment.'
       },
       {
-        question: 'Can foreigners buy property in Dubai?',
-        answer: 'Yes, foreigners can buy property in Dubai. There are no restrictions on foreign ownership in freehold areas. Properties in Dubai Marina, Jumeirah Lakes Towers, and other freehold areas can be owned 100% by foreigners.'
+        question: 'Can non-residents own 100% of their property in Dubai?',
+        answer: 'Absolutely. Dubai offers "Freehold" areas where international investors have 100% ownership rights. RAGDOL specializes exclusively in these high-growth, unrestricted zones.'
       },
       {
-        question: 'What is the process for buying off-plan property?',
-        answer: 'Off-plan buying involves: selecting a property, signing a reservation agreement, paying booking fees, signing the SPA within 30 days, paying remaining deposit, and taking possession upon completion. Due diligence is crucial.'
-      },
-      {
-        question: 'How much are property transfer fees in Dubai?',
-        answer: 'Property transfer fees in Dubai include: 4% registration fee, 0.25% escrow fee, 0.125% registration fee for off-plan, and 4% VAT on new properties. Additional costs may include agent fees and legal fees.'
-      },
-      {
-        question: 'What is the minimum investment required?',
-        answer: 'There is no minimum investment requirement for property purchases in Dubai. You can buy a studio apartment or a fraction of a property, though most investors start with AED 1-2 million investments.'
+        question: 'What are the associated costs beyond the purchase price?',
+        answer: 'Standard costs include a 4% Dubai Land Department (DLD) registration fee, a small administrative fee, and our professional brokerage fee. We provide a detailed "Cost of Acquisition" breakdown for every property.'
       }
     ]
   },
   {
-    title: 'Selling Property',
-    icon: '💰',
+    title: 'Investment & Yield',
+    icon: BanknotesIcon,
     questions: [
       {
-        question: 'How long does it take to sell a property in Dubai?',
-        answer: 'Property sales in Dubai typically take 3-6 months depending on location, price, and market conditions. Prime locations may sell faster, while off-market or unique properties may take longer.'
+        question: 'What is the average rental yield for luxury properties?',
+        answer: 'Dubai remains one of the world\'s highest-yielding markets. Luxury apartments typically yield 6-8% net, while ultra-luxury villas offer 4-6% alongside significant capital appreciation.'
       },
       {
-        question: 'What are the selling costs and fees?',
-        answer: 'Selling costs include: real estate agent commission (2-4%), DLD transfer fees (4%), escrow account fee (0.25%), and potential capital gains tax considerations. Marketing costs may also apply.'
-      },
-      {
-        question: 'Do I need to be present for the sale?',
-        answer: 'You can appoint a power of attorney to handle the sale in your absence. Many property owners successfully sell their Dubai properties remotely through appointed representatives.'
-      },
-      {
-        question: 'Can I sell my property before completion?',
-        answer: 'Yes, off-plan properties can be sold before completion through assignment. This requires developer approval and proper legal documentation. Assignment fees typically range from 2-5%.'
-      },
-      {
-        question: 'What is the capital gains tax on property sales?',
-        answer: 'Dubai has no capital gains tax on property sales. However, if you\'re not a tax resident, you may have tax implications in your home country.'
+        question: 'Is there any tax on rental income or capital gains?',
+        answer: 'One of Dubai\'s greatest advantages is the 0% tax environment. There is no personal income tax on rentals and no capital gains tax on property appreciation.'
       }
     ]
   },
   {
-    title: 'Investment & Finance',
-    icon: '📊',
+    title: 'Legal & Compliance',
+    icon: ScaleIcon,
     questions: [
       {
-        question: 'What are the mortgage options for expats?',
-        answer: 'Expats can get mortgages up to 75-80% of property value with interest rates from 3-6%. Requirements include minimum salary AED 15,000-25,000, good credit history, and employment visa.'
+        question: 'How does RAGDOL ensure transaction security?',
+        answer: 'Every transaction is processed through government-regulated escrow accounts. We work closely with the Dubai Land Department to ensure all title deeds are issued instantly upon completion.'
       },
       {
-        question: 'Is Dubai property a good investment?',
-        answer: 'Dubai property has shown strong appreciation historically. Key advantages include 0% capital gains tax, stable economy, tourism growth, and Expo 2020 legacy developments.'
-      },
-      {
-        question: 'What is the rental yield in Dubai?',
-        answer: 'Rental yields vary by location and property type: Dubai Marina (6-8%), Jumeirah Beach Residence (5-7%), Downtown Dubai (4-6%), and affordable areas (7-10%). Average yield is around 6-7%.'
-      },
-      {
-        question: 'Are there any tax benefits for property investors?',
-        answer: 'Dubai offers tax advantages including 0% capital gains tax, 0% income tax on rental income for some investors, and various free zones with 0% corporate tax. No inheritance tax applies.'
-      },
-      {
-        question: 'What are the best areas for investment?',
-        answer: 'Top investment areas include Dubai Marina, Jumeirah Beach Residence, Dubai Silicon Oasis, Dubai South, and Dubai Creek Harbour. Consider factors like infrastructure, job growth, and rental demand.'
-      }
-    ]
-  },
-  {
-    title: 'Legal & Documentation',
-    icon: '📋',
-    questions: [
-      {
-        question: 'What is a Title Deed (Noon Book)?',
-        answer: 'A Title Deed is the official ownership document issued by Dubai Land Department (DLD). It contains property details, owner information, and legal boundaries. It\'s essential for ownership transfer and mortgage purposes.'
-      },
-      {
-        question: 'What is the difference between freehold and leasehold?',
-        answer: 'Freehold properties offer permanent ownership rights. Leasehold properties have long-term leases (usually 99 years) from developers or government. Freehold areas include Dubai Marina, Dubai Festival City, and Jumeirah Lakes Towers.'
-      },
-      {
-        question: 'What is the Dubai Land Department (DLD)?',
-        answer: 'DLD is the government authority responsible for property registration, title deeds, planning approvals, and land management in Dubai. All property transactions must be registered with DLD.'
-      },
-      {
-        question: 'What is a Memorandum of Understanding (MOU)?',
-        answer: 'An MOU is a preliminary agreement outlining the main terms of a property transaction. It\'s not legally binding but shows serious intent. The formal Sale and Purchase Agreement (SPA) follows the MOU.'
-      },
-      {
-        question: 'What are the escrow account requirements?',
-        answer: 'All property transactions over AED 500,000 require an escrow account. 20% of the purchase price must be deposited into escrow before registration. Funds are released upon completion of all legal requirements.'
-      }
-    ]
-  },
-  {
-    title: 'Living in Dubai',
-    icon: '🌴',
-    questions: [
-      {
-        question: 'What visas are available for property owners?',
-        answer: 'Property owners can apply for various visas: 5-year residence visa (renewable), 10-year golden visa (for investors), or 1-5 year visit visas. Golden visa requires AED 2 million+ property investment.'
-      },
-      {
-        question: 'Are there property management services available?',
-        answer: 'Yes, professional property management companies handle tenant screening, rent collection, maintenance, and property oversight. Fees typically range from 5-10% of monthly rent.'
-      },
-      {
-        question: 'What are the utility costs for properties?',
-        answer: 'Average monthly utilities: electricity AED 500-1,500, water/gas AED 200-500, internet AED 300-600, maintenance fees AED 500-2,000 depending on property size and location.'
-      },
-      {
-        question: 'Can I rent out my property on Airbnb?',
-        answer: 'Short-term rentals are regulated. Properties in freehold areas can be rented for up to 90 days per year without additional licenses. Commercial licenses are required for longer-term short rentals.'
-      },
-      {
-        question: 'What are the community guidelines?',
-        answer: 'Dubai has strict community guidelines: no alcohol consumption in public, modest dress code in public spaces, respect for Islamic customs during Ramadan, and adherence to noise regulations.'
+        question: 'What is the process for off-plan investments?',
+        answer: 'Off-plan investments involve a structured payment plan linked to construction milestones. We only represent developers with a proven track record of excellence and timely delivery.'
       }
     ]
   }
 ]
 
 export default function FAQPage() {
-  const [activeTab, setActiveTab] = useState('all')
-  const [searchTerm, setSearchTerm] = useState('')
-  const [openQuestions, setOpenQuestions] = useState<Set<string>>(new Set())
+  const [searchQuery, setSearchQuery] = useState('')
+  const [openIndex, setOpenIndex] = useState<string | null>(null)
 
-  const toggleQuestion = (questionId: string) => {
-    const newOpenQuestions = new Set(openQuestions)
-    if (newOpenQuestions.has(questionId)) {
-      newOpenQuestions.delete(questionId)
-    } else {
-      newOpenQuestions.add(questionId)
-    }
-    setOpenQuestions(newOpenQuestions)
+  const toggleAccordion = (id: string) => {
+    setOpenIndex(openIndex === id ? null : id)
   }
 
-  const allQuestions = faqCategories.flatMap(category =>
-    category.questions.map((q, index) => ({
-      ...q,
-      id: `${category.title.toLowerCase().replace(' ', '-')}-${index}`,
-      category: category.title
-    }))
-  )
-
-  const filteredQuestions = allQuestions.filter(question => {
-    const matchesSearch = question.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         question.answer.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = activeTab === 'all' || question.category.toLowerCase().replace(' ', '-') === activeTab
-    return matchesSearch && matchesCategory
-  })
-
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#0d0d0d', color: '#f5f5f5' }}>
+    <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <div className="relative py-20" style={{ backgroundColor: '#141414' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6" style={{ color: '#f5f5f5' }}>
-              Frequently Asked Questions
-            </h1>
-            <p className="text-xl md:text-2xl mb-8" style={{ color: '#f5f5f5', opacity: 0.8 }}>
-              Find answers to common questions about Dubai's real estate market
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                className="px-8 py-4 rounded-lg font-semibold transition-colors"
-                style={{ backgroundColor: '#d4af37', color: '#0d0d0d' }}
-              >
-                Browse All FAQs
-              </button>
-              <button
-                className="px-8 py-4 border-2 rounded-lg font-semibold transition-colors"
-                style={{ borderColor: '#d4af37', color: '#d4af37' }}
-              >
-                Contact Support
-              </button>
+      <section className="relative h-[40vh] flex items-center justify-center overflow-hidden bg-secondary">
+        <div className="absolute inset-0">
+          <Image 
+            src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=2000&auto=format&fit=crop"
+            alt="Dubai FAQ"
+            fill
+            className="object-cover opacity-20"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-secondary/60 via-secondary/40 to-white"></div>
+        </div>
+        
+        <div className="container-custom relative z-10 text-center">
+          <span className="inline-block px-4 py-1 bg-primary/20 text-primary text-sm font-bold tracking-widest uppercase rounded-full mb-6">
+            Knowledge Base
+          </span>
+          <h1 className="text-5xl md:text-6xl font-serif text-white mb-8">
+            Expert <span className="text-primary italic">Insights</span>
+          </h1>
+          
+          {/* Search Bar */}
+          <div className="max-w-2xl mx-auto relative">
+            <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none">
+              <MagnifyingGlassIcon className="h-5 w-5 text-slate-400" />
             </div>
+            <input
+              type="text"
+              placeholder="Search for property insights, legal advice, or investment tips..."
+              className="w-full pl-14 pr-6 py-5 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary/50 transition-all outline-none"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Navigation Tabs */}
-      <div className="border-b" style={{ borderColor: '#d4af37', backgroundColor: '#141414' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex space-x-8 overflow-x-auto">
-            {['all', 'buying-property', 'selling-property', 'investment-finance', 'legal-documentation', 'living-dubai'].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm capitalize whitespace-nowrap transition-colors ${
-                  activeTab === tab
-                    ? 'border-[#d4af37] text-[#d4af37]'
-                    : 'border-transparent text-[#f5f5f5] hover:text-[#d4af37]'
-                }`}
-              >
-                {tab.replace('-', ' ')}
-              </button>
-            ))}
-          </nav>
-        </div>
-      </div>
-
-      {/* Content Sections */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        {activeTab === 'all' && (
-          <div className="space-y-12">
-            {/* Search */}
-            <div className="max-w-md mx-auto">
-              <div className="relative">
-                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5" style={{ color: '#d4af37' }} />
-                <input
-                  type="text"
-                  placeholder="Search FAQs..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent"
-                  style={{
-                    borderColor: '#d4af37',
-                    backgroundColor: '#262626',
-                    color: '#f5f5f5'
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* FAQ Categories */}
-            {faqCategories.map((category, categoryIndex) => (
-              <div key={categoryIndex}>
-                <div className="flex items-center mb-6">
-                  <span className="text-2xl mr-3">{category.icon}</span>
-                  <h2 className="text-2xl font-bold" style={{ color: '#f5f5f5' }}>
-                    {category.title}
-                  </h2>
-                </div>
-                <div className="space-y-4">
-                  {category.questions.map((faq, faqIndex) => {
-                    const questionId = `${category.title.toLowerCase().replace(' ', '-')}-${faqIndex}`
-                    const isOpen = openQuestions.has(questionId)
-
-                    return (
-                      <div
-                        key={faqIndex}
-                        className="border rounded-lg"
-                        style={{ borderColor: '#d4af37', backgroundColor: '#141414' }}
-                      >
-                        <button
-                          onClick={() => toggleQuestion(questionId)}
-                          className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-[#262626] transition-colors"
-                        >
-                          <span className="font-medium" style={{ color: '#f5f5f5' }}>
-                            {faq.question}
-                          </span>
-                          <ChevronDownIcon
-                            className={`h-5 w-5 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-                            style={{ color: '#d4af37' }}
-                          />
-                        </button>
-                        {isOpen && (
-                          <div className="px-6 pb-4">
-                            <p style={{ color: '#f5f5f5', opacity: 0.8 }}>
-                              {faq.answer}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Category-specific views */}
-        {activeTab !== 'all' && (
-          <div>
-            <h2 className="text-3xl font-bold text-center mb-12" style={{ color: '#f5f5f5' }}>
-              {activeTab.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())} FAQs
-            </h2>
-            <div className="space-y-4">
-              {filteredQuestions.map((faq) => {
-                const isOpen = openQuestions.has(faq.id)
-
-                return (
-                  <div
-                    key={faq.id}
-                    className="border rounded-lg"
-                    style={{ borderColor: '#d4af37', backgroundColor: '#141414' }}
+      {/* FAQ Content */}
+      <section className="py-24">
+        <div className="container-custom">
+          <div className="grid lg:grid-cols-3 gap-16">
+            {/* Sidebar Categories */}
+            <div className="lg:col-span-1 space-y-4">
+              <div className="sticky top-32">
+                <h2 className="text-2xl font-serif text-secondary mb-8">Categories</h2>
+                {faqCategories.map((category, idx) => (
+                  <button
+                    key={idx}
+                    className="w-full flex items-center gap-4 p-5 rounded-2xl hover:bg-slate-50 transition-colors group text-left"
                   >
-                    <button
-                      onClick={() => toggleQuestion(faq.id)}
-                      className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-[#262626] transition-colors"
-                    >
-                      <span className="font-medium" style={{ color: '#f5f5f5' }}>
-                        {faq.question}
-                      </span>
-                      <ChevronDownIcon
-                        className={`h-5 w-5 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-                        style={{ color: '#d4af37' }}
-                      />
-                    </button>
-                    {isOpen && (
-                      <div className="px-6 pb-4">
-                        <p style={{ color: '#f5f5f5', opacity: 0.8 }}>
-                          {faq.answer}
-                        </p>
-                      </div>
-                    )}
+                    <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                      <category.icon className="h-6 w-6 text-primary" />
+                    </div>
+                    <span className="font-bold text-secondary">{category.title}</span>
+                  </button>
+                ))}
+                
+                <div className="mt-12 p-8 bg-secondary rounded-[2rem] text-white relative overflow-hidden">
+                  <SparklesIcon className="h-8 w-8 text-primary mb-4" />
+                  <h3 className="text-xl font-serif mb-2">Still have questions?</h3>
+                  <p className="text-slate-400 text-sm mb-6">Our advisors are available for a private consultation.</p>
+                  <button className="w-full py-3 bg-primary text-secondary font-bold rounded-xl hover:bg-white transition-colors">
+                    Contact Advisor
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Accordion List */}
+            <div className="lg:col-span-2 space-y-12">
+              {faqCategories.map((category, catIdx) => (
+                <div key={catIdx}>
+                  <h3 className="text-2xl font-serif text-secondary mb-8 flex items-center gap-3">
+                    <category.icon className="h-6 w-6 text-primary" />
+                    {category.title}
+                  </h3>
+                  <div className="space-y-4">
+                    {category.questions.map((faq, qIdx) => {
+                      const id = `${catIdx}-${qIdx}`
+                      const isOpen = openIndex === id
+                      return (
+                        <div 
+                          key={qIdx}
+                          className={`border border-slate-100 rounded-2xl overflow-hidden transition-all duration-300 ${isOpen ? 'shadow-xl shadow-slate-200/50 border-primary/20' : 'hover:border-slate-200'}`}
+                        >
+                          <button
+                            onClick={() => toggleAccordion(id)}
+                            className="w-full flex items-center justify-between p-6 text-left bg-white"
+                          >
+                            <span className="font-bold text-secondary pr-8">{faq.question}</span>
+                            <ChevronDownIcon className={`h-5 w-5 text-primary transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+                          </button>
+                          <div 
+                            className={`overflow-hidden transition-all duration-500 ease-in-out ${isOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}
+                          >
+                            <div className="p-6 pt-0 text-slate-600 leading-relaxed bg-white">
+                              {faq.answer}
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
                   </div>
-                )
-              })}
+                </div>
+              ))}
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      </section>
 
       {/* CTA Section */}
-      <div className="py-16" style={{ backgroundColor: '#141414' }}>
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <QuestionMarkCircleIcon className="h-16 w-16 mx-auto mb-6" style={{ color: '#d4af37' }} />
-          <h2 className="text-3xl font-bold mb-4" style={{ color: '#f5f5f5' }}>
-            Still Have Questions?
-          </h2>
-          <p className="text-lg mb-8" style={{ color: '#f5f5f5', opacity: 0.8 }}>
-            Our expert team is here to help you with personalized guidance for your Dubai property journey.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button
-              className="px-8 py-4 rounded-lg font-semibold transition-colors"
-              style={{ backgroundColor: '#d4af37', color: '#0d0d0d' }}
-            >
-              Get Expert Consultation
-            </button>
-            <button
-              className="px-8 py-4 border-2 rounded-lg font-semibold transition-colors"
-              style={{ borderColor: '#d4af37', color: '#d4af37' }}
-            >
-              Schedule a Call
-            </button>
+      <section className="py-24 bg-slate-50">
+        <div className="container-custom text-center">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-4xl font-serif text-secondary mb-6">Ready to <span className="text-primary italic">Invest</span>?</h2>
+            <p className="text-slate-500 text-lg mb-10">
+              Join thousands of global investors who trust RAGDOL for their Dubai property portfolio.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button className="px-10 py-4 bg-secondary text-white font-bold rounded-xl hover:bg-primary hover:text-secondary transition-all duration-300">
+                View Listings
+              </button>
+              <button className="px-10 py-4 bg-white text-secondary border-2 border-secondary font-bold rounded-xl hover:bg-secondary hover:text-white transition-all duration-300">
+                Download Guide
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   )
 }

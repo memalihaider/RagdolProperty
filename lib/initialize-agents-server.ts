@@ -37,4 +37,4 @@ export async function initializeAgents() {
 }
 
 // Initialize on import
-initializeAgents().catch(console.error);
+// initializeAgents().catch(console.error);

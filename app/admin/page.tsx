@@ -42,8 +42,10 @@ import Reports from '@/components/admin/Reports'
 import Settings from '@/components/admin/Settings'
 import System from '@/components/admin/System'
 import SEO from '@/components/admin/SEO'
+import Careers from '@/components/admin/Careers'
+import Agents from '@/components/admin/Agents'
 import { useAuth } from '@/contexts/AuthContext'
-import { supabase } from '@/lib/supabase'
+// import { supabase } from '@/lib/supabase' // Using mock data instead
 
 const propertyCategories = [
   { id: '1', name: 'Apartments', description: 'Modern residential apartments', icon: '🏢', isActive: true },
@@ -221,7 +223,7 @@ export default function AdminPanel() {
         const agentsResponse = await fetch('/api/admin/agents')
         if (agentsResponse.ok) {
           const agentsData = await agentsResponse.json()
-          setAgents(agentsData)
+          setAgents(agentsData.agents || [])
         }
       } catch (error) {
         console.error('Error fetching data:', error)
@@ -272,8 +274,6 @@ export default function AdminPanel() {
     setShowAddProperty(false)
     setEditingProperty(null)
   }
-    setEditingProperty(null)
-  }
 
   const handleCategorySubmit = async (categoryData: any) => {
     try {
@@ -301,8 +301,6 @@ export default function AdminPanel() {
       console.error('Error submitting category:', error)
     }
     setShowAddCategory(false)
-    setEditingCategory(null)
-  }
     setEditingCategory(null)
   }
 
@@ -386,6 +384,13 @@ export default function AdminPanel() {
               <MapIcon className="w-5 h-5" />
               Categories
             </button>
+            <a
+              href="/admin/projects"
+              className="w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center gap-3 hover:bg-primary hover:text-primary-foreground text-foreground"
+            >
+              <CubeIcon className="w-5 h-5" />
+              Project Management
+            </a>
             <button
               onClick={() => setActiveTab('users')}
               className={`w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center gap-3 ${
@@ -441,13 +446,28 @@ export default function AdminPanel() {
               <WrenchScrewdriverIcon className="w-5 h-5" />
               Settings
             </button>
-            <a
-              href="/admin/agents"
-              className="w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center gap-3 hover:bg-primary hover:text-primary-foreground text-foreground"
+            <button
+              onClick={() => setActiveTab('agents')}
+              className={`w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center gap-3 ${
+                activeTab === 'agents'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'hover:bg-muted text-foreground'
+              }`}
             >
               <BriefcaseIcon className="w-5 h-5" />
               Manage Agents
-            </a>
+            </button>
+            <button
+              onClick={() => setActiveTab('careers')}
+              className={`w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center gap-3 ${
+                activeTab === 'careers'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'hover:bg-muted text-foreground'
+              }`}
+            >
+              <BriefcaseIcon className="w-5 h-5" />
+              Careers & Jobs
+            </button>
             <button
               onClick={() => setActiveTab('system')}
               className={`w-full text-left px-4 py-3 rounded-lg transition-colors flex items-center gap-3 ${
@@ -706,7 +726,7 @@ export default function AdminPanel() {
                 {categories.map((category) => (
                   <div key={category.id} className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-shadow">
                     <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-2xl flex-shrink-0">
+                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-2xl shrink-0">
                         {category.icon}
                       </div>
                       <div className="flex-1">
@@ -1147,6 +1167,8 @@ export default function AdminPanel() {
 
           {activeTab === 'analytics' && <Reports />}
           {activeTab === 'settings' && <Settings />}
+          {activeTab === 'agents' && <Agents />}
+          {activeTab === 'careers' && <Careers />}
           {activeTab === 'system' && <System />}
         </div>
       </main>

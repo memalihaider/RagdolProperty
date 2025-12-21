@@ -50,7 +50,7 @@ interface Agent {
 export default function AdminDashboard() {
   const { user, profile, signOut, loading } = useAuth()
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState<'overview' | 'questions' | 'valuations' | 'users' | 'properties' | 'agents' | 'settings'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'questions' | 'valuations' | 'users' | 'properties' | 'projects' | 'download-interests' | 'agents' | 'settings'>('overview')
   const [questions, setQuestions] = useState<Question[]>([])
   const [valuations, setValuations] = useState<Valuation[]>([])
   const [users, setUsers] = useState<any[]>([])
@@ -103,6 +103,8 @@ export default function AdminDashboard() {
           console.error('Error loading properties:', err)
           setProperties([])
         }
+      } else if (activeTab === 'projects') {
+        // Projects are handled in the separate projects page
       } else if (activeTab === 'users') {
         try {
           const response = await fetch('/api/admin/users')
@@ -295,6 +297,8 @@ export default function AdminDashboard() {
               { id: 'valuations', label: 'Property Valuations' },
               { id: 'users', label: 'User Management' },
               { id: 'properties', label: 'Property Management' },
+              { id: 'projects', label: 'Project Management' },
+              { id: 'download-interests', label: 'Download Interests' },
               { id: 'agents', label: 'Agent Management' },
               { id: 'settings', label: 'Settings' }
             ].map((tab) => (
@@ -673,6 +677,27 @@ export default function AdminDashboard() {
             </div>
           )}
 
+          {activeTab === 'projects' && (
+            <div className="bg-white shadow overflow-hidden sm:rounded-md">
+              <div className="px-4 py-5 sm:px-6">
+                <div className="text-center py-12">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+                    Project Management
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    Manage real estate projects and developments
+                  </p>
+                  <button
+                    onClick={() => router.push('/admin/projects')}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                  >
+                    Go to Project Management
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {activeTab === 'agents' && (
             <div className="bg-white shadow overflow-hidden sm:rounded-md">
               <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
@@ -876,6 +901,33 @@ export default function AdminDashboard() {
                     ))}
                   </ul>
                 )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'download-interests' && (
+            <div className="bg-white shadow overflow-hidden sm:rounded-md">
+              <div className="px-4 py-5 sm:px-6">
+                <h3 className="text-lg leading-6 font-medium text-gray-900">
+                  Download Interests
+                </h3>
+                <p className="mt-1 max-w-2xl text-sm text-gray-500">
+                  Manage leads from floor plan and brochure downloads
+                </p>
+              </div>
+              <div className="border-t border-gray-200">
+                <div className="p-4">
+                  <p className="text-gray-500 text-center py-8">
+                    Download interests management is available on a separate page.
+                    <br />
+                    <a
+                      href="/admin/download-interests"
+                      className="text-blue-600 hover:text-blue-800 font-medium"
+                    >
+                      Go to Download Interests →
+                    </a>
+                  </p>
+                </div>
               </div>
             </div>
           )}

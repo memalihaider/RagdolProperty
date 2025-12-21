@@ -1,10 +1,13 @@
+'use client'
+
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase-server'
 import { Database } from '@/lib/database.types'
 import ListingCard from '@/components/ListingCard'
 import PropertySlider from '@/components/PropertySlider'
 import HeroSearch from '@/components/HeroSearch'
-import { Metadata } from 'next'
+import HeroImageSlider from '@/components/HeroImageSlider'
+import AgentSlider from '@/components/AgentSlider'
+import { useTranslation } from 'react-i18next'
 import {
   BuildingOffice2Icon,
   HomeIcon,
@@ -13,26 +16,10 @@ import {
   UserGroupIcon,
   NewspaperIcon,
   StarIcon,
+  ArrowRightIcon,
 } from '@heroicons/react/24/outline'
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid'
 // Database types already imported above
-
-export const metadata: Metadata = {
-  title: 'RAGDOL - Premium Real Estate in Dubai | Buy, Sell & Rent Properties',
-  description: 'Find your dream property in Dubai. Browse luxury apartments, villas, plots, and commercial properties. Premier real estate platform with expert guidance.',
-  keywords: 'real estate dubai, property for sale dubai, buy house dubai, luxury apartments dubai, villas dubai, property investment dubai',
-  openGraph: {
-    title: 'RAGDOL - Premium Real Estate in Dubai',
-    description: 'Find your dream property in Dubai. Browse luxury apartments, villas, plots, and commercial properties.',
-    type: 'website',
-    locale: 'en_US',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'RAGDOL - Premium Real Estate in Dubai',
-    description: 'Find your dream property in Dubai. Browse luxury apartments, villas, plots, and commercial properties.',
-  },
-}
 
 type Property = Database['public']['Tables']['properties']['Row']
 
@@ -43,20 +30,21 @@ const mockFeaturedProperties = [
     title: 'Luxury Penthouse in Downtown Dubai',
     price: 12500000,
     priceLabel: 'total',
-    image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80',
+    image: 'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=800',
     location: 'Downtown Dubai, Dubai',
     beds: 4,
     baths: 5,
     sqft: 4200,
     type: 'Penthouse',
     featured: true,
+    video_url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
   },
   {
     id: '2',
     title: 'Modern Villa with Private Beach',
     price: 8900000,
     priceLabel: 'total',
-    image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80',
+    image: 'https://images.pexels.com/photos/209296/pexels-photo-209296.jpeg?auto=compress&cs=tinysrgb&w=800',
     location: 'Palm Jumeirah, Dubai',
     beds: 5,
     baths: 6,
@@ -69,7 +57,7 @@ const mockFeaturedProperties = [
     title: 'Contemporary Apartment Marina View',
     price: 3200000,
     priceLabel: 'total',
-    image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80',
+    image: 'https://images.pexels.com/photos/1396132/pexels-photo-1396132.jpeg?auto=compress&cs=tinysrgb&w=800',
     location: 'Dubai Marina, Dubai',
     beds: 3,
     baths: 3,
@@ -82,7 +70,7 @@ const mockFeaturedProperties = [
     title: 'Studio Apartment Downtown Perfect Investment',
     price: 950000,
     priceLabel: 'total',
-    image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80',
+    image: 'https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg?auto=compress&cs=tinysrgb&w=800',
     location: 'Downtown Dubai, Dubai',
     beds: 1,
     baths: 1,
@@ -95,7 +83,7 @@ const mockFeaturedProperties = [
     title: 'Spacious 2BR Apartment with Terrace',
     price: 2100000,
     priceLabel: 'total',
-    image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80',
+    image: 'https://images.pexels.com/photos/1396074/pexels-photo-1396074.jpeg?auto=compress&cs=tinysrgb&w=800',
     location: 'JBR Beach, Dubai',
     beds: 2,
     baths: 2,
@@ -108,7 +96,7 @@ const mockFeaturedProperties = [
     title: 'Premium Luxury Townhouse',
     price: 6500000,
     priceLabel: 'total',
-    image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80',
+    image: 'https://images.pexels.com/photos/1396124/pexels-photo-1396124.jpeg?auto=compress&cs=tinysrgb&w=800',
     location: 'Emirates Hills, Dubai',
     beds: 4,
     baths: 4,
@@ -125,7 +113,7 @@ const mockRentalProperties = [
     title: 'Furnished Studio with Utilities Included',
     price: 4500,
     priceLabel: 'per_month',
-    image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80',
+    image: 'https://images.pexels.com/photos/1396126/pexels-photo-1396126.jpeg?auto=compress&cs=tinysrgb&w=800',
     location: 'Downtown Dubai, Dubai',
     beds: 1,
     baths: 1,
@@ -138,7 +126,7 @@ const mockRentalProperties = [
     title: 'Modern 2BR Apartment - Furnished',
     price: 8500,
     priceLabel: 'per_month',
-    image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80',
+    image: 'https://images.pexels.com/photos/1396128/pexels-photo-1396128.jpeg?auto=compress&cs=tinysrgb&w=800',
     location: 'Dubai Marina, Dubai',
     beds: 2,
     baths: 2,
@@ -151,7 +139,7 @@ const mockRentalProperties = [
     title: 'Luxury Villa with Private Pool',
     price: 18000,
     priceLabel: 'per_month',
-    image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80',
+    image: 'https://images.pexels.com/photos/1396130/pexels-photo-1396130.jpeg?auto=compress&cs=tinysrgb&w=800',
     location: 'Arabian Ranches, Dubai',
     beds: 4,
     baths: 4,
@@ -164,7 +152,7 @@ const mockRentalProperties = [
     title: 'Cozy 1BR Apartment - Great Location',
     price: 5500,
     priceLabel: 'per_month',
-    image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80',
+    image: 'https://images.pexels.com/photos/1396129/pexels-photo-1396129.jpeg?auto=compress&cs=tinysrgb&w=800',
     location: 'JBR Beach, Dubai',
     beds: 1,
     baths: 1,
@@ -212,272 +200,653 @@ function transformProperty(dbProperty: Property, isRental: boolean = false): UIP
 }
 
 // Fetch featured properties (sale status)
-async function getFeaturedProperties(limit = 6): Promise<UIProperty[]> {
-  try {
-    const supabase = await createClient()
-    const { data, error } = await supabase
-      .from('properties')
-      .select('*')
-      .eq('status', 'sale')
-      .eq('featured', true)
-      .order('created_at', { ascending: false })
-      .limit(limit)
-
-    if (error || !data) return []
-    return (data as Property[]).map(p => transformProperty(p, false))
-  } catch (err) {
-    return []
-  }
+function getFeaturedProperties(limit = 6): UIProperty[] {
+  return mockFeaturedProperties.slice(0, limit)
 }
 
 // Fetch rental properties (rent status)
-async function getRentalProperties(limit = 4): Promise<UIProperty[]> {
-  try {
-    const supabase = await createClient()
-    const { data, error } = await supabase
-      .from('properties')
-      .select('*')
-      .eq('status', 'rent')
-      .order('created_at', { ascending: false })
-      .limit(limit)
+function getRentalProperties(limit = 4): UIProperty[] {
+  return mockRentalProperties.slice(0, limit)
+}
 
-    if (error || !data) return []
-    return (data as Property[]).map(p => transformProperty(p, true))
-  } catch (err) {
-    return []
-  }
+// Fetch new projects
+function getNewProjects(limit = 4) {
+  
+  const mockProjects = [
+    {
+      id: 'p1',
+      name: 'The Royal Atlantis Residences',
+      location: 'Palm Jumeirah, Dubai',
+      starting_price: 7500000,
+      hero_image_url: 'https://images.pexels.com/photos/1396134/pexels-photo-1396134.jpeg?auto=compress&cs=tinysrgb&w=800',
+      status: 'Under Construction',
+      developer: 'Kerzner International'
+    },
+    {
+      id: 'p2',
+      name: 'One Za\'abeel',
+      location: 'Zabeel, Dubai',
+      starting_price: 3900000,
+      hero_image_url: 'https://images.pexels.com/photos/1396136/pexels-photo-1396136.jpeg?auto=compress&cs=tinysrgb&w=800',
+      status: 'Near Completion',
+      developer: 'Ithra Dubai'
+    },
+    {
+      id: 'p3',
+      name: 'Cavalli Tower',
+      location: 'Dubai Marina, Dubai',
+      starting_price: 2100000,
+      hero_image_url: 'https://images.pexels.com/photos/1396138/pexels-photo-1396138.jpeg?auto=compress&cs=tinysrgb&w=800',
+      status: 'New Launch',
+      developer: 'DAMAC Properties'
+    },
+    {
+      id: 'p4',
+      name: 'District One West',
+      location: 'MBR City, Dubai',
+      starting_price: 12000000,
+      hero_image_url: 'https://images.pexels.com/photos/1396140/pexels-photo-1396140.jpeg?auto=compress&cs=tinysrgb&w=800',
+      status: 'Under Construction',
+      developer: 'Meydan'
+    }
+  ]
+  return mockProjects.slice(0, limit)
 }
 
 // Fetch top agents by rating
-async function getTopAgents(limit = 4): Promise<AgentWithProfile[]> {
-  try {
-    const supabase = await createClient()
-    const { data, error } = await supabase
-      .from('agents')
-      .select('*, profiles:profiles(*)')
-      .order('rating', { ascending: false })
-      .limit(limit)
-
-    if (error || !data) return []
-    return data as AgentWithProfile[]
-  } catch (err) {
-    return []
-  }
+function getTopAgents(limit = 4): AgentWithProfile[] {
+  const mockAgents: AgentWithProfile[] = [
+    {
+      id: 'agent-1',
+      title: 'Senior Real Estate Agent',
+      bio: 'Specializing in luxury properties',
+      experience_years: 8,
+      rating: 4.8,
+      review_count: 89,
+      total_sales: 450000000,
+      profile_image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&q=80',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      office: 'Dubai Downtown',
+      license_no: '123456789',
+      approved: true,
+      social: { linkedin: 'https://linkedin.com', instagram: '@agent' },
+      brokerage: 'RAGDOL',
+      certifications: ['RERA', 'Certified'],
+      commission_rate: 2.5,
+      languages: ['English', 'Arabic'],
+      areas: ['Downtown', 'Marina'],
+      verified: true,
+      user_id: 'user-1',
+      whatsapp: '+971501234567',
+      linkedin_url: 'https://linkedin.com',
+      instagram_handle: '@agent',
+      website_url: 'https://agent.ragdol.ae',
+      location: 'Dubai',
+      profile_images: ['https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&q=80'],
+      specializations: ['Luxury Properties', 'Investment'],
+      telegram: null,
+      profiles: {
+        id: 'user-1',
+        full_name: 'Sarah Ahmed',
+        avatar_url: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&q=80',
+        phone: '+971501234567',
+        role: 'agent',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        email_verified: true,
+        phone_verified: true,
+        last_login: new Date().toISOString(),
+        login_count: 245,
+        location: 'Dubai',
+        bio: 'Real estate agent',
+        preferences: { notifications: true, language: 'en' },
+        social_links: { linkedin: 'https://linkedin.com' }
+      }
+    },
+    {
+      id: 'agent-2',
+      title: 'Luxury Property Specialist',
+      bio: 'Expert in Palm Jumeirah',
+      experience_years: 10,
+      rating: 4.9,
+      review_count: 120,
+      total_sales: 625000000,
+      profile_image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      office: 'Palm Jumeirah',
+      license_no: '987654321',
+      approved: true,
+      social: { linkedin: 'https://linkedin.com', instagram: '@agent' },
+      brokerage: 'RAGDOL',
+      certifications: ['RERA', 'Certified'],
+      commission_rate: 2.75,
+      languages: ['English', 'Arabic', 'French'],
+      areas: ['Palm', 'Emirates Hills'],
+      verified: true,
+      user_id: 'user-2',
+      whatsapp: '+971501234568',
+      linkedin_url: 'https://linkedin.com',
+      instagram_handle: '@agent',
+      website_url: 'https://agent2.ragdol.ae',
+      location: 'Dubai',
+      profile_images: ['https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80'],
+      specializations: ['Luxury Villas', 'Waterfront'],
+      telegram: null,
+      profiles: {
+        id: 'user-2',
+        full_name: 'Ahmed Hassan',
+        avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80',
+        phone: '+971502345678',
+        role: 'agent',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        email_verified: true,
+        phone_verified: true,
+        last_login: new Date().toISOString(),
+        login_count: 312,
+        location: 'Dubai',
+        bio: 'Luxury specialist',
+        preferences: { notifications: true, language: 'en' },
+        social_links: { linkedin: 'https://linkedin.com' }
+      }
+    },
+    {
+      id: 'agent-3',
+      title: 'Commercial Broker',
+      bio: 'Commercial spaces specialist',
+      experience_years: 9,
+      rating: 4.7,
+      review_count: 76,
+      total_sales: 380000000,
+      profile_image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      office: 'Business Bay',
+      license_no: '456789123',
+      approved: true,
+      social: { linkedin: 'https://linkedin.com', instagram: '@agent' },
+      brokerage: 'RAGDOL',
+      certifications: ['RERA', 'Certified'],
+      commission_rate: 3.0,
+      languages: ['English', 'Arabic', 'Urdu'],
+      areas: ['Business Bay', 'Marina'],
+      verified: true,
+      user_id: 'user-3',
+      whatsapp: '+971501234569',
+      linkedin_url: 'https://linkedin.com',
+      instagram_handle: '@agent',
+      website_url: 'https://agent3.ragdol.ae',
+      location: 'Dubai',
+      profile_images: ['https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80'],
+      specializations: ['Commercial', 'Investment'],
+      telegram: null,
+      profiles: {
+        id: 'user-3',
+        full_name: 'Fatima Khan',
+        avatar_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80',
+        phone: '+971503456789',
+        role: 'agent',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        email_verified: true,
+        phone_verified: true,
+        last_login: new Date().toISOString(),
+        login_count: 198,
+        location: 'Dubai',
+        bio: 'Commercial broker',
+        preferences: { notifications: true, language: 'en' },
+        social_links: { linkedin: 'https://linkedin.com' }
+      }
+    },
+    {
+      id: 'agent-4',
+      title: 'Investment Advisor',
+      bio: 'Property investment specialist',
+      experience_years: 7,
+      rating: 4.6,
+      review_count: 95,
+      total_sales: 320000000,
+      profile_image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&q=80',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      office: 'Jumeirah Village Circle',
+      license_no: '789123456',
+      approved: true,
+      social: { linkedin: 'https://linkedin.com', instagram: '@agent' },
+      brokerage: 'RAGDOL',
+      certifications: ['RERA', 'Certified'],
+      commission_rate: 2.25,
+      languages: ['English', 'Arabic', 'Hindi'],
+      areas: ['JVC', 'Dubai Silicon Oasis'],
+      verified: true,
+      user_id: 'user-4',
+      whatsapp: '+971501234570',
+      linkedin_url: 'https://linkedin.com',
+      instagram_handle: '@agent',
+      website_url: 'https://agent4.ragdol.ae',
+      location: 'Dubai',
+      profile_images: ['https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&q=80'],
+      specializations: ['Investment', 'Residential'],
+      telegram: null,
+      profiles: {
+        id: 'user-4',
+        full_name: 'Maria Rodriguez',
+        avatar_url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&q=80',
+        phone: '+971504567890',
+        role: 'agent',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        email_verified: true,
+        phone_verified: true,
+        last_login: new Date().toISOString(),
+        login_count: 167,
+        location: 'Dubai',
+        bio: 'Investment advisor',
+        preferences: { notifications: true, language: 'en' },
+        social_links: { linkedin: 'https://linkedin.com' }
+      }
+    },
+    {
+      id: 'agent-5',
+      title: 'Off-Plan Specialist',
+      bio: 'New developments expert',
+      experience_years: 6,
+      rating: 4.8,
+      review_count: 82,
+      total_sales: 280000000,
+      profile_image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      office: 'Dubai Festival City',
+      license_no: '321654987',
+      approved: true,
+      social: { linkedin: 'https://linkedin.com', instagram: '@agent' },
+      brokerage: 'RAGDOL',
+      certifications: ['RERA', 'Certified'],
+      commission_rate: 2.5,
+      languages: ['English', 'Arabic'],
+      areas: ['Festival City', 'Al Barsha'],
+      verified: true,
+      user_id: 'user-5',
+      whatsapp: '+971501234571',
+      linkedin_url: 'https://linkedin.com',
+      instagram_handle: '@agent',
+      website_url: 'https://agent5.ragdol.ae',
+      location: 'Dubai',
+      profile_images: ['https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80'],
+      specializations: ['Off-Plan', 'New Developments'],
+      telegram: null,
+      profiles: {
+        id: 'user-5',
+        full_name: 'David Chen',
+        avatar_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80',
+        phone: '+971505678901',
+        role: 'agent',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        email_verified: true,
+        phone_verified: true,
+        last_login: new Date().toISOString(),
+        login_count: 134,
+        location: 'Dubai',
+        bio: 'Off-plan specialist',
+        preferences: { notifications: true, language: 'en' },
+        social_links: { linkedin: 'https://linkedin.com' }
+      }
+    },
+    {
+      id: 'agent-6',
+      title: 'Rental Specialist',
+      bio: 'Long-term rental expert',
+      experience_years: 11,
+      rating: 4.9,
+      review_count: 156,
+      total_sales: 420000000,
+      profile_image: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=400&q=80',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      office: 'Dubai Marina',
+      license_no: '654987321',
+      approved: true,
+      social: { linkedin: 'https://linkedin.com', instagram: '@agent' },
+      brokerage: 'RAGDOL',
+      certifications: ['RERA', 'Certified'],
+      commission_rate: 1.5,
+      languages: ['English', 'Arabic', 'Russian'],
+      areas: ['Marina', 'JBR'],
+      verified: true,
+      user_id: 'user-6',
+      whatsapp: '+971501234572',
+      linkedin_url: 'https://linkedin.com',
+      instagram_handle: '@agent',
+      website_url: 'https://agent6.ragdol.ae',
+      location: 'Dubai',
+      profile_images: ['https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=400&q=80'],
+      specializations: ['Rentals', 'Long-term'],
+      telegram: null,
+      profiles: {
+        id: 'user-6',
+        full_name: 'Elena Petrova',
+        avatar_url: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=400&q=80',
+        phone: '+971506789012',
+        role: 'agent',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        email_verified: true,
+        phone_verified: true,
+        last_login: new Date().toISOString(),
+        login_count: 289,
+        location: 'Dubai',
+        bio: 'Rental specialist',
+        preferences: { notifications: true, language: 'en' },
+        social_links: { linkedin: 'https://linkedin.com' }
+      }
+    },
+    {
+      id: 'agent-7',
+      title: 'Luxury Villa Specialist',
+      bio: 'Exclusive villa properties expert',
+      experience_years: 12,
+      rating: 4.9,
+      review_count: 178,
+      total_sales: 890000000,
+      profile_image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&q=80',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      office: 'Emirates Hills',
+      license_no: '987321654',
+      approved: true,
+      social: { linkedin: 'https://linkedin.com', instagram: '@agent' },
+      brokerage: 'RAGDOL',
+      certifications: ['RERA', 'Certified', 'Luxury Specialist'],
+      commission_rate: 3.0,
+      languages: ['English', 'Arabic', 'French', 'Italian'],
+      areas: ['Emirates Hills', 'Palm', 'Jumeirah'],
+      verified: true,
+      user_id: 'user-7',
+      whatsapp: '+971501234573',
+      linkedin_url: 'https://linkedin.com',
+      instagram_handle: '@agent',
+      website_url: 'https://agent7.ragdol.ae',
+      location: 'Dubai',
+      profile_images: ['https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&q=80'],
+      specializations: ['Luxury Villas', 'Exclusive Properties'],
+      telegram: null,
+      profiles: {
+        id: 'user-7',
+        full_name: 'Isabella Rossi',
+        avatar_url: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&q=80',
+        phone: '+971507890123',
+        role: 'agent',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        email_verified: true,
+        phone_verified: true,
+        last_login: new Date().toISOString(),
+        login_count: 345,
+        location: 'Dubai',
+        bio: 'Luxury villa specialist',
+        preferences: { notifications: true, language: 'en' },
+        social_links: { linkedin: 'https://linkedin.com' }
+      }
+    },
+    {
+      id: 'agent-8',
+      title: 'Commercial Property Broker',
+      bio: 'Office and retail space specialist',
+      experience_years: 9,
+      rating: 4.7,
+      review_count: 134,
+      total_sales: 560000000,
+      profile_image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=80',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      office: 'Business Bay',
+      license_no: '456123789',
+      approved: true,
+      social: { linkedin: 'https://linkedin.com', instagram: '@agent' },
+      brokerage: 'RAGDOL',
+      certifications: ['RERA', 'Certified', 'Commercial Broker'],
+      commission_rate: 2.75,
+      languages: ['English', 'Arabic', 'Urdu'],
+      areas: ['Business Bay', 'DIFC', 'Dubai Media City'],
+      verified: true,
+      user_id: 'user-8',
+      whatsapp: '+971501234574',
+      linkedin_url: 'https://linkedin.com',
+      instagram_handle: '@agent',
+      website_url: 'https://agent8.ragdol.ae',
+      location: 'Dubai',
+      profile_images: ['https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=80'],
+      specializations: ['Commercial', 'Office Spaces', 'Retail'],
+      telegram: null,
+      profiles: {
+        id: 'user-8',
+        full_name: 'Ahmed Al-Mansoori',
+        avatar_url: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=80',
+        phone: '+971508901234',
+        role: 'agent',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        email_verified: true,
+        phone_verified: true,
+        last_login: new Date().toISOString(),
+        login_count: 223,
+        location: 'Dubai',
+        bio: 'Commercial property broker',
+        preferences: { notifications: true, language: 'en' },
+        social_links: { linkedin: 'https://linkedin.com' }
+      }
+    }
+  ]
+  return mockAgents.slice(0, limit)
 }
 
-export default async function HomePage() {
-  const topAgents = await getTopAgents()
-  const featuredProperties = await getFeaturedProperties()
-  const rentalProperties = await getRentalProperties()
+export default function HomePage() {
+  const { t } = useTranslation()
+  const topAgents = getTopAgents(8)
+  const featuredProperties = getFeaturedProperties()
+  const rentalProperties = getRentalProperties()
+  const newProjects = getNewProjects()
 
   return (
-    <div>
-      {/* Hero Landing Section */}
-      <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/20 rounded-full blur-3xl"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-primary/10 to-secondary/10 rounded-full blur-3xl"></div>
-        </div>
+    <div className="flex flex-col min-h-screen">
+      {/* Hero Landing Section with Image Slider */}
+      <section className="relative w-full h-[95vh] min-h-[700px] overflow-hidden">
+        {/* Image Slider Background */}
+        <HeroImageSlider />
 
-        <div className="container-custom relative z-10">
-          <div className="text-center max-w-4xl mx-auto space-y-8">
-            {/* Main Heading */}
-            <div className="space-y-4">
-              <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
-                Find Your <span className="text-gradient bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Dream Property</span>
-              </h1>
-              <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                Discover premium properties in Dubai's most exclusive locations. From luxury apartments to stunning villas, find your perfect home with expert guidance.
-              </p>
-            </div>
-
-            {/* Search Component */}
-            <div className="max-w-3xl mx-auto">
-              <HeroSearch />
-            </div>
-
-            {/* Quick Action Buttons */}
-            <div className="flex flex-wrap gap-4 justify-center pt-8">
-              <Link
-                href="/properties"
-                className="group px-6 py-3 bg-primary text-primary-foreground rounded-full font-semibold text-sm hover:bg-primary/90 transition-all duration-300 hover:scale-105 hover:shadow-lg"
-              >
-                <HomeIcon className="w-4 h-4 inline mr-2 group-hover:scale-110 transition-transform" />
-                Browse Properties
-              </Link>
-              <Link
-                href="/projects"
-                className="group px-6 py-3 bg-secondary text-secondary-foreground rounded-full font-semibold text-sm hover:bg-secondary/90 transition-all duration-300 hover:scale-105 hover:shadow-lg"
-              >
-                <BuildingOffice2Icon className="w-4 h-4 inline mr-2 group-hover:scale-110 transition-transform" />
-                New Developments
-              </Link>
-              <Link
-                href="/properties?featured=true"
-                className="group px-6 py-3 bg-gradient-to-r from-primary/10 to-secondary/10 text-primary border border-primary/20 rounded-full font-semibold text-sm hover:from-primary/20 hover:to-secondary/20 transition-all duration-300 hover:scale-105 hover:shadow-lg"
-              >
-                <SparklesIcon className="w-4 h-4 inline mr-2 group-hover:scale-110 transition-transform" />
-                Featured Listings
-              </Link>
-            </div>
-
-            {/* Stats or Trust Indicators */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-16 max-w-2xl mx-auto">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary">5000+</div>
-                <div className="text-sm text-muted-foreground">Properties</div>
+        {/* Content Overlay */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-0">
+          <div className="container-custom w-full pt-20">
+            <div className="text-center max-w-6xl mx-auto space-y-10">
+              {/* Main Heading */}
+              <div className="space-y-4 sm:space-y-6">
+                <h2 className="text-primary font-bold tracking-[0.4em] uppercase text-xs sm:text-sm drop-shadow-md">
+                  {t('homepage.premiumRealEstate')}
+                </h2>
+                <h1 className="text-2xl sm:text-3xl md:text-5xl font-black tracking-tight text-white drop-shadow-2xl leading-tight">
+                  {t('homepage.findYourDreamHome')}
+                </h1>
+                <p className="text-base sm:text-xl md:text-2xl text-white/90 max-w-3xl mx-auto leading-relaxed font-medium drop-shadow-lg px-4 sm:px-0">
+                  {t('homepage.discoverExclusiveProperties')}
+                </p>
               </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary">200+</div>
-                <div className="text-sm text-muted-foreground">Agents</div>
+
+              {/* Search Component */}
+              <div className="max-w-4xl mx-auto animate-slide-up [animation-delay:200ms]">
+                <HeroSearch />
               </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary">50+</div>
-                <div className="text-sm text-muted-foreground">Projects</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary">10K+</div>
-                <div className="text-sm text-muted-foreground">Happy Clients</div>
+
+              {/* Stats Section */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-12 pt-8 sm:pt-12 max-w-3xl mx-auto animate-fade-in [animation-delay:400ms] px-4 sm:px-0">
+                <div className="text-center group">
+                  <div className="text-3xl sm:text-4xl font-black text-white mb-1 group-hover:text-primary transition-colors">2500+</div>
+                  <div className="text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-white/60">{t('homepage.properties')}</div>
+                </div>
+                <div className="text-center group">
+                  <div className="text-3xl sm:text-4xl font-black text-white mb-1 group-hover:text-primary transition-colors">500+</div>
+                  <div className="text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-white/60">{t('homepage.happyClients')}</div>
+                </div>
+                <div className="text-center group">
+                  <div className="text-3xl sm:text-4xl font-black text-white mb-1 group-hover:text-primary transition-colors">150+</div>
+                  <div className="text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-white/60">{t('homepage.expertAgents')}</div>
+                </div>
+                <div className="text-center group">
+                  <div className="text-3xl sm:text-4xl font-black text-white mb-1 group-hover:text-primary transition-colors">15+</div>
+                  <div className="text-[8px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-white/60">{t('homepage.yearsExperience')}</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <div className="w-6 h-10 border-2 border-muted-foreground/30 rounded-full flex justify-center">
-            <div className="w-1 h-3 bg-muted-foreground/50 rounded-full mt-2 animate-pulse"></div>
+        <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-20">
+          <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center">
+            <div className="w-1 h-2 bg-white/60 rounded-full mt-2 animate-bounce"></div>
           </div>
         </div>
       </section>
 
-      {/* Video Reels Section */}
-      <section className="section-padding bg-card">
+      {/* Video Showcase Section */}
+      <section className="py-16 sm:py-24 bg-slate-50">
         <div className="container-custom">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Property <span className="text-gradient">Showcase</span>
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Explore stunning properties through our curated video tours
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 sm:mb-16 gap-6 px-4 sm:px-0">
+            <div className="max-w-2xl">
+              <h2 className="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4">
+                {t('homepage.visualExperience')}
+              </h2>
+              <h3 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
+                {t('homepage.propertyShowcase')}
+              </h3>
+            </div>
+            <p className="text-slate-500 font-medium max-w-md text-sm sm:text-base">
+              {t('homepage.exploreStunningProperties')}
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Video Reel 1 */}
-            <div className="relative aspect-[9/16] rounded-xl overflow-hidden shadow-lg group cursor-pointer">
-              <video
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                autoPlay
-                muted
-                loop
-                playsInline
-              >
-                <source src="https://res.cloudinary.com/thenprogrammer/video/upload/v1764843424/WhatsApp_Video_2025-11-29_at_12.14.53_udvkvk.mp4" type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
-                <div className="bg-white/90 rounded-full p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <svg className="w-6 h-6 text-gray-900" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z"/>
-                  </svg>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 px-4 sm:px-0">
+            {[
+              { title: 'Luxury Penthouse', loc: 'Downtown Dubai', vid: 'v1764843424/WhatsApp_Video_2025-11-29_at_12.14.53_udvkvk.mp4' },
+              { title: 'Beachfront Villa', loc: 'Palm Jumeirah', vid: 'v1764843423/WhatsApp_Video_2025-11-29_at_12.13.39_n3dwhm.mp4' },
+              { title: 'Marina View', loc: 'Dubai Marina', vid: 'v1764843481/WhatsApp_Video_2025-11-29_at_12.19.32_jm5ups.mp4' },
+              { title: 'Modern Townhouse', loc: 'Emirates Hills', vid: 'v1764843447/WhatsApp_Video_2025-11-29_at_12.18.06_e0j4gz.mp4' }
+            ].map((reel, i) => (
+              <div key={i} className="relative aspect-9/16 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl group cursor-pointer animate-slide-up" style={{ animationDelay: `${i * 100}ms` }}>
+                <video
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  autoPlay muted loop playsInline
+                >
+                  <source src={`https://res.cloudinary.com/thenprogrammer/video/upload/${reel.vid}`} type="video/mp4" />
+                </video>
+                <div className="absolute inset-0 bg-linear-to-t from-slate-900/90 via-transparent to-transparent p-4 sm:p-6 flex flex-col justify-end">
+                  <h4 className="text-white font-bold text-base sm:text-lg">{reel.title}</h4>
+                  <p className="text-white/70 text-sm font-medium">{reel.loc}</p>
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="h-12 w-12 sm:h-16 sm:w-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/30">
+                    <svg className="w-6 h-6 sm:w-8 sm:h-8 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                  </div>
                 </div>
               </div>
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                <h3 className="text-white font-semibold text-sm">Luxury Penthouse Tour</h3>
-                <p className="text-white/80 text-xs">Downtown Dubai</p>
-              </div>
-            </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-            {/* Video Reel 2 */}
-            <div className="relative aspect-[9/16] rounded-xl overflow-hidden shadow-lg group cursor-pointer">
-              <video
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                autoPlay
-                muted
-                loop
-                playsInline
-              >
-                <source src="https://res.cloudinary.com/thenprogrammer/video/upload/v1764843423/WhatsApp_Video_2025-11-29_at_12.13.39_n3dwhm.mp4" type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
-                <div className="bg-white/90 rounded-full p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <svg className="w-6 h-6 text-gray-900" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z"/>
-                  </svg>
-                </div>
-              </div>
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                <h3 className="text-white font-semibold text-sm">Beachfront Villa</h3>
-                <p className="text-white/80 text-xs">Palm Jumeirah</p>
-              </div>
-            </div>
+      {/* Trusted Partners */}
+      <section className="py-16 sm:py-24 bg-white">
+        <div className="container-custom">
+          <div className="text-center mb-12 sm:mb-16 px-4 sm:px-0">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif text-secondary mb-4 sm:mb-6">
+              {t('homepage.trustedPartners')}
+            </h2>
+            <p className="text-lg sm:text-xl text-slate-600 max-w-3xl mx-auto">
+              {t('homepage.collaborateWithDevelopers')}
+            </p>
+          </div>
 
-            {/* Video Reel 3 */}
-            <div className="relative aspect-[9/16] rounded-xl overflow-hidden shadow-lg group cursor-pointer">
-              <video
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                autoPlay
-                muted
-                loop
-                playsInline
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 sm:gap-8 md:gap-12 px-4 sm:px-0">
+            {[
+              {
+                name: 'Emaar',
+                logo: 'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=400&h=200&fit=crop'
+              },
+              {
+                name: 'Sobha',
+                logo: 'https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg?auto=compress&cs=tinysrgb&w=400&h=200&fit=crop'
+              },
+              {
+                name: 'Damac',
+                logo: 'https://images.pexels.com/photos/3184296/pexels-photo-3184296.jpeg?auto=compress&cs=tinysrgb&w=400&h=200&fit=crop'
+              },
+              {
+                name: 'Binghati',
+                logo: 'https://images.pexels.com/photos/3184301/pexels-photo-3184301.jpeg?auto=compress&cs=tinysrgb&w=400&h=200&fit=crop'
+              },
+              {
+                name: 'Aldar',
+                logo: 'https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=400&h=200&fit=crop'
+              },
+              {
+                name: 'Azizi',
+                logo: 'https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?auto=compress&cs=tinysrgb&w=400&h=200&fit=crop'
+              }
+            ].map((partner, index) => (
+              <div
+                key={index}
+                className="group flex flex-col items-center justify-center p-4 sm:p-6 rounded-2xl bg-slate-50 hover:bg-white hover:shadow-xl transition-all duration-300 border border-slate-100 hover:border-primary/20"
               >
-                <source src="https://res.cloudinary.com/thenprogrammer/video/upload/v1764843481/WhatsApp_Video_2025-11-29_at_12.19.32_jm5ups.mp4" type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
-                <div className="bg-white/90 rounded-full p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <svg className="w-6 h-6 text-gray-900" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z"/>
-                  </svg>
+                <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 mb-3 sm:mb-4 rounded-xl overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <img
+                    src={partner.logo}
+                    alt={`${partner.name} Logo`}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
+                <h3 className="text-sm sm:text-lg font-bold text-secondary group-hover:text-primary transition-colors text-center">
+                  {partner.name}
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500 mt-1 text-center">Properties</p>
               </div>
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                <h3 className="text-white font-semibold text-sm">Marina View Apartment</h3>
-                <p className="text-white/80 text-xs">Dubai Marina</p>
-              </div>
-            </div>
+            ))}
+          </div>
 
-            {/* Video Reel 4 */}
-            <div className="relative aspect-[9/16] rounded-xl overflow-hidden shadow-lg group cursor-pointer">
-              <video
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                autoPlay
-                muted
-                loop
-                playsInline
-              >
-                <source src="https://res.cloudinary.com/thenprogrammer/video/upload/v1764843447/WhatsApp_Video_2025-11-29_at_12.18.06_e0j4gz.mp4" type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
-                <div className="bg-white/90 rounded-full p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <svg className="w-6 h-6 text-gray-900" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z"/>
-                  </svg>
-                </div>
+          <div className="text-center mt-12 sm:mt-16 px-4 sm:px-0">
+            <p className="text-slate-600 mb-4 sm:mb-6 text-sm sm:text-base">
+              {t('homepage.joinThousandsClients')}
+            </p>
+            <div className="flex flex-wrap justify-center gap-4 sm:gap-8 text-xs sm:text-sm text-slate-500">
+              <div className="flex items-center gap-2">
+                <StarIcon className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-500" />
+                <span>{t('homepage.trustedDevelopers')}</span>
               </div>
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                <h3 className="text-white font-semibold text-sm">Modern Townhouse</h3>
-                <p className="text-white/80 text-xs">Emirates Hills</p>
+              <div className="flex items-center gap-2">
+                <BuildingOffice2Icon className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+                <span>{t('homepage.premiumProperties')}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <UserGroupIcon className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+                <span>{t('homepage.expertGuidance')}</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Featured Properties Slider */}
-      <section className="section-padding bg-background">
+      {/* Featured Properties Slider (Buy) */}
+      <section className="py-24 bg-white">
         <div className="container-custom">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Featured <span className="text-gradient">Properties</span>
+          <div className="text-center mb-16">
+            <h2 className="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4">
+              {t('homepage.exclusiveSelection')}
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Discover hand-picked premium properties from Dubai's most sought-after locations
-            </p>
+            <h3 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
+              {t('homepage.propertiesFor')} <span className="text-primary">{t('homepage.buyText')}</span>
+            </h3>
           </div>
           <PropertySlider 
             title=""
@@ -487,18 +856,18 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Rental Properties Slider */}
-      <section className="section-padding bg-card">
+      {/* Properties for Rent */}
+      <section className="py-24 bg-slate-50">
         <div className="container-custom">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Available for <span className="text-gradient">Rent</span>
+          <div className="text-center mb-16">
+            <h2 className="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4">
+              {t('homepage.rentalCollection')}
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Flexible rental options from furnished studios to luxury villas
-            </p>
+            <h3 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
+              {t('homepage.propertiesFor')} <span className="text-primary">{t('homepage.rentText')}</span>
+            </h3>
           </div>
-          <PropertySlider
+          <PropertySlider 
             title=""
             properties={rentalProperties.length > 0 ? rentalProperties : mockRentalProperties}
             showCount={4}
@@ -506,266 +875,305 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Categories */}
-      <section className="section-padding bg-card">
+      {/* New Projects Section */}
+      <section className="py-24 bg-white">
         <div className="container-custom">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-            Explore by <span className="text-gradient">Category</span>
-          </h2>
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+            <div>
+              <h2 className="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4">
+                {t('homepage.futureLiving')}
+              </h2>
+              <h3 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
+                {t('homepage.newText')} <span className="text-primary">{t('homepage.projectsText')}</span>
+              </h3>
+            </div>
+            <Link href="/projects" className="btn-outline">
+              {t('homepage.viewAllProjects')}
+            </Link>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {newProjects.map((project) => (
+              <Link key={project.id} href={`/projects/${project.id}`} className="group">
+                <div className="relative aspect-[4/5] rounded-3xl overflow-hidden mb-6 shadow-lg">
+                  <img 
+                    src={project.hero_image_url} 
+                    alt={project.name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  />
+                  <div className="absolute top-4 left-4">
+                    <span className="px-4 py-1.5 bg-white/90 backdrop-blur-md text-secondary text-[10px] font-black uppercase tracking-widest rounded-full shadow-sm">
+                      {project.status}
+                    </span>
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                </div>
+                <h4 className="text-xl font-black text-slate-900 mb-1 group-hover:text-primary transition-colors">{project.name}</h4>
+                <p className="text-slate-500 font-medium text-sm mb-2">{project.location}</p>
+                <div className="text-primary font-bold text-sm">
+                  Starting from <span className="text-lg">AED {project.starting_price.toLocaleString()}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
 
+      {/* Popular Areas Section */}
+      <section className="py-24 bg-slate-50">
+        <div className="container-custom">
+          <div className="text-center mb-16">
+            <h2 className="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4">
+              Prime Locations
+            </h2>
+            <h3 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
+              Explore <span className="text-primary">Popular Areas</span>
+            </h3>
+          </div>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Link
-              href="/properties?status=sale"
-              className="group card-custom hover:border-primary transition-all"
-            >
-              <div className="flex items-center space-x-4">
-                <div className="p-3 bg-primary/10 rounded-lg">
-                  <HomeIcon className="h-8 w-8 text-primary" />
+            {[
+              { name: 'Dubai Marina', count: '1,240', image: 'https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg?auto=compress&cs=tinysrgb&w=800' },
+              { name: 'Downtown Dubai', count: '850', image: 'https://images.pexels.com/photos/1396074/pexels-photo-1396074.jpeg?auto=compress&cs=tinysrgb&w=800' },
+              { name: 'Palm Jumeirah', count: '420', image: 'https://images.pexels.com/photos/1396124/pexels-photo-1396124.jpeg?auto=compress&cs=tinysrgb&w=800' },
+              { name: 'Business Bay', count: '960', image: 'https://images.pexels.com/photos/1396126/pexels-photo-1396126.jpeg?auto=compress&cs=tinysrgb&w=800' }
+            ].map((area, i) => (
+              <Link key={i} href={`/properties?area=${area.name}`} className="group relative aspect-[4/5] rounded-[2rem] overflow-hidden shadow-xl">
+                <img 
+                  src={area.image} 
+                  alt={area.name}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent" />
+                <div className="absolute bottom-8 left-8 right-8">
+                  <h4 className="text-2xl font-black text-white mb-1">{area.name}</h4>
+                  <p className="text-white/70 font-bold uppercase tracking-widest text-[10px]">{area.count} Properties</p>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">
-                    Buy Property
-                  </h3>
-                  <p className="text-sm text-muted-foreground">Find your dream home</p>
+                <div className="absolute top-6 right-6 h-12 w-12 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-4 group-hover:translate-x-0">
+                  <ArrowRightIcon className="h-5 w-5" />
                 </div>
-              </div>
-            </Link>
-
-            <Link
-              href="/properties?status=rent"
-              className="group card-custom hover:border-primary transition-all"
-            >
-              <div className="flex items-center space-x-4">
-                <div className="p-3 bg-primary/10 rounded-lg">
-                  <BuildingOffice2Icon className="h-8 w-8 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">
-                    Rent Property
-                  </h3>
-                  <p className="text-sm text-muted-foreground">Flexible rental options</p>
-                </div>
-              </div>
-            </Link>
-
-            <Link
-              href="/projects"
-              className="group card-custom hover:border-primary transition-all"
-            >
-              <div className="flex items-center space-x-4">
-                <div className="p-3 bg-primary/10 rounded-lg">
-                  <SparklesIcon className="h-8 w-8 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">
-                    New Projects
-                  </h3>
-                  <p className="text-sm text-muted-foreground">Off-plan developments</p>
-                </div>
-              </div>
-            </Link>
-
-            <Link
-              href="/market"
-              className="group card-custom hover:border-primary transition-all"
-            >
-              <div className="flex items-center space-x-4">
-                <div className="p-3 bg-primary/10 rounded-lg">
-                  <ChartBarIcon className="h-8 w-8 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">
-                    Market Insights
-                  </h3>
-                  <p className="text-sm text-muted-foreground">Data & analytics</p>
-                </div>
-              </div>
+              </Link>
+            ))}
+          </div>
+          
+          <div className="text-center mt-12">
+            <Link href="/explore" className="btn-outline rounded-full! px-10!">
+              Explore All Areas
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Latest Properties - TODO: Implement with real data */}
-      {/* {mockFeaturedProperties.length > 0 && (
-        <section className="section-padding bg-background">
-          <div className="container-custom">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h2 className="text-3xl md:text-4xl font-bold mb-2">
-                  Latest <span className="text-gradient">Listings</span>
-                </h2>
-                <p className="text-muted-foreground">
-                  Recently added properties
+      {/* Why Choose Us */}
+      <section className="py-16 sm:py-24 bg-slate-900 text-white overflow-hidden">
+        <div className="container-custom">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 sm:gap-20 items-center">
+            <div className="relative">
+              <div className="absolute -top-20 -left-20 w-64 h-64 sm:w-96 sm:h-96 bg-primary/20 rounded-full blur-[120px]" />
+              <div className="relative rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-2xl border border-white/10">
+                <img 
+                  src="https://images.pexels.com/photos/1396128/pexels-photo-1396128.jpeg?auto=compress&cs=tinysrgb&w=800" 
+                  alt="Luxury Real Estate" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="absolute -bottom-6 -right-6 sm:-bottom-10 sm:-right-10 bg-white p-6 sm:p-10 rounded-3xl sm:rounded-4xl shadow-2xl max-w-xs animate-slide-up">
+                <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
+                  <div className="h-10 w-10 sm:h-14 sm:w-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
+                    <SparklesIcon className="h-6 w-6 sm:h-8 sm:w-8" />
+                  </div>
+                  <div className="font-black text-slate-900 text-lg sm:text-xl">Premium Quality</div>
+                </div>
+                <p className="text-slate-500 leading-relaxed font-medium text-sm sm:text-base">
+                  We only list properties that meet our high standards of luxury and quality.
                 </p>
               </div>
-              <Link
-                href="/properties"
-                className="btn-outline hidden md:block"
-              >
-                View All
-              </Link>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {mockFeaturedProperties.map((property) => (
-                <ListingCard key={property.id} property={property} />
-              ))}
-            </div>
-
-            <div className="mt-8 text-center md:hidden">
-              <Link href="/properties" className="btn-outline">
-                View All Properties
-              </Link>
+            
+            <div className="space-y-6 sm:space-y-10">
+              <div>
+                <h2 className="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4">
+                  Our Excellence
+                </h2>
+                <h3 className="text-3xl sm:text-4xl md:text-6xl font-black tracking-tight mb-6 sm:mb-8">
+                  Why Choose RAGDOL?
+                </h3>
+                <p className="text-lg sm:text-xl text-slate-400 leading-relaxed font-medium">
+                  We combine deep market knowledge with a personalized approach to help you find the perfect property in Dubai's competitive market.
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-10">
+                <div className="space-y-3 sm:space-y-4 group">
+                  <div className="h-10 w-10 sm:h-12 sm:w-12 bg-white/5 text-primary rounded-2xl flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all duration-300">
+                    <ChartBarIcon className="h-5 w-5 sm:h-6 sm:w-6" />
+                  </div>
+                  <h4 className="font-bold text-lg sm:text-xl">Market Analysis</h4>
+                  <p className="text-slate-400 font-medium text-sm sm:text-base">Real-time data and insights to make informed investment decisions.</p>
+                </div>
+                <div className="space-y-3 sm:space-y-4 group">
+                  <div className="h-10 w-10 sm:h-12 sm:w-12 bg-white/5 text-primary rounded-2xl flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all duration-300">
+                    <UserGroupIcon className="h-5 w-5 sm:h-6 sm:w-6" />
+                  </div>
+                  <h4 className="font-bold text-lg sm:text-xl">Expert Guidance</h4>
+                  <p className="text-slate-400 font-medium text-sm sm:text-base">Dedicated agents with years of experience in the Dubai market.</p>
+                </div>
+              </div>
+              
+              <button className="btn-primary rounded-full! px-8 sm:px-10! py-3 sm:py-4! text-sm sm:text-base! shadow-2xl shadow-primary/30">
+                Learn More About Us
+              </button>
             </div>
           </div>
-        </section>
-      )} */}
+        </div>
+      </section>
 
       {/* Top Agents Section */}
-      <section className="section-padding bg-background">
+      <section className="py-24 bg-white">
+        <AgentSlider agents={topAgents} showCount={4} />
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-16 sm:py-24 bg-slate-50 overflow-hidden">
         <div className="container-custom">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Meet Our <span className="text-gradient">Top Agents</span>
+          <div className="text-center mb-12 sm:mb-16 px-4 sm:px-0">
+            <h2 className="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4">
+              {t('homepage.clientStories')}
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Connect with experienced real estate professionals who know Dubai inside out
-            </p>
+            <h3 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
+              {t('homepage.whatOurClientsSay')}
+            </h3>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {topAgents.map((agent) => (
-              <div key={agent.id} className="card-custom group hover:shadow-xl transition-all duration-300">
-                <div className="text-center">
-                  {/* Agent Image */}
-                  <div className="relative mb-4">
-                    <div className="w-24 h-24 mx-auto rounded-full overflow-hidden bg-muted">
-                      <img
-                        src={agent.profiles?.avatar_url || agent.profile_image || '/api/placeholder/96/96'}
-                        alt={agent.profiles?.full_name || agent.title || 'Agent'}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="flex items-center justify-center gap-1 mt-2">
-                      {[...Array(5)].map((_, i) => (
-                        <StarSolidIcon
-                          key={i}
-                          className={`h-4 w-4 ${
-                            i < Math.floor(agent.rating || 0)
-                              ? 'text-yellow-400'
-                              : 'text-gray-300'
-                          }`}
-                        />
-                      ))}
-                      <span className="text-sm text-muted-foreground ml-1">
-                        ({agent.review_count ?? 0})
-                      </span>
-                    </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 px-4 sm:px-0">
+            {[
+              {
+                name: 'James Wilson',
+                role: 'Property Investor',
+                content: 'RAGDOL provided exceptional service in helping me find a high-yield investment property in Downtown Dubai. Their market insights are unmatched.',
+                avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80'
+              },
+              {
+                name: 'Elena Rodriguez',
+                role: 'Home Owner',
+                content: 'The team at RAGDOL made the process of buying our first home in Palm Jumeirah so smooth. They handled everything with professionalism and care.',
+                avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80'
+              },
+              {
+                name: 'Michael Chen',
+                role: 'Business Owner',
+                content: 'Finding commercial space in Business Bay was a breeze with RAGDOL. They understood our requirements perfectly and delivered beyond expectations.',
+                avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80'
+              }
+            ].map((testimonial, i) => (
+              <div key={i} className="bg-white p-6 sm:p-10 rounded-[2rem] sm:rounded-[2.5rem] shadow-xl shadow-slate-200/50 relative group">
+                <div className="absolute -top-4 sm:-top-6 left-6 sm:left-10 h-10 w-10 sm:h-12 sm:w-12 bg-primary rounded-2xl flex items-center justify-center text-secondary shadow-lg shadow-primary/20">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 fill-current" viewBox="0 0 24 24"><path d="M14.017 21L14.017 18C14.017 16.8954 14.9124 16 16.017 16H19.017C19.5693 16 20.017 15.5523 20.017 15V9C20.017 8.44772 19.5693 8 19.017 8H16.017C15.4647 8 15.017 8.44772 15.017 9V12C15.017 12.5523 14.5693 13 14.017 13H12.017V21H14.017ZM5.017 21L5.017 18C5.017 16.8954 5.91243 16 7.017 16H10.017C10.5693 16 11.017 15.5523 11.017 15V9C11.017 8.44772 10.5693 8 10.017 8H7.017C6.46472 8 6.017 8.44772 6.017 9V12C6.017 12.5523 5.56929 13 5.017 13H3.017V21H5.017Z"/></svg>
+                </div>
+                <p className="text-slate-600 text-base sm:text-lg leading-relaxed mb-6 sm:mb-8 italic">
+                  "{testimonial.content}"
+                </p>
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <img src={testimonial.avatar} alt={testimonial.name} className="h-12 w-12 sm:h-14 sm:w-14 rounded-full object-cover" />
+                  <div>
+                    <h4 className="font-black text-slate-900 text-sm sm:text-base">{testimonial.name}</h4>
+                    <p className="text-primary text-xs font-bold uppercase tracking-widest">{testimonial.role}</p>
                   </div>
-
-                  {/* Agent Info */}
-                  <h3 className="font-semibold text-lg mb-1 group-hover:text-primary transition-colors">
-                    {agent.profiles?.full_name || agent.title || 'Agent'}
-                  </h3>
-                  <p className="text-sm text-primary font-medium mb-2">{agent.title}</p>
-                  <p className="text-sm text-muted-foreground mb-3">{agent.experience_years ?? 'N/A'} experience</p>
-
-                  {/* Stats */}
-                    <div className="flex justify-center gap-4 text-sm text-muted-foreground mb-4">
-                    <div className="text-center">
-                      <div className="font-semibold text-foreground">{agent.total_sales ?? agent.total_sales ?? '—'}</div>
-                      <div>Properties</div>
-                    </div>
-                  </div>
-
-                  {/* Specialties */}
-                    <div className="flex flex-wrap gap-1 justify-center">
-                    {(agent.specializations || []).map((specialty, index) => (
-                      <span
-                        key={index}
-                        className="px-2 py-1 text-xs bg-primary/10 text-primary rounded-full"
-                      >
-                        {specialty}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Contact Button */}
-                  <Link
-                    href={`/agents/${agent.id}`}
-                    className="btn-primary w-full mt-4 inline-block text-center"
-                  >
-                    View Profile
-                  </Link>
                 </div>
               </div>
             ))}
-          </div>
-
-          <div className="text-center mt-8">
-            <Link href="/agents" className="btn-outline">
-              View All Agents
-            </Link>
           </div>
         </div>
       </section>
 
-      {/* Partners Section - TODO: Implement with real data */}
-      {/* <section className="section-padding bg-card">
+      {/* Latest News Section */}
+      <section className="py-24 bg-white">
         <div className="container-custom">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Trusted <span className="text-gradient">Partners</span>
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              We collaborate with Dubai's leading real estate developers and organizations
-            </p>
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+            <div>
+              <h2 className="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4">
+                Market Insights
+              </h2>
+              <h3 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
+                Latest <span className="text-primary">News & Articles</span>
+              </h3>
+            </div>
+            <Link href="/blog" className="btn-outline">
+              View All Articles
+            </Link>
           </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
-            {mockPartners.map((partner) => (
-              <div
-                key={partner.id}
-                className="group flex flex-col items-center text-center p-4 rounded-lg hover:bg-background transition-colors"
-              >
-                <div className="w-16 h-16 mb-3 rounded-lg overflow-hidden bg-muted group-hover:scale-105 transition-transform">
-                  <img
-                    src={partner.logo}
-                    alt={partner.name}
-                    className="w-full h-full object-cover"
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            {[
+              {
+                title: 'Dubai Real Estate Market Trends 2024',
+                date: 'Dec 15, 2023',
+                category: 'Market Update',
+                image: 'https://images.pexels.com/photos/1396130/pexels-photo-1396130.jpeg?auto=compress&cs=tinysrgb&w=800'
+              },
+              {
+                title: 'Top 5 Areas for Property Investment in Dubai',
+                date: 'Dec 10, 2023',
+                category: 'Investment',
+                image: 'https://images.pexels.com/photos/1396129/pexels-photo-1396129.jpeg?auto=compress&cs=tinysrgb&w=800'
+              },
+              {
+                title: 'The Ultimate Guide to Buying Off-Plan',
+                date: 'Dec 05, 2023',
+                category: 'Guides',
+                image: 'https://images.pexels.com/photos/1396132/pexels-photo-1396132.jpeg?auto=compress&cs=tinysrgb&w=800'
+              }
+            ].map((post, i) => (
+              <Link key={i} href="/blog" className="group">
+                <div className="relative aspect-[16/10] rounded-3xl overflow-hidden mb-6 shadow-lg">
+                  <img 
+                    src={post.image} 
+                    alt={post.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />
+                  <div className="absolute top-4 left-4">
+                    <span className="px-4 py-1.5 bg-white/90 backdrop-blur-md text-primary text-[10px] font-black uppercase tracking-widest rounded-full">
+                      {post.category}
+                    </span>
+                  </div>
                 </div>
-                <h3 className="font-semibold text-sm mb-1 group-hover:text-primary transition-colors">
-                  {partner.name}
-                </h3>
-                <p className="text-xs text-muted-foreground leading-tight">
-                  {partner.description}
-                </p>
-              </div>
+                <div className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-3">{post.date}</div>
+                <h4 className="text-2xl font-black text-slate-900 group-hover:text-primary transition-colors leading-tight">
+                  {post.title}
+                </h4>
+              </Link>
             ))}
           </div>
         </div>
-      </section> */}
-
-      {/* Blog Section - TODO: Implement with real data */}
+      </section>
 
       {/* CTA Section */}
-      <section className="section-padding bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10">
+      <section className="py-16 sm:py-24">
         <div className="container-custom">
-          <div className="max-w-3xl mx-auto text-center space-y-6">
-            <h2 className="text-3xl md:text-4xl font-bold">
-              Ready to Sell Your Property?
-            </h2>
-            <p className="text-lg text-muted-foreground">
-              Get connected with thousands of potential buyers and our expert agents
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/sell" className="btn-primary">
-                List Your Property
-              </Link>
-              <Link href="/agents/register" className="btn-outline">
-                Become an Agent
-              </Link>
+          <div className="relative rounded-[3rem] sm:rounded-[4rem] overflow-hidden bg-slate-900 py-16 sm:py-24 px-6 sm:px-8 md:px-16 text-center">
+            <div className="absolute inset-0 opacity-40">
+              <img 
+                src="https://images.pexels.com/photos/1350789/pexels-photo-1350789.jpeg?auto=compress&cs=tinysrgb&w=1200" 
+                alt="Dubai Skyline" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-b from-slate-900/80 via-slate-900/40 to-slate-900/80" />
+            <div className="relative z-10 max-w-4xl mx-auto">
+              <h2 className="text-4xl sm:text-5xl md:text-7xl font-black text-white mb-6 sm:mb-8 tracking-tight leading-tight">
+                {t('homepage.readyToFindPerfectSpace')}
+              </h2>
+              <p className="text-lg sm:text-xl md:text-2xl text-white/80 mb-8 sm:mb-12 font-medium leading-relaxed">
+                {t('homepage.joinThousandsHomeowners')}
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center">
+                <Link href="/properties" className="btn-primary rounded-full! px-8 sm:px-12! py-4 sm:py-5! text-base sm:text-lg! shadow-2xl shadow-primary/30">
+                  {t('homepage.browseProperties')}
+                </Link>
+                <Link href="/contact" className="btn-outline border-white! text-white! hover:bg-white! hover:text-slate-900! rounded-full! px-8 sm:px-12! py-4 sm:py-5! text-base sm:text-lg! backdrop-blur-md">
+                  {t('homepage.contactUs')}
+                </Link>
+              </div>
             </div>
           </div>
         </div>

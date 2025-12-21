@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase-server'
 import { Database } from '@/lib/database.types'
 import {
   MapPinIcon,
@@ -141,30 +140,8 @@ const mockFloorPlans = [
 ]
 
 async function getProject(id: string): Promise<Project | null> {
-  try {
-    const supabase = await createClient()
-
-    const { data, error } = await supabase
-      .from('projects')
-      .select(`
-        *,
-        developer:developers(*),
-        properties(*)
-      `)
-      .eq('id', id)
-      .eq('published', true)
-      .single()
-
-    if (error) {
-      // Return mock data for development
-      return mockProject as Project
-    }
-
-    return data as Project
-  } catch (err) {
-    // Return mock data for development
-    return mockProject as Project
-  }
+  // Return mock data
+  return mockProject as Project
 }
 
 export default async function ProjectPage({ params }: { params: Promise<{ id: string }> }) {

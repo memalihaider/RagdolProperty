@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
 
 export default function PropertyValuation() {
   const [formData, setFormData] = useState({
@@ -44,31 +43,13 @@ export default function PropertyValuation() {
     }
 
     try {
-      const { error } = await (supabase as any)
-        .from('property_valuations')
-        .insert({
-          user_id: user.id,
-          property_type: formData.propertyType,
-          location: formData.location,
-          size_sqm: parseInt(formData.size) || null,
-          bedrooms: parseInt(formData.bedrooms) || null,
-          bathrooms: parseInt(formData.bathrooms) || null,
-          year_built: parseInt(formData.yearBuilt) || null,
-          condition: formData.condition,
-          additional_features: formData.additionalFeatures,
-          urgency: formData.urgency,
-          contact_method: formData.contactMethod,
-          status: 'pending'
-        })
+      // Mock insert - simulate success
+      await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API call
 
-      if (error) {
-        setError(error.message)
-      } else {
-        setSuccess(true)
-        setTimeout(() => {
-          router.push('/customer/dashboard')
-        }, 3000)
-      }
+      setSuccess(true)
+      setTimeout(() => {
+        router.push('/customer/dashboard')
+      }, 3000)
     } catch (err) {
       setError('An unexpected error occurred')
     }

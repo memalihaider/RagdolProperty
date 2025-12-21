@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Noto_Sans_Arabic, Cairo, Amiri } from "next/font/google";
 import "./globals.css";
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from '@/contexts/AuthContext'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import '@/lib/initialize-agents-server'  // Initialize agents on server startup
+import FloatingActionButtons from '@/components/FloatingActionButtons'
+import FloatingTools from '@/components/FloatingTools'
+import I18nProvider from '@/components/I18nProvider'
+import DynamicHtml from '@/components/DynamicHtml'
+// import '@/lib/initialize-agents-server'  // Initialize agents on server startup
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,11 +21,55 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const notoSansArabic = Noto_Sans_Arabic({
+  variable: "--font-noto-sans-arabic",
+  subsets: ["arabic"],
+  weight: ["300", "400", "500", "600", "700"],
+});
+
+const cairo = Cairo({
+  variable: "--font-cairo",
+  subsets: ["arabic", "latin"],
+  weight: ["300", "400", "500", "600", "700", "900"],
+});
+
+const amiri = Amiri({
+  variable: "--font-amiri",
+  subsets: ["arabic", "latin"],
+  weight: ["400", "700"],
+});
+
 export const metadata: Metadata = {
   title: "RAGDOL - Premium Real Estate in Pakistan",
   description: "Find your dream property in Pakistan. Browse apartments, villas, plots, and commercial properties in Lahore, Karachi, Islamabad, and more.",
   keywords: "real estate pakistan, property for sale, buy house pakistan, apartments lahore, villas karachi",
 };
+
+function RootContent({ children }: { children: React.ReactNode }) {
+  return (
+    <AuthProvider>
+      <I18nProvider>
+        <Header />
+        <main className="flex-2 pt-20">
+          {children}
+        </main>
+        <Footer />
+        <FloatingActionButtons />
+        <FloatingTools />
+      </I18nProvider>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#363636',
+            color: '#fff',
+          },
+        }}
+      />
+    </AuthProvider>
+  )
+}
 
 export default function RootLayout({
   children,
@@ -29,35 +77,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <DynamicHtml>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
+        className={`${geistSans.variable} ${geistMono.variable} ${notoSansArabic.variable} ${cairo.variable} ${amiri.variable} antialiased min-h-screen flex flex-col`}
       >
-        <AuthProvider>
-          <Header />
-          <main className="flex-1">
-            {children}
-          </main>
-          <Footer />
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              duration: 3000,
-              style: {
-                background: '#141414',
-                color: '#f5f5f5',
-                border: '1px solid #333333',
-              },
-              success: {
-                iconTheme: {
-                  primary: '#d4af37',
-                  secondary: '#141414',
-                },
-              },
-            }}
-          />
-        </AuthProvider>
+        <RootContent>{children}</RootContent>
       </body>
-    </html>
-  );
+    </DynamicHtml>
+  )
 }

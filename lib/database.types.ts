@@ -2091,6 +2091,96 @@ export type Database = {
           },
         ]
       }
+      download_interests: {
+        Row: {
+          additional_notes: string | null
+          assigned_agent_id: string | null
+          budget_range: string | null
+          contacted_at: string | null
+          converted_at: string | null
+          created_at: string
+          download_type: string
+          email: string
+          employer: string | null
+          full_name: string
+          id: string
+          interested_in_financing: boolean | null
+          ip_address: unknown
+          monthly_income: number | null
+          nationality: string | null
+          occupation: string | null
+          phone: string
+          property_id: string
+          status: string
+          timeline: string | null
+          updated_at: string
+          user_agent: string | null
+        }
+        Insert: {
+          additional_notes?: string | null
+          assigned_agent_id?: string | null
+          budget_range?: string | null
+          contacted_at?: string | null
+          converted_at?: string | null
+          created_at?: string
+          download_type: string
+          email: string
+          employer?: string | null
+          full_name: string
+          id?: string
+          interested_in_financing?: boolean | null
+          ip_address?: unknown
+          monthly_income?: number | null
+          nationality?: string | null
+          occupation?: string | null
+          phone: string
+          property_id: string
+          status?: string
+          timeline?: string | null
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Update: {
+          additional_notes?: string | null
+          assigned_agent_id?: string | null
+          budget_range?: string | null
+          contacted_at?: string | null
+          converted_at?: string | null
+          created_at?: string
+          download_type?: string
+          email?: string
+          employer?: string | null
+          full_name?: string
+          id?: string
+          interested_in_financing?: boolean | null
+          ip_address?: unknown
+          monthly_income?: number | null
+          nationality?: string | null
+          occupation?: string | null
+          phone?: string
+          property_id?: string
+          status?: string
+          timeline?: string | null
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "download_interests_assigned_agent_id_fkey"
+            columns: ["assigned_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "download_interests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

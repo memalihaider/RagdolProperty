@@ -2,11 +2,30 @@
 
 import { useState, useRef, useCallback } from 'react'
 import { XMarkIcon, PhotoIcon, MapPinIcon, PlusIcon, TrashIcon, CloudArrowUpIcon, ArrowsUpDownIcon } from '@heroicons/react/24/outline'
+import dynamic from 'next/dynamic'
+import { useTranslation } from 'react-i18next'
+
+// Dynamically import LocationPicker to avoid SSR issues with Leaflet
+const LocationPicker = dynamic(() => import('@/components/LocationPicker'), {
+  ssr: false,
+  loading: () => (
+    <div className="h-[300px] w-full bg-slate-100 animate-pulse rounded-xl flex items-center justify-center border border-border">
+      <div className="text-muted-foreground flex flex-col items-center gap-2">
+        <MapPinIcon className="w-8 h-8 animate-bounce" />
+        <p className="text-sm font-medium">Loading Map...</p>
+      </div>
+    </div>
+  )
+})
 
 interface PropertyFormData {
   title: string
+  title_ar?: string
+  title_fr?: string
   slug: string
   description: string
+  description_ar?: string
+  description_fr?: string
   category_id?: string
   type: string
   status: string
@@ -28,6 +47,12 @@ interface PropertyFormData {
   project_id?: string
   developer_id?: string
   agent_id?: string
+  video_url?: string
+  // Additional fields for comprehensive filtering
+  furnished?: boolean
+  parking?: string
+  property_age?: string
+  completion?: string
 }
 
 interface PropertyFormProps {
@@ -89,7 +114,122 @@ const commonFeatures = [
   'Sea View',
   'City View',
   'Burj Khalifa View',
+  // Special features for filtering
+  'Beachfront',
+  'Marina View',
+  'Golf Course',
+  'Private Pool',
+  'Penthouse',
+  'Duplex',
+  'Townhouse'
 ]
+
+interface MultiLanguageInputProps {
+  label: string
+  value: string
+  valueAr?: string
+  valueFr?: string
+  onChange: (value: string) => void
+  onChangeAr?: (value: string) => void
+  onChangeFr?: (value: string) => void
+  placeholder?: string
+  required?: boolean
+  rows?: number
+  textarea?: boolean
+}
+
+function MultiLanguageInput({
+  label,
+  value,
+  valueAr,
+  valueFr,
+  onChange,
+  onChangeAr,
+  onChangeFr,
+  placeholder,
+  required,
+  rows = 3,
+  textarea = false
+}: MultiLanguageInputProps) {
+  const { t } = useTranslation()
+  const [activeTab, setActiveTab] = useState<'en' | 'ar' | 'fr'>('en')
+
+  const languages = [
+    { code: 'en' as const, name: t('propertyForm.languages.english'), flag: '🇺🇸' },
+    { code: 'fr' as const, name: t('propertyForm.languages.french'), flag: '🇫🇷' },
+    { code: 'ar' as const, name: t('propertyForm.languages.arabic'), flag: '🇦🇪' }
+  ]
+
+  const getCurrentValue = () => {
+    switch (activeTab) {
+      case 'ar': return valueAr || ''
+      case 'fr': return valueFr || ''
+      default: return value
+    }
+  }
+
+  const handleValueChange = (newValue: string) => {
+    switch (activeTab) {
+      case 'ar': onChangeAr?.(newValue); break
+      case 'fr': onChangeFr?.(newValue); break
+      default: onChange(newValue); break
+    }
+  }
+
+  return (
+    <div className="space-y-2">
+      <label className="block text-sm font-medium text-foreground">
+        {label} {required && '*'}
+      </label>
+
+      {/* Language Tabs */}
+      <div className="flex border-b border-border">
+        {languages.map((lang) => (
+          <button
+            key={lang.code}
+            onClick={() => setActiveTab(lang.code)}
+            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors ${
+              activeTab === lang.code
+                ? 'border-b-2 border-primary text-primary'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <span>{lang.flag}</span>
+            <span>{lang.name}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Input Field */}
+      {textarea ? (
+        <textarea
+          value={getCurrentValue()}
+          onChange={(e) => handleValueChange(e.target.value)}
+          rows={rows}
+          className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-foreground resize-none"
+          placeholder={placeholder ? t(placeholder, { language: languages.find(l => l.code === activeTab)?.name }) : undefined}
+          required={required && activeTab === 'en'}
+        />
+      ) : (
+        <input
+          type="text"
+          value={getCurrentValue()}
+          onChange={(e) => handleValueChange(e.target.value)}
+          className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-foreground"
+          placeholder={placeholder ? t(placeholder, { language: languages.find(l => l.code === activeTab)?.name }) : undefined}
+          required={required && activeTab === 'en'}
+        />
+      )}
+
+      {/* Character Count for Description */}
+      {textarea && activeTab === 'en' && (
+        <p className="text-xs text-muted-foreground">
+          {value.length} characters
+        </p>
+      )}
+    </div>
+  )
+}
 
 export default function PropertyForm({
   isOpen,
@@ -100,10 +240,16 @@ export default function PropertyForm({
   agents = [],
   categories = []
 }: PropertyFormProps) {
+  const { t } = useTranslation()
+  const [activeLanguageTab, setActiveLanguageTab] = useState<'en' | 'ar' | 'fr'>('en')
   const [formData, setFormData] = useState<PropertyFormData>({
     title: initialData?.title || '',
+    title_ar: initialData?.title_ar || '',
+    title_fr: initialData?.title_fr || '',
     slug: initialData?.slug || '',
     description: initialData?.description || '',
+    description_ar: initialData?.description_ar || '',
+    description_fr: initialData?.description_fr || '',
     category_id: initialData?.category_id || '',
     type: initialData?.type || 'apartment',
     status: initialData?.status || 'sale',
@@ -125,6 +271,12 @@ export default function PropertyForm({
     project_id: initialData?.project_id,
     developer_id: initialData?.developer_id,
     agent_id: initialData?.agent_id,
+    video_url: initialData?.video_url || '',
+    // Additional fields for comprehensive filtering
+    furnished: initialData?.furnished,
+    parking: initialData?.parking,
+    property_age: initialData?.property_age,
+    completion: initialData?.completion,
   })
 
   const [newImageUrl, setNewImageUrl] = useState('')
@@ -155,6 +307,14 @@ export default function PropertyForm({
       slug: generateSlug(title)
     }))
   }
+
+  const handleLocationChange = useCallback((lat: number, lng: number, address: string) => {
+    setFormData(prev => ({
+      ...prev,
+      coords: { lat, lng },
+      address: address
+    }))
+  }, [])
 
   const addImage = () => {
     if (newImageUrl.trim()) {
@@ -343,6 +503,8 @@ export default function PropertyForm({
       const submitData = {
         ...formData,
         images: reorderedImages,
+        // Set published to false for new properties (they need review)
+        published: mode === 'create' ? false : formData.published,
       }
 
       await onSubmit(submitData)
@@ -358,37 +520,37 @@ export default function PropertyForm({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-card border border-border rounded-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+      <div className="bg-card border border-border rounded-xl w-full max-w-5xl max-h-[95vh] overflow-hidden shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-border">
-          <h2 className="text-2xl font-bold text-foreground">
-            {mode === 'create' ? 'Add New Property' : 'Edit Property'}
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-t-lg">
+          <h2 className="text-2xl font-bold mb-2">
+            {mode === 'create' ? t('propertyForm.addNewProperty') : t('propertyForm.editProperty')}
           </h2>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-muted rounded-lg transition-colors"
-          >
-            <XMarkIcon className="h-6 w-6 text-muted-foreground" />
-          </button>
+          <p className="text-blue-100">
+            {mode === 'create' ? t('propertyForm.fillDetails') : t('propertyForm.updateDetails')}
+          </p>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="overflow-y-auto max-h-[calc(90vh-140px)]">
+        <form onSubmit={handleSubmit} className="overflow-y-auto max-h-[calc(95vh-140px)]">
           <div className="p-6 space-y-8">
-            {/* Basic Information */}
+            {/* 1. Basic Information */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-foreground">Basic Information</h3>
+              <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                <span className="flex items-center justify-center w-6 h-6 bg-primary text-primary-foreground rounded-full text-sm font-bold">1</span>
+                {t('propertyForm.sections.basicInfo')}
+              </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Property Title *
-                  </label>
-                  <input
-                    type="text"
+                  <MultiLanguageInput
+                    label={t('propertyForm.title')}
                     value={formData.title}
-                    onChange={(e) => handleTitleChange(e.target.value)}
-                    className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-foreground"
+                    valueAr={formData.title_ar}
+                    valueFr={formData.title_fr}
+                    onChange={(value) => handleTitleChange(value)}
+                    onChangeAr={(value) => setFormData(prev => ({ ...prev, title_ar: value }))}
+                    onChangeFr={(value) => setFormData(prev => ({ ...prev, title_fr: value }))}
                     required
                   />
                 </div>
@@ -486,7 +648,7 @@ export default function PropertyForm({
                     className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-foreground"
                   >
                     <option value="">Select an agent...</option>
-                    {agents.map((agent) => (
+                    {(agents || []).map((agent) => (
                       <option key={agent.id} value={agent.id}>
                         {agent.title || agent.profiles?.full_name || 'Unnamed Agent'}
                       </option>
@@ -522,23 +684,26 @@ export default function PropertyForm({
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Description
-                </label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  rows={6}
-                  className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-foreground resize-none"
-                  placeholder="Detailed property description..."
-                />
-              </div>
+              <MultiLanguageInput
+                label={t('propertyForm.description')}
+                value={formData.description}
+                valueAr={formData.description_ar}
+                valueFr={formData.description_fr}
+                onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
+                onChangeAr={(value) => setFormData(prev => ({ ...prev, description_ar: value }))}
+                onChangeFr={(value) => setFormData(prev => ({ ...prev, description_fr: value }))}
+                textarea
+                rows={6}
+                placeholder="propertyForm.descriptionPlaceholder"
+              />
             </div>
 
-            {/* Property Details */}
+            {/* 2. Property Details */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-foreground">Property Details</h3>
+              <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                <span className="flex items-center justify-center w-6 h-6 bg-primary text-primary-foreground rounded-full text-sm font-bold">2</span>
+                {t('propertyForm.sections.propertyDetails')}
+              </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
@@ -579,12 +744,80 @@ export default function PropertyForm({
                     min="0"
                   />
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Furnished
+                  </label>
+                  <select
+                    value={formData.furnished === true ? 'true' : formData.furnished === false ? 'false' : ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, furnished: e.target.value === 'true' ? true : e.target.value === 'false' ? false : undefined }))}
+                    className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-foreground"
+                  >
+                    <option value="">Not specified</option>
+                    <option value="true">Furnished</option>
+                    <option value="false">Unfurnished</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Parking
+                  </label>
+                  <select
+                    value={formData.parking || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, parking: e.target.value || undefined }))}
+                    className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-foreground"
+                  >
+                    <option value="">Not specified</option>
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                    <option value="covered">Covered</option>
+                    <option value="open">Open</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Property Age
+                  </label>
+                  <select
+                    value={formData.property_age || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, property_age: e.target.value || undefined }))}
+                    className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-foreground"
+                  >
+                    <option value="">Not specified</option>
+                    <option value="new">New (0 years)</option>
+                    <option value="1-5">1-5 years</option>
+                    <option value="5-10">5-10 years</option>
+                    <option value="10+">10+ years</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Completion Status
+                  </label>
+                  <select
+                    value={formData.completion || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, completion: e.target.value || undefined }))}
+                    className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-foreground"
+                  >
+                    <option value="">Not specified</option>
+                    <option value="ready">Ready to Move</option>
+                    <option value="off-plan">Off-Plan</option>
+                    <option value="under-construction">Under Construction</option>
+                  </select>
+                </div>
               </div>
             </div>
 
-            {/* Location */}
+            {/* 3. Location */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-foreground">Location</h3>
+              <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                <span className="flex items-center justify-center w-6 h-6 bg-primary text-primary-foreground rounded-full text-sm font-bold">3</span>
+                {t('propertyForm.sections.location')}
+              </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -622,6 +855,17 @@ export default function PropertyForm({
                     onChange={(e) => setFormData(prev => ({ ...prev, area: e.target.value }))}
                     className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-foreground"
                     placeholder="e.g., Downtown Dubai"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Select Location on Map
+                  </label>
+                  <LocationPicker 
+                    lat={formData.coords?.lat || 25.2048} 
+                    lng={formData.coords?.lng || 55.2708} 
+                    onChange={handleLocationChange}
                   />
                 </div>
 
@@ -663,10 +907,39 @@ export default function PropertyForm({
               </div>
             </div>
 
+            {/* 4. Video URL */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                <span className="flex items-center justify-center w-6 h-6 bg-primary text-primary-foreground rounded-full text-sm font-bold">4</span>
+                {t('propertyForm.sections.videoUrl')}
+              </h3>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Video URL (Optional)
+                </label>
+                <input
+                  type="url"
+                  value={formData.video_url || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, video_url: e.target.value }))}
+                  className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-foreground"
+                  placeholder="https://youtube.com/watch?v=... or https://vimeo.com/..."
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Add a YouTube, Vimeo, or direct video URL to showcase your property
+                </p>
+              </div>
+            </div>
+
             {/* Images */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-foreground">Property Images</h3>
+            {/* 5. Property Images */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                <span className="flex items-center justify-center w-6 h-6 bg-primary text-primary-foreground rounded-full text-sm font-bold">5</span>
+                {t('propertyForm.sections.propertyImages')}
+              </h3>
                 <span className="text-sm text-muted-foreground">{formData.images.length} images</span>
               </div>
 
@@ -836,9 +1109,12 @@ export default function PropertyForm({
               </div>
             </div>
 
-            {/* Floorplans */}
+            {/* 6. Floorplans */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-foreground">Floorplans</h3>
+              <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                <span className="flex items-center justify-center w-6 h-6 bg-primary text-primary-foreground rounded-full text-sm font-bold">6</span>
+                {t('propertyForm.sections.floorplans')}
+              </h3>
 
               <div className="space-y-4">
                 <div>
@@ -886,9 +1162,12 @@ export default function PropertyForm({
               </div>
             </div>
 
-            {/* Features */}
+            {/* 7. Features */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-foreground">Features & Amenities</h3>
+              <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                <span className="flex items-center justify-center w-6 h-6 bg-primary text-primary-foreground rounded-full text-sm font-bold">7</span>
+                {t('propertyForm.sections.featuresAmenities')}
+              </h3>
 
               <div className="space-y-4">
                 <div>
@@ -962,9 +1241,12 @@ export default function PropertyForm({
               </div>
             </div>
 
-            {/* Publishing Options */}
+            {/* 8. Publishing Options */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-foreground">Publishing Options</h3>
+              <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                <span className="flex items-center justify-center w-6 h-6 bg-primary text-primary-foreground rounded-full text-sm font-bold">8</span>
+                {t('propertyForm.sections.publishingOptions')}
+              </h3>
 
               <div className="flex items-center gap-6">
                 <label className="flex items-center gap-2">
@@ -990,6 +1272,8 @@ export default function PropertyForm({
             </div>
           </div>
 
+          </div>
+
           {/* Footer */}
           <div className="flex items-center justify-end gap-4 p-6 border-t border-border bg-muted/30">
             <button
@@ -1005,7 +1289,7 @@ export default function PropertyForm({
               className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Saving...' : mode === 'create' ? 'Create Property' : 'Update Property'}
+              {isSubmitting ? 'Submitting...' : mode === 'create' ? 'Submit for Review' : 'Update Property'}
             </button>
           </div>
         </form>
