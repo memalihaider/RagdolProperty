@@ -9,6 +9,7 @@ import FloatingActionButtons from '@/components/FloatingActionButtons'
 import FloatingTools from '@/components/FloatingTools'
 import I18nProvider from '@/components/I18nProvider'
 import DynamicHtml from '@/components/DynamicHtml'
+import ConditionalLayout from '@/components/ConditionalLayout'
 // import '@/lib/initialize-agents-server'  // Initialize agents on server startup
 
 const geistSans = Geist({
@@ -49,13 +50,9 @@ function RootContent({ children }: { children: React.ReactNode }) {
   return (
     <AuthProvider>
       <I18nProvider>
-        <Header />
-        <main className="flex-2 pt-20">
+        <ConditionalLayout>
           {children}
-        </main>
-        <Footer />
-        <FloatingActionButtons />
-        <FloatingTools />
+        </ConditionalLayout>
       </I18nProvider>
       <Toaster
         position="top-right"

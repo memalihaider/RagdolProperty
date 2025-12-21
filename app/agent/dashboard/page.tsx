@@ -37,7 +37,32 @@ export default function AgentDashboard() {
     total_views: 1240,
     total_favorites: 89,
   })
+  const [recentApplications, setRecentApplications] = useState<any[]>([])
+  const [recentProperties, setRecentProperties] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    fetchDashboardData()
+  }, [])
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true)
+      // Fetch recent applications
+      const appsRes = await fetch('/api/agent/applications?limit=5')
+      const appsData = await appsRes.json()
+      setRecentApplications(appsData.applications || [])
+
+      // Fetch recent properties
+      const propsRes = await fetch('/api/agent/properties?limit=3')
+      const propsData = await propsRes.json()
+      setRecentProperties(propsData.properties || [])
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -190,6 +215,89 @@ export default function AgentDashboard() {
               </Link>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Recent Properties & Market Insights */}
+      <div className="grid lg:grid-cols-2 gap-12 mt-12">
+        {/* Recent Properties */}
+        <div className="bg-white rounded-[2.5rem] border border-slate-100 p-10 shadow-sm">
+          <div className="flex items-center justify-between mb-8">
+            <h3 className="text-2xl font-serif text-secondary">Recent Listings</h3>
+            <Link href="/agent/properties" className="text-primary font-bold text-sm hover:underline underline-offset-4">View All</Link>
+          </div>
+
+          <div className="space-y-6">
+            {recentProperties.length > 0 ? recentProperties.map((property) => (
+              <div key={property.id} className="flex items-center gap-6 p-4 hover:bg-slate-50 rounded-2xl transition-all group border border-transparent hover:border-slate-100">
+                <div className="w-16 h-16 bg-slate-100 rounded-2xl overflow-hidden">
+                  <img
+                    src={property.images?.[0] || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSI4IiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Tm8gSW1nPC90ZXh0Pjwvc3ZnPg=='}
+                    alt={property.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-bold text-secondary group-hover:text-primary transition-colors mb-1">{property.title}</h4>
+                  <div className="text-sm text-slate-400 flex items-center gap-4">
+                    <span>{property.price?.toLocaleString()} {property.currency}</span>
+                    <span>{property.beds} beds • {property.baths} baths</span>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className={`px-3 py-1 rounded-full text-xs font-bold ${
+                    property.published ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                  }`}>
+                    {property.published ? 'Published' : 'Draft'}
+                  </div>
+                </div>
+              </div>
+            )) : (
+              <div className="text-center py-8 text-slate-400">
+                <FolderIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No properties yet</p>
+                <Link href="/agent/properties/new" className="text-primary font-bold hover:underline mt-2 inline-block">
+                  Create your first listing
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Market Insights */}
+        <div className="bg-gradient-to-br from-primary to-secondary rounded-[2.5rem] p-10 text-white relative overflow-hidden">
+          <div className="absolute -right-20 -bottom-20 w-60 h-60 bg-white/10 rounded-full blur-3xl"></div>
+          <h3 className="text-2xl font-serif mb-8">Market <span className="text-white/80 italic">Insights</span></h3>
+
+          <div className="space-y-6">
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-white/80 font-medium">Average Property Price</span>
+                <span className="text-2xl font-bold">AED 4.2M</span>
+              </div>
+              <div className="text-emerald-300 text-sm font-medium">+8.5% from last month</div>
+            </div>
+
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-white/80 font-medium">Market Demand</span>
+                <span className="text-2xl font-bold">High</span>
+              </div>
+              <div className="text-emerald-300 text-sm font-medium">Luxury segment growing</div>
+            </div>
+
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-white/80 font-medium">Your Performance</span>
+                <span className="text-2xl font-bold">Top 10%</span>
+              </div>
+              <div className="text-emerald-300 text-sm font-medium">Above average agent</div>
+            </div>
+          </div>
+
+          <button className="w-full mt-8 py-4 bg-white/20 backdrop-blur-md border border-white/30 text-white font-bold rounded-2xl hover:bg-white/30 transition-all">
+            View Full Market Report
+          </button>
         </div>
       </div>
     </div>

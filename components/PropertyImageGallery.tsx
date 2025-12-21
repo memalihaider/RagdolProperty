@@ -42,7 +42,7 @@ export default function PropertyImageGallery({
   })
 
   // If no valid media, use a placeholder image
-  const displayMedia = mediaItems.length > 0 ? mediaItems : [{ type: 'image' as const, url: 'https://via.placeholder.com/800x500?text=No+Media' }]
+  const displayMedia = mediaItems.length > 0 ? mediaItems : [{ type: 'image' as const, url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjUwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIE1lZGlhPC90ZXh0Pjwvc3ZnPg==' }]
 
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0)
 
@@ -65,7 +65,7 @@ export default function PropertyImageGallery({
               src={selectedMedia.url}
               controls
               className="w-full h-full object-cover"
-              poster={`https://via.placeholder.com/800x450?text=${encodeURIComponent(title)}`}
+              poster={`data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQ1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIFZpZGVvPC90ZXh0Pjwvc3ZnPg==`}
               style={{ zIndex: 10 }}
             >
               Your browser does not support the video tag.

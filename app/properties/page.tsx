@@ -1051,7 +1051,7 @@ export default async function PropertiesPage({ searchParams }: { searchParams?: 
   // Normalize properties for UI
   properties = rawProps.map((p: any) => ({
     ...p,
-    image: p.image || p.image_url || (Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : 'https://via.placeholder.com/400x300?text=No+Image'),
+    image: p.image || p.image_url || (Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='),
     price: typeof p.price === 'string' ? parseFloat(p.price) : (p.price ?? 0),
     area: p.area || p.location || p.neighborhood || p.district || null,
     city: p.city || 'Dubai',
@@ -1615,7 +1615,7 @@ export default async function PropertiesPage({ searchParams }: { searchParams?: 
                         title: property.title || 'Untitled property',
                         price: (property.price as number) ?? 0,
                         priceLabel: property.priceLabel || 'total',
-                        image: (property.image as string) || 'https://via.placeholder.com/400x300?text=No+Image',
+                        image: (property.image as string) || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==',
                         location: property.location || `${property.area || ''}${property.city ? ', ' + property.city : ''}`,
                         beds: (property.beds as number) ?? 0,
                         baths: (property.baths as number) ?? 0,

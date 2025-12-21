@@ -45,7 +45,7 @@ export default function Footer() {
               <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
                 <SparklesIcon className="h-7 w-7 text-secondary" />
               </div>
-              <span className="text-3xl font-serif text-white tracking-tighter">RAGDOL</span>
+              <span className="text-3xl font-serif text-white tracking-tighter">RAGDOLL</span>
             </Link>
             <p className="text-lg text-slate-400 mb-10 leading-relaxed max-w-md">
               Redefining luxury real estate in Dubai. We provide bespoke property solutions for the world's most discerning investors.

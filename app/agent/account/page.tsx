@@ -72,11 +72,27 @@ export default function AgentAccount() {
   }
 
   return (
-    <div className="p-4 lg:p-8 max-w-4xl mx-auto">
+    <div className="min-h-screen bg-slate-50 p-6 lg:p-12">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-foreground mb-2">Account Settings</h1>
-        <p className="text-muted-foreground">Manage your profile and account preferences</p>
+      <div className="mb-12">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
+          <div>
+            <div className="flex items-center gap-2 text-primary mb-2">
+              <UserIcon className="h-5 w-5" />
+              <span className="text-sm font-bold uppercase tracking-widest">Profile Management</span>
+            </div>
+            <h1 className="text-4xl font-serif text-secondary">
+              Account <span className="text-primary italic">Settings</span>
+            </h1>
+            <p className="text-slate-500 mt-2">Manage your profile, preferences, and account information</p>
+          </div>
+          <button
+            onClick={() => setIsEditing(!isEditing)}
+            className="px-6 py-3 bg-secondary text-white font-bold rounded-xl hover:bg-primary hover:text-secondary transition-all shadow-lg shadow-secondary/20"
+          >
+            {isEditing ? 'Cancel' : 'Edit Profile'}
+          </button>
+        </div>
       </div>
 
       {/* Profile Card */}

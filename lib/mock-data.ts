@@ -100,7 +100,7 @@ export const mockProperties = [
     title: 'Emirates Hills Luxury Mansion',
     slug: 'emirates-hills-luxury-mansion',
     type: 'villa',
-    status: 'sale',
+    status: 'active',
     price: 55000000,
     currency: 'AED',
     beds: 7,
@@ -118,6 +118,7 @@ export const mockProperties = [
     parking: 'yes',
     propertyAge: '1-5',
     completion: 'ready',
+    created_at: '2024-01-15T10:00:00Z',
   },
   {
     id: 'prop-lux-002',
@@ -407,7 +408,7 @@ export const mockDevelopers = [
   {
     id: 'dev-001',
     name: 'Emaar Properties',
-    logo_url: 'https://via.placeholder.com/200x100?text=Emaar',
+    logo_url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkVtYWFyPC90ZXh0Pjwvc3ZnPg==',
     website: 'https://www.emaar.com',
     description: 'Leading real estate developer in UAE with iconic projects across Dubai.',
     contact_email: 'info@emaar.com',
@@ -419,7 +420,7 @@ export const mockDevelopers = [
   {
     id: 'dev-002',
     name: 'Damac Properties',
-    logo_url: 'https://via.placeholder.com/200x100?text=Damac',
+    logo_url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkRhbWFjPC90ZXh0Pjwvc3ZnPg==',
     website: 'https://www.damacproperties.com',
     description: 'Luxury real estate developer known for ultra-premium residences.',
     contact_email: 'sales@damacproperties.com',
@@ -754,3 +755,101 @@ export function getTopAgents(limit = 4) {
       profiles: null, // Not needed for simplified interface
     }))
 }
+
+// ============= CUSTOMER MOCK DATA =============
+export const mockSavedProperties = [
+  {
+    id: 'saved-001',
+    user_id: 'user-001', // Mock user ID
+    property_id: 'prop-lux-001',
+    saved_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'saved-002',
+    user_id: 'user-001',
+    property_id: 'prop-lux-002',
+    saved_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'saved-003',
+    user_id: 'user-001',
+    property_id: 'prop-001',
+    saved_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+]
+
+export const mockValuations = [
+  {
+    id: 'val-001',
+    user_id: 'user-001',
+    property_type: 'villa',
+    location: 'Dubai Marina',
+    size: '2500',
+    bedrooms: '4',
+    bathrooms: '5',
+    year_built: '2020',
+    condition: 'excellent',
+    additional_features: 'Private pool, garden, parking',
+    urgency: 'medium',
+    contact_method: 'email',
+    status: 'completed',
+    estimated_value: '18500000',
+    currency: 'AED',
+    created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+    completed_at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'val-002',
+    user_id: 'user-001',
+    property_type: 'penthouse',
+    location: 'Downtown Dubai',
+    size: '1800',
+    bedrooms: '3',
+    bathrooms: '4',
+    year_built: '2019',
+    condition: 'good',
+    additional_features: 'Burj Khalifa view, terrace',
+    urgency: 'high',
+    contact_method: 'phone',
+    status: 'in_progress',
+    created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+]
+
+export const mockCustomerEnquiries = [
+  {
+    id: 'enq-001',
+    user_id: 'user-001',
+    property_id: 'prop-lux-001',
+    name: 'John Smith',
+    email: 'john.smith@example.com',
+    phone: '+971501234567',
+    message: 'I am interested in this property. Can you provide more details about the neighborhood and available financing options?',
+    status: 'responded',
+    created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    responded_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'enq-002',
+    user_id: 'user-001',
+    property_id: 'prop-lux-002',
+    name: 'John Smith',
+    email: 'john.smith@example.com',
+    phone: '+971501234567',
+    message: 'Is this property still available? I would like to schedule a viewing this weekend.',
+    status: 'pending',
+    created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'enq-003',
+    user_id: 'user-001',
+    property_id: 'prop-001',
+    name: 'John Smith',
+    email: 'john.smith@example.com',
+    phone: '+971501234567',
+    message: 'Could you please send me the floor plan and more interior photos?',
+    status: 'responded',
+    created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    responded_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+]

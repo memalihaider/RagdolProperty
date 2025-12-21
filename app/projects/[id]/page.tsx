@@ -99,7 +99,7 @@ With its strategic location, modern architecture and Meraas' reputation for deli
   developer: {
     id: 'dev-1',
     name: 'Meraas',
-    logo_url: 'https://via.placeholder.com/100x50?text=Meraas',
+    logo_url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjUwIiB2aWV3Qm94PSIwIDAgMTAwIDUwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNkZGQiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEyIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+TWVyYWFzPC90ZXh0Pjwvc3ZnPg==',
     website: 'https://meraas.com',
     description: 'Leading real estate developer in Dubai',
     contact_email: 'info@meraas.com',
@@ -211,7 +211,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
               <div className="relative">
                 <div className="aspect-[16/9] relative overflow-hidden bg-muted">
                   <Image
-                    src={project.hero_image_url || project.images?.[0] || 'https://via.placeholder.com/800x450?text=No+Image'}
+                    src={project.hero_image_url || project.images?.[0] || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQ1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg=='}
                     alt={project.name}
                     fill
                     className="object-cover"

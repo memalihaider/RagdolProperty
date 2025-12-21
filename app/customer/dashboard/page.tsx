@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { 
   UserIcon, 
@@ -19,15 +19,58 @@ import {
 } from '@heroicons/react/24/outline'
 import Image from 'next/image'
 
+interface SavedProperty {
+  id: string
+  property_id: string
+  saved_at: string
+  property: {
+    id: string
+    title: string
+    slug: string
+    type: string
+    status: string
+    price: number
+    currency: string
+    beds: number
+    baths: number
+    sqft: number
+    image: string
+    location: string
+    area: string
+    city: string
+    featured: boolean
+  } | null
+}
+
 export default function CustomerDashboard() {
   const { user, profile, signOut, loading } = useAuth()
   const router = useRouter()
+  const [savedProperties, setSavedProperties] = useState<SavedProperty[]>([])
+  const [loadingSaved, setLoadingSaved] = useState(true)
 
   useEffect(() => {
     if (!loading && !user) {
       router.push('/admin/login')
     }
   }, [user, loading, router])
+
+  useEffect(() => {
+    const fetchSavedProperties = async () => {
+      try {
+        const response = await fetch('/api/customer/saved-properties')
+        const data = await response.json()
+        setSavedProperties(data.savedProperties.slice(0, 3)) // Show only first 3
+      } catch (error) {
+        console.error('Error fetching saved properties:', error)
+      } finally {
+        setLoadingSaved(false)
+      }
+    }
+
+    if (user) {
+      fetchSavedProperties()
+    }
+  }, [user])
 
   if (loading) {
     return (
@@ -40,7 +83,7 @@ export default function CustomerDashboard() {
   if (!user) return null
 
   const stats = [
-    { label: 'Saved Properties', value: '12', icon: HeartIcon },
+    { label: 'Saved Properties', value: savedProperties.length.toString(), icon: HeartIcon },
     { label: 'Active Inquiries', value: '3', icon: ChatBubbleLeftRightIcon },
     { label: 'Valuations', value: '2', icon: ChartBarIcon },
   ]
@@ -137,24 +180,72 @@ export default function CustomerDashboard() {
           {/* Quick Actions & Recent Activity */}
           <div className="grid lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-8">
-              {/* Featured Action */}
-              <div className="relative overflow-hidden bg-secondary rounded-[2.5rem] p-10 text-white">
-                <div className="absolute right-0 top-0 w-1/2 h-full opacity-20">
-                  <Image 
-                    src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1000&auto=format&fit=crop"
-                    alt="Luxury Home"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="relative z-10 max-w-md">
-                  <h3 className="text-3xl font-serif mb-4">Ready to find your <span className="text-primary italic">next masterpiece?</span></h3>
-                  <p className="text-slate-300 mb-8">Explore our latest off-market opportunities and exclusive developments in Dubai.</p>
-                  <Link href="/properties" className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-secondary font-bold rounded-xl hover:bg-white transition-all">
-                    Browse Properties
-                    <SparklesIcon className="h-5 w-5" />
+              {/* Saved Properties */}
+              <div className="bg-white rounded-[2.5rem] border border-slate-100 p-10">
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-2xl font-serif text-secondary">Saved Properties</h3>
+                  <Link href="/properties" className="text-primary font-bold hover:text-secondary transition-colors">
+                    View All →
                   </Link>
                 </div>
+                {loadingSaved ? (
+                  <div className="space-y-6">
+                    {[1, 2, 3].map((_, i) => (
+                      <div key={i} className="flex items-center gap-6 p-4 animate-pulse">
+                        <div className="w-16 h-16 bg-slate-200 rounded-xl"></div>
+                        <div className="flex-1">
+                          <div className="h-4 bg-slate-200 rounded mb-2"></div>
+                          <div className="h-3 bg-slate-200 rounded w-2/3"></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : savedProperties.length > 0 ? (
+                  <div className="space-y-6">
+                    {savedProperties.map((saved) => (
+                      <div key={saved.id} className="flex items-center gap-6 p-4 hover:bg-slate-50 rounded-2xl transition-all group">
+                        <div className="w-16 h-16 relative rounded-xl overflow-hidden flex-shrink-0">
+                          <Image 
+                            src={saved.property?.image || 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=200&auto=format&fit=crop'}
+                            alt={saved.property?.title || 'Property'}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-secondary font-bold group-hover:text-primary transition-colors">
+                            {saved.property?.title || 'Property Title'}
+                          </div>
+                          <div className="text-sm text-slate-400">
+                            {saved.property?.location || 'Location'} • {saved.property?.beds} beds • {saved.property?.sqft} sqft
+                          </div>
+                          <div className="text-primary font-bold text-lg">
+                            {saved.property?.price?.toLocaleString()} {saved.property?.currency}
+                          </div>
+                        </div>
+                        <Link 
+                          href={`/properties/${saved.property?.slug || saved.property_id}`}
+                          className="px-6 py-3 bg-primary text-secondary font-bold rounded-xl hover:bg-secondary hover:text-primary transition-all"
+                        >
+                          View Details
+                        </Link>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <HeartIcon className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+                    <h4 className="text-lg font-bold text-secondary mb-2">No saved properties yet</h4>
+                    <p className="text-slate-500 mb-6">Start exploring properties and save your favorites for later.</p>
+                    <Link 
+                      href="/properties" 
+                      className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-secondary font-bold rounded-xl hover:bg-white transition-all"
+                    >
+                      Browse Properties
+                      <SparklesIcon className="h-5 w-5" />
+                    </Link>
+                  </div>
+                )}
               </div>
 
               {/* Recent Activity */}

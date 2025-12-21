@@ -585,7 +585,7 @@ export default function PropertyPage({ params }: PropertyPageProps) {
                     <div className="relative inline-block">
                       <div className="w-24 h-24 mx-auto rounded-full overflow-hidden ring-4 ring-slate-50 shadow-lg">
                         <Image
-                          src={property.agent.avatar_url || 'https://via.placeholder.com/96x96?text=Agent'}
+                          src={property.agent.avatar_url || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSI0OCIiIGN5PSI0OCIiIHI9IjQ4IiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkFnZW50PC90ZXh0Pjwvc3ZnPg=='}
                           alt={property.agent.full_name || 'Agent'}
                           fill
                           className="object-cover"
@@ -700,7 +700,7 @@ export default function PropertyPage({ params }: PropertyPageProps) {
                 title: prop.title,
                 price: prop.price,
                 priceLabel: prop.status === 'sale' ? 'total' : 'per_month',
-                image: prop.images?.[0] || 'https://via.placeholder.com/400x300?text=No+Image',
+                image: prop.images?.[0] || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==',
                 location: `${prop.area}, ${prop.city}`,
                 beds: prop.beds || 0,
                 baths: prop.baths || 0,

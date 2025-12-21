@@ -113,27 +113,41 @@ export default function AgentApplications() {
   }
 
   return (
-    <div className="p-4 lg:p-8">
+    <div className="min-h-screen bg-slate-50 p-6 lg:p-12">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-foreground mb-2">Applications</h1>
-        <p className="text-muted-foreground">Manage inquiries and applications for your properties</p>
+      <div className="mb-12">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
+          <div>
+            <div className="flex items-center gap-2 text-primary mb-2">
+              <EnvelopeIcon className="h-5 w-5" />
+              <span className="text-sm font-bold uppercase tracking-widest">Lead Management</span>
+            </div>
+            <h1 className="text-4xl font-serif text-secondary">
+              Property <span className="text-primary italic">Inquiries</span>
+            </h1>
+            <p className="text-slate-500 mt-2">Manage and respond to property applications and leads</p>
+          </div>
+          <div className="text-right">
+            <div className="text-2xl font-bold text-secondary">{applications.length}</div>
+            <div className="text-sm text-slate-400">Total Applications</div>
+          </div>
+        </div>
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex gap-4 mb-8 border-b border-border overflow-x-auto">
+      <div className="flex gap-2 mb-8 p-2 bg-white rounded-2xl border border-slate-100 shadow-sm w-fit overflow-x-auto">
         {(['all', 'pending', 'accepted', 'rejected'] as const).map((status) => (
           <button
             key={status}
             onClick={() => setFilter(status)}
-            className={`px-4 py-2 font-medium transition-colors whitespace-nowrap ${
+            className={`px-6 py-3 font-bold rounded-xl transition-all whitespace-nowrap ${
               filter === status
-                ? 'text-primary border-b-2 border-primary'
-                : 'text-muted-foreground hover:text-foreground'
+                ? 'bg-secondary text-white shadow-md'
+                : 'text-slate-400 hover:text-secondary hover:bg-slate-50'
             }`}
           >
             {status.charAt(0).toUpperCase() + status.slice(1)}
-            <span className="ml-2 text-sm">
+            <span className="ml-2 text-sm opacity-75">
               ({applications.filter(a => status === 'all' || a.status === status).length})
             </span>
           </button>
