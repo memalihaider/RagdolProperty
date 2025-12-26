@@ -317,10 +317,10 @@ export default function NewsArticlePage() {
 
   if (!article) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0d0d0d', color: '#f5f5f5' }}>
+      <div className="min-h-screen flex items-center justify-center bg-secondary">
         <div className="text-center">
-          <NewspaperIcon className="h-16 w-16 mx-auto mb-4" style={{ color: '#d4af37' }} />
-          <p>Loading article...</p>
+          <NewspaperIcon className="h-16 w-16 mx-auto mb-4 text-primary" />
+          <p className="text-slate-300">Loading article...</p>
         </div>
       </div>
     )
@@ -330,14 +330,13 @@ export default function NewsArticlePage() {
   const nextArticle = currentArticleIndex < newsArticles.length - 1 ? newsArticles[currentArticleIndex + 1] : null
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#0d0d0d', color: '#f5f5f5' }}>
+    <div className="min-h-screen bg-secondary">
       {/* Header */}
-      <div className="border-b" style={{ borderColor: '#d4af37', backgroundColor: '#141414' }}>
+      <div className="border-b border-primary/20 bg-slate-900">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <Link
             href="/news"
-            className="inline-flex items-center text-sm font-medium transition-colors hover:text-[#d4af37]"
-            style={{ color: '#f5f5f5' }}
+            className="inline-flex items-center text-sm font-medium text-slate-300 hover:text-primary transition-colors"
           >
             <ArrowLeftIcon className="h-4 w-4 mr-2" />
             Back to News
@@ -349,40 +348,37 @@ export default function NewsArticlePage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-4">
-            <span
-              className="px-3 py-1 rounded-full text-xs font-medium"
-              style={{ backgroundColor: '#d4af37', color: '#0d0d0d' }}
-            >
+            <span className="px-3 py-1 bg-primary text-secondary rounded-full text-xs font-bold uppercase tracking-widest">
               {article.category}
             </span>
-            <div className="flex items-center text-sm" style={{ color: '#f5f5f5', opacity: 0.6 }}>
+            <div className="flex items-center text-sm text-slate-400">
               <CalendarDaysIcon className="h-4 w-4 mr-1" />
               {article.date}
             </div>
-            <div className="flex items-center text-sm" style={{ color: '#f5f5f5', opacity: 0.6 }}>
+            <div className="flex items-center text-sm text-slate-400">
               <ClockIcon className="h-4 w-4 mr-1" />
               {article.readTime}
             </div>
           </div>
 
-          <h1 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: '#f5f5f5' }}>
+          <h1 className="text-3xl md:text-4xl font-black text-white mb-4 tracking-tight">
             {article.title}
           </h1>
 
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <UserIcon className="h-5 w-5 mr-2" style={{ color: '#d4af37' }} />
-              <span className="text-sm font-medium" style={{ color: '#f5f5f5' }}>
+              <UserIcon className="h-5 w-5 mr-2 text-primary" />
+              <span className="text-sm font-medium text-white">
                 {article.author}
               </span>
             </div>
 
             <div className="flex items-center gap-2">
-              <button className="p-2 rounded-full hover:bg-[#262626] transition-colors">
-                <ShareIcon className="h-5 w-5" style={{ color: '#f5f5f5' }} />
+              <button className="p-2 rounded-full hover:bg-slate-800 transition-colors">
+                <ShareIcon className="h-5 w-5 text-slate-300" />
               </button>
-              <button className="p-2 rounded-full hover:bg-[#262626] transition-colors">
-                <BookmarkIcon className="h-5 w-5" style={{ color: '#f5f5f5' }} />
+              <button className="p-2 rounded-full hover:bg-slate-800 transition-colors">
+                <BookmarkIcon className="h-5 w-5 text-slate-300" />
               </button>
             </div>
           </div>
@@ -399,21 +395,19 @@ export default function NewsArticlePage() {
         {/* Article Content */}
         <div className="prose prose-lg max-w-none mb-12">
           <div
-            className="text-lg leading-relaxed"
-            style={{ color: '#f5f5f5', opacity: 0.9 }}
+            className="text-lg leading-relaxed text-slate-300 prose-headings:text-white prose-headings:font-black prose-headings:tracking-tight prose-p:text-slate-300 prose-li:text-slate-300 prose-strong:text-white"
             dangerouslySetInnerHTML={{ __html: article.content }}
           />
         </div>
 
         {/* Tags */}
         <div className="mb-12">
-          <h3 className="text-lg font-semibold mb-4" style={{ color: '#f5f5f5' }}>Tags</h3>
+          <h3 className="text-lg font-bold text-white mb-4">Tags</h3>
           <div className="flex flex-wrap gap-2">
             {article.tags.map((tag: string, index: number) => (
               <span
                 key={index}
-                className="px-3 py-1 rounded-full text-sm border"
-                style={{ borderColor: '#d4af37', color: '#d4af37' }}
+                className="px-3 py-1 rounded-full text-sm border border-primary/30 text-primary hover:bg-primary hover:text-secondary transition-all"
               >
                 {tag}
               </span>
@@ -422,18 +416,17 @@ export default function NewsArticlePage() {
         </div>
 
         {/* Article Navigation */}
-        <div className="border-t border-b py-8 mb-12" style={{ borderColor: '#262626' }}>
+        <div className="border-t border-b border-slate-700 py-8 mb-12">
           <div className="flex justify-between items-center">
             {previousArticle ? (
               <Link
                 href={`/news/${previousArticle.id}`}
-                className="flex items-center p-4 rounded-lg border transition-colors hover:border-[#d4af37]"
-                style={{ borderColor: '#262626', backgroundColor: '#141414' }}
+                className="flex items-center p-4 rounded-2xl bg-slate-900 border border-primary/20 hover:border-primary/40 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10"
               >
-                <ArrowLeftIcon className="h-5 w-5 mr-3" style={{ color: '#d4af37' }} />
+                <ArrowLeftIcon className="h-5 w-5 mr-3 text-primary" />
                 <div>
-                  <div className="text-sm" style={{ color: '#f5f5f5', opacity: 0.6 }}>Previous Article</div>
-                  <div className="text-sm font-medium" style={{ color: '#f5f5f5' }}>
+                  <div className="text-sm text-slate-500">Previous Article</div>
+                  <div className="text-sm font-bold text-white">
                     {previousArticle.title.length > 50 ? `${previousArticle.title.substring(0, 50)}...` : previousArticle.title}
                   </div>
                 </div>
@@ -445,16 +438,15 @@ export default function NewsArticlePage() {
             {nextArticle ? (
               <Link
                 href={`/news/${nextArticle.id}`}
-                className="flex items-center p-4 rounded-lg border transition-colors hover:border-[#d4af37] text-right"
-                style={{ borderColor: '#262626', backgroundColor: '#141414' }}
+                className="flex items-center p-4 rounded-2xl bg-slate-900 border border-primary/20 hover:border-primary/40 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10 text-right"
               >
                 <div>
-                  <div className="text-sm" style={{ color: '#f5f5f5', opacity: 0.6 }}>Next Article</div>
-                  <div className="text-sm font-medium" style={{ color: '#f5f5f5' }}>
+                  <div className="text-sm text-slate-500">Next Article</div>
+                  <div className="text-sm font-bold text-white">
                     {nextArticle.title.length > 50 ? `${nextArticle.title.substring(0, 50)}...` : nextArticle.title}
                   </div>
                 </div>
-                <ArrowRightIcon className="h-5 w-5 ml-3" style={{ color: '#d4af37' }} />
+                <ArrowRightIcon className="h-5 w-5 ml-3 text-primary" />
               </Link>
             ) : (
               <div></div>
@@ -464,27 +456,25 @@ export default function NewsArticlePage() {
 
         {/* Related Articles */}
         <div>
-          <h3 className="text-2xl font-bold mb-6" style={{ color: '#f5f5f5' }}>Related Articles</h3>
+          <h3 className="text-2xl font-black text-secondary tracking-tight mb-6">
+            <span className="text-secondary">Related</span> <span className="text-primary">Articles</span>
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {relatedArticles.map((relatedArticle) => (
               <Link
                 key={relatedArticle.id}
                 href={`/news/${relatedArticle.id}`}
-                className="block p-6 rounded-lg border transition-transform hover:scale-105 hover:border-[#d4af37]"
-                style={{ borderColor: '#262626', backgroundColor: '#141414' }}
+                className="block p-6 rounded-2xl bg-slate-900 border border-primary/20 hover:border-primary/40 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10 hover:scale-105"
               >
                 <div className="mb-3">
-                  <span
-                    className="px-2 py-1 rounded text-xs font-medium"
-                    style={{ backgroundColor: '#262626', color: '#d4af37' }}
-                  >
+                  <span className="px-2 py-1 bg-slate-800 text-primary rounded-full text-xs font-bold uppercase tracking-widest border border-primary/30">
                     {relatedArticle.category}
                   </span>
                 </div>
-                <h4 className="text-lg font-semibold mb-2" style={{ color: '#f5f5f5' }}>
+                <h4 className="text-lg font-bold text-white mb-2 hover:text-primary transition-colors">
                   {relatedArticle.title}
                 </h4>
-                <div className="text-sm font-medium transition-colors" style={{ color: '#d4af37' }}>
+                <div className="text-sm font-bold text-primary hover:text-white transition-colors">
                   Read Article →
                 </div>
               </Link>
@@ -494,30 +484,22 @@ export default function NewsArticlePage() {
       </div>
 
       {/* Newsletter Signup */}
-      <div className="py-16" style={{ backgroundColor: '#141414' }}>
+      <div className="py-16 bg-slate-900">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <NewspaperIcon className="h-16 w-16 mx-auto mb-6" style={{ color: '#d4af37' }} />
-          <h2 className="text-3xl font-bold mb-4" style={{ color: '#f5f5f5' }}>
-            Stay Updated with Latest News
+          <NewspaperIcon className="h-16 w-16 mx-auto mb-6 text-primary" />
+          <h2 className="text-3xl md:text-4xl font-black text-secondary tracking-tight mb-4">
+            <span className="text-secondary">Stay Updated</span> <span className="text-primary">with Latest News</span>
           </h2>
-          <p className="text-lg mb-8" style={{ color: '#f5f5f5', opacity: 0.8 }}>
+          <p className="text-lg mb-8 text-slate-300 max-w-2xl mx-auto">
             Subscribe to our newsletter for exclusive market insights and property updates.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
             <input
               type="email"
               placeholder="Enter your email"
-              className="flex-1 px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent"
-              style={{
-                borderColor: '#d4af37',
-                backgroundColor: '#262626',
-                color: '#f5f5f5'
-              }}
+              className="flex-1 px-4 py-3 border border-primary/30 bg-slate-800 text-white rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
             />
-            <button
-              className="px-8 py-3 rounded-lg font-semibold transition-colors whitespace-nowrap"
-              style={{ backgroundColor: '#d4af37', color: '#0d0d0d' }}
-            >
+            <button className="px-8 py-3 bg-primary text-secondary font-bold rounded-xl hover:bg-white transition-all whitespace-nowrap">
               Subscribe
             </button>
           </div>

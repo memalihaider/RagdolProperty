@@ -91,28 +91,22 @@ export default function NewsPage() {
   const regularArticles = filteredArticles.filter(article => !article.featured)
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#0d0d0d', color: '#f5f5f5' }}>
+    <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <div className="relative py-20" style={{ backgroundColor: '#141414' }}>
+      <div className="relative py-20 bg-gradient-to-br from-primary/5 to-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6" style={{ color: '#f5f5f5' }}>
-              Real Estate News
+            <h1 className="text-4xl md:text-6xl font-black text-secondary mb-6 tracking-tight">
+              <span className="text-secondary">Real Estate</span> <span className="text-primary">News</span>
             </h1>
-            <p className="text-xl md:text-2xl mb-8" style={{ color: '#f5f5f5', opacity: 0.8 }}>
+            <p className="text-xl md:text-2xl mb-8 text-slate-600 max-w-3xl mx-auto">
               Stay informed with the latest Dubai real estate market insights and industry updates
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                className="px-8 py-4 rounded-lg font-semibold transition-colors"
-                style={{ backgroundColor: '#d4af37', color: '#0d0d0d' }}
-              >
+              <button className="px-8 py-4 bg-primary text-secondary font-bold rounded-xl hover:bg-primary/90 transition-all shadow-sm hover:shadow-md">
                 Latest Updates
               </button>
-              <button
-                className="px-8 py-4 border-2 rounded-lg font-semibold transition-colors"
-                style={{ borderColor: '#d4af37', color: '#d4af37' }}
-              >
+              <button className="px-8 py-4 border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-secondary transition-all">
                 Market Reports
               </button>
             </div>
@@ -121,7 +115,7 @@ export default function NewsPage() {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="border-b" style={{ borderColor: '#d4af37', backgroundColor: '#141414' }}>
+      <div className="border-b border-slate-200 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex space-x-8">
             {['latest', 'market-reports', 'developments', 'insights'].map((tab) => (
@@ -130,8 +124,8 @@ export default function NewsPage() {
                 onClick={() => setActiveTab(tab)}
                 className={`py-4 px-1 border-b-2 font-medium text-sm capitalize transition-colors ${
                   activeTab === tab
-                    ? 'border-[#d4af37] text-[#d4af37]'
-                    : 'border-transparent text-[#f5f5f5] hover:text-[#d4af37]'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-slate-600 hover:text-primary'
                 }`}
               >
                 {tab.replace('-', ' ')}
@@ -148,18 +142,13 @@ export default function NewsPage() {
             {/* Search and Filter */}
             <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
               <div className="relative flex-1 max-w-md">
-                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5" style={{ color: '#d4af37' }} />
+                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary" />
                 <input
                   type="text"
                   placeholder="Search news..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent"
-                  style={{
-                    borderColor: '#d4af37',
-                    backgroundColor: '#262626',
-                    color: '#f5f5f5'
-                  }}
+                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
                 />
               </div>
               <div className="flex gap-2 overflow-x-auto">
@@ -167,10 +156,10 @@ export default function NewsPage() {
                   <button
                     key={category}
                     onClick={() => setSelectedCategory(category)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                    className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
                       selectedCategory === category
-                        ? 'bg-[#d4af37] text-[#0d0d0d]'
-                        : 'bg-[#262626] text-[#f5f5f5] hover:bg-[#d4af37] hover:text-[#0d0d0d]'
+                        ? 'bg-primary text-secondary'
+                        : 'bg-slate-100 text-slate-700 hover:bg-primary hover:text-secondary'
                     }`}
                   >
                     {category}
@@ -181,7 +170,7 @@ export default function NewsPage() {
 
             {/* Featured Article */}
             {featuredArticle && (
-              <div className="relative overflow-hidden rounded-lg" style={{ backgroundColor: '#141414' }}>
+              <div className="relative overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm">
                 <div className="md:flex">
                   <div className="md:w-1/2">
                     <div
@@ -191,24 +180,21 @@ export default function NewsPage() {
                   </div>
                   <div className="md:w-1/2 p-8">
                     <div className="flex items-center mb-4">
-                      <span
-                        className="px-3 py-1 rounded-full text-xs font-medium"
-                        style={{ backgroundColor: '#d4af37', color: '#0d0d0d' }}
-                      >
+                      <span className="px-3 py-1 bg-primary text-secondary rounded-full text-xs font-bold uppercase tracking-widest">
                         Featured
                       </span>
-                      <span className="ml-4 text-sm" style={{ color: '#f5f5f5', opacity: 0.8 }}>
+                      <span className="ml-4 text-sm text-slate-500">
                         {featuredArticle.category}
                       </span>
                     </div>
-                    <h2 className="text-2xl font-bold mb-4" style={{ color: '#f5f5f5' }}>
+                    <h2 className="text-2xl font-black text-secondary mb-4 tracking-tight">
                       {featuredArticle.title}
                     </h2>
-                    <p className="mb-6" style={{ color: '#f5f5f5', opacity: 0.8 }}>
+                    <p className="mb-6 text-slate-600 leading-relaxed">
                       {featuredArticle.excerpt}
                     </p>
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center text-sm" style={{ color: '#f5f5f5', opacity: 0.8 }}>
+                      <div className="flex items-center text-sm text-slate-500">
                         <UserIcon className="h-4 w-4 mr-1" />
                         {featuredArticle.author}
                         <span className="mx-2">•</span>
@@ -219,8 +205,7 @@ export default function NewsPage() {
                       </div>
                       <Link
                         href={`/news/${featuredArticle.id}`}
-                        className="flex items-center text-sm font-medium transition-colors"
-                        style={{ color: '#d4af37' }}
+                        className="flex items-center text-sm font-bold text-primary hover:text-primary/80 transition-colors"
                       >
                         Read More
                         <ArrowRightIcon className="h-4 w-4 ml-1" />
@@ -237,32 +222,28 @@ export default function NewsPage() {
                 <Link
                   key={article.id}
                   href={`/news/${article.id}`}
-                  className="block rounded-lg overflow-hidden border transition-transform hover:scale-105"
-                  style={{ borderColor: '#d4af37', backgroundColor: '#141414' }}
+                  className="block rounded-2xl overflow-hidden bg-white border border-slate-200 hover:border-primary/40 transition-all duration-300 shadow-sm hover:shadow-lg group"
                 >
                   <div
-                    className="h-48 bg-cover bg-center"
+                    className="h-48 bg-cover bg-center group-hover:scale-105 transition-transform duration-300"
                     style={{ backgroundImage: `url(${article.image})` }}
                   />
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-3">
-                      <span
-                        className="px-2 py-1 rounded text-xs font-medium"
-                        style={{ backgroundColor: '#262626', color: '#d4af37' }}
-                      >
+                      <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-bold uppercase tracking-widest border border-slate-200">
                         {article.category}
                       </span>
-                      <span className="text-xs" style={{ color: '#f5f5f5', opacity: 0.6 }}>
+                      <span className="text-xs text-slate-500">
                         {article.readTime}
                       </span>
                     </div>
-                    <h3 className="text-lg font-semibold mb-3" style={{ color: '#f5f5f5' }}>
+                    <h3 className="text-lg font-bold text-secondary mb-3 group-hover:text-primary transition-colors leading-tight">
                       {article.title}
                     </h3>
-                    <p className="text-sm mb-4" style={{ color: '#f5f5f5', opacity: 0.8 }}>
+                    <p className="text-sm mb-4 text-slate-600 leading-relaxed">
                       {article.excerpt}
                     </p>
-                    <div className="flex items-center justify-between text-xs" style={{ color: '#f5f5f5', opacity: 0.6 }}>
+                    <div className="flex items-center justify-between text-xs text-slate-500">
                       <span>{article.author}</span>
                       <span>{article.date}</span>
                     </div>
@@ -275,28 +256,23 @@ export default function NewsPage() {
 
         {activeTab === 'market-reports' && (
           <div>
-            <h2 className="text-3xl font-bold text-center mb-12" style={{ color: '#f5f5f5' }}>
-              Market Reports & Analysis
+            <h2 className="text-3xl md:text-4xl font-black text-secondary tracking-tight text-center mb-12">
+              <span className="text-secondary">Market Reports</span> <span className="text-primary">& Analysis</span>
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {newsArticles.filter(article => article.category === 'Market Report' || article.category === 'Market Update').map((article) => (
-                <div
-                  key={article.id}
-                  className="p-6 rounded-lg border"
-                  style={{ borderColor: '#d4af37', backgroundColor: '#141414' }}
-                >
-                  <h3 className="text-xl font-semibold mb-3" style={{ color: '#f5f5f5' }}>
+                <div className="p-6 rounded-2xl bg-white border border-slate-200 hover:border-primary/40 transition-all duration-300 shadow-sm hover:shadow-lg">
+                  <h3 className="text-xl font-bold text-secondary mb-3 hover:text-primary transition-colors">
                     {article.title}
                   </h3>
-                  <p className="mb-4" style={{ color: '#f5f5f5', opacity: 0.8 }}>
+                  <p className="mb-4 text-slate-600 leading-relaxed">
                     {article.excerpt}
                   </p>
                   <div className="flex items-center justify-between text-sm">
-                    <span style={{ color: '#f5f5f5', opacity: 0.6 }}>{article.date}</span>
+                    <span className="text-slate-500">{article.date}</span>
                     <Link
                       href={`/news/${article.id}`}
-                      className="font-medium transition-colors"
-                      style={{ color: '#d4af37' }}
+                      className="font-bold text-primary hover:text-primary/80 transition-colors"
                     >
                       Read Report
                     </Link>
@@ -309,28 +285,23 @@ export default function NewsPage() {
 
         {activeTab === 'developments' && (
           <div>
-            <h2 className="text-3xl font-bold text-center mb-12" style={{ color: '#f5f5f5' }}>
-              New Developments & Projects
+            <h2 className="text-3xl md:text-4xl font-black text-secondary tracking-tight text-center mb-12">
+              <span className="text-secondary">New Developments</span> <span className="text-primary">& Projects</span>
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {newsArticles.filter(article => article.category === 'New Developments').map((article) => (
-                <div
-                  key={article.id}
-                  className="p-6 rounded-lg border"
-                  style={{ borderColor: '#d4af37', backgroundColor: '#141414' }}
-                >
-                  <h3 className="text-xl font-semibold mb-3" style={{ color: '#f5f5f5' }}>
+                <div className="p-6 rounded-2xl bg-white border border-slate-200 hover:border-primary/40 transition-all duration-300 shadow-sm hover:shadow-lg">
+                  <h3 className="text-xl font-bold text-secondary mb-3 hover:text-primary transition-colors">
                     {article.title}
                   </h3>
-                  <p className="mb-4" style={{ color: '#f5f5f5', opacity: 0.8 }}>
+                  <p className="mb-4 text-slate-600 leading-relaxed">
                     {article.excerpt}
                   </p>
                   <div className="flex items-center justify-between text-sm">
-                    <span style={{ color: '#f5f5f5', opacity: 0.6 }}>{article.date}</span>
+                    <span className="text-slate-500">{article.date}</span>
                     <Link
                       href={`/news/${article.id}`}
-                      className="font-medium transition-colors"
-                      style={{ color: '#d4af37' }}
+                      className="font-bold text-primary hover:text-primary/80 transition-colors"
                     >
                       Learn More
                     </Link>
@@ -343,28 +314,23 @@ export default function NewsPage() {
 
         {activeTab === 'insights' && (
           <div>
-            <h2 className="text-3xl font-bold text-center mb-12" style={{ color: '#f5f5f5' }}>
-              Investment Insights & Trends
+            <h2 className="text-3xl md:text-4xl font-black text-secondary tracking-tight text-center mb-12">
+              <span className="text-secondary">Investment Insights</span> <span className="text-primary">& Trends</span>
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {newsArticles.filter(article => article.category === 'Investment' || article.category === 'Global Rankings' || article.category === 'Sustainability').map((article) => (
-                <div
-                  key={article.id}
-                  className="p-6 rounded-lg border"
-                  style={{ borderColor: '#d4af37', backgroundColor: '#141414' }}
-                >
-                  <h3 className="text-xl font-semibold mb-3" style={{ color: '#f5f5f5' }}>
+                <div className="p-6 rounded-2xl bg-white border border-slate-200 hover:border-primary/40 transition-all duration-300 shadow-sm hover:shadow-md">
+                  <h3 className="text-xl font-bold text-secondary mb-3 hover:text-primary transition-colors">
                     {article.title}
                   </h3>
-                  <p className="mb-4" style={{ color: '#f5f5f5', opacity: 0.8 }}>
+                  <p className="mb-4 text-slate-600 leading-relaxed">
                     {article.excerpt}
                   </p>
                   <div className="flex items-center justify-between text-sm">
-                    <span style={{ color: '#f5f5f5', opacity: 0.6 }}>{article.date}</span>
+                    <span className="text-slate-500">{article.date}</span>
                     <Link
                       href={`/news/${article.id}`}
-                      className="font-medium transition-colors"
-                      style={{ color: '#d4af37' }}
+                      className="font-bold text-primary hover:text-secondary transition-colors"
                     >
                       Read Analysis
                     </Link>
@@ -377,30 +343,22 @@ export default function NewsPage() {
       </div>
 
       {/* Newsletter Signup */}
-      <div className="py-16" style={{ backgroundColor: '#141414' }}>
+      <div className="py-16 bg-slate-900">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <NewspaperIcon className="h-16 w-16 mx-auto mb-6" style={{ color: '#d4af37' }} />
-          <h2 className="text-3xl font-bold mb-4" style={{ color: '#f5f5f5' }}>
-            Stay Updated with Latest News
+          <NewspaperIcon className="h-16 w-16 mx-auto mb-6 text-primary" />
+          <h2 className="text-3xl md:text-4xl font-black text-secondary tracking-tight mb-4">
+            <span className="text-secondary">Stay Updated</span> <span className="text-primary">with Latest News</span>
           </h2>
-          <p className="text-lg mb-8" style={{ color: '#f5f5f5', opacity: 0.8 }}>
+          <p className="text-lg mb-8 text-slate-300 max-w-2xl mx-auto">
             Subscribe to our newsletter for exclusive market insights and property updates.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
             <input
               type="email"
               placeholder="Enter your email"
-              className="flex-1 px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent"
-              style={{
-                borderColor: '#d4af37',
-                backgroundColor: '#262626',
-                color: '#f5f5f5'
-              }}
+              className="flex-1 px-4 py-3 border border-primary/30 bg-slate-800 text-white rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
             />
-            <button
-              className="px-8 py-3 rounded-lg font-semibold transition-colors whitespace-nowrap"
-              style={{ backgroundColor: '#d4af37', color: '#0d0d0d' }}
-            >
+            <button className="px-8 py-3 bg-primary text-secondary font-bold rounded-xl hover:bg-white transition-all whitespace-nowrap">
               Subscribe
             </button>
           </div>

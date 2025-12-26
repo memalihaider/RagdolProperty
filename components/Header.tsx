@@ -123,6 +123,17 @@ export default function Header() {
             { label: t('header.navigation.investmentDeals'), href: '/properties?action=buy&sortBy=price-low' },
             { label: t('header.navigation.luxurySelection'), href: '/properties?action=buy&category=luxe' }
           ]
+        },
+        {
+          label: t('header.navigation.landmarks'),
+          href: '/properties?action=buy',
+          subItems: [
+            { label: t('header.navigation.burjKhalifa'), href: '/properties?action=buy&landmark=Burj Khalifa' },
+            { label: t('header.navigation.dubaiMall'), href: '/properties?action=buy&landmark=Dubai Mall' },
+            { label: t('header.navigation.burjAlArab'), href: '/properties?action=buy&landmark=Burj Al Arab' },
+            { label: t('header.navigation.palmJumeirahMonorail'), href: '/properties?action=buy&landmark=Palm Jumeirah Monorail' },
+            { label: t('header.navigation.dubaiMarinaWalk'), href: '/properties?action=buy&landmark=Dubai Marina Walk' }
+          ]
         }
       ]
     },
@@ -176,27 +187,36 @@ export default function Header() {
       ]
     },
     {
-      label: t('header.navigation.luxury'),
+      label: 'Luxe',
       hasDropdown: true,
       items: [
         {
-          label: t('header.navigation.luxuryCollections'),
-          href: '/properties?category=luxe',
+          label: 'Luxury Projects',
+          href: '/projects?category=luxe'
+        },
+        {
+          label: 'Luxury Properties for Sale',
+          href: '/properties?action=buy&category=luxe',
           subItems: [
-            { label: t('header.navigation.luxuryProducts'), href: '/properties?category=luxe' },
-            { label: t('header.navigation.ultraLuxuryProducts'), href: '/properties?category=ultra-luxe' },
-            { label: t('header.navigation.dubaiBrandedResidences'), href: '/properties?category=branded' }
+            { label: 'Apartments', href: '/properties?action=buy&category=luxe&type=apartment' },
+            { label: 'Villas', href: '/properties?action=buy&category=luxe&type=villa' },
+            { label: 'Homes', href: '/properties?action=buy&category=luxe&type=home' },
+            { label: 'Penthouse', href: '/properties?action=buy&category=luxe&type=penthouse' }
           ]
         },
         {
-          label: t('header.navigation.luxuryProperties'),
-          href: '/properties?action=buy&category=luxe',
+          label: 'Luxury Properties for Rent',
+          href: '/properties?action=rent&category=luxe',
           subItems: [
-            { label: t('header.navigation.luxuryApartments'), href: '/properties?action=buy&category=luxe&type=apartment' },
-            { label: t('header.navigation.luxuryVillas'), href: '/properties?action=buy&category=luxe&type=villa' },
-            { label: t('header.navigation.luxuryHomes'), href: '/properties?action=buy&category=luxe&type=home' },
-            { label: t('header.navigation.luxuryPenthouses'), href: '/properties?action=buy&category=luxe&type=penthouse' }
+            { label: 'Apartments', href: '/properties?action=rent&category=luxe&type=apartment' },
+            { label: 'Villas', href: '/properties?action=rent&category=luxe&type=villa' },
+            { label: 'Homes', href: '/properties?action=rent&category=luxe&type=home' },
+            { label: 'Penthouse', href: '/properties?action=rent&category=luxe&type=penthouse' }
           ]
+        },
+        {
+          label: 'Dubai Branded Residences',
+          href: '/properties?category=branded'
         }
       ]
     },
@@ -275,12 +295,12 @@ export default function Header() {
       )}
       <div className="container-custom flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500 bg-secondary">
-            <StarIcon className="h-6 w-6 transition-colors text-primary" />
-          </div>
-          <span className="text-2xl font-serif tracking-tighter transition-colors text-secondary">
-            RAGDOLL
+        <Link href="/" className="flex flex-col items-center group">
+          <span className="text-3xl font-serif font-bold tracking-tight text-secondary group-hover:text-primary transition-colors">
+            Ragdoll
+          </span>
+          <span className="text-xs font-light text-secondary/70 tracking-wider uppercase">
+            Properties
           </span>
         </Link>
 

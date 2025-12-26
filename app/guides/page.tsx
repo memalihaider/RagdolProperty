@@ -92,16 +92,15 @@ export default function AreaGuidesPage() {
   )
 
   return (
-    <div className="min-h-screen bg-[#0d0d0d] text-[#f5f5f5]">
+    <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#d4af37]/10 to-transparent"></div>
+      <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 to-slate-50">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Dubai Area <span className="text-[#d4af37]">Guides</span>
+            <h1 className="text-4xl md:text-6xl font-black text-secondary mb-6 tracking-tight">
+              <span className="text-secondary">Dubai Area</span> <span className="text-primary">Guides</span>
             </h1>
-            <p className="text-xl md:text-2xl text-[#a3a3a3] max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
               Discover the perfect neighborhood in Dubai. Explore detailed guides for every area,
               from luxury waterfront properties to family-friendly communities.
             </p>
@@ -111,17 +110,17 @@ export default function AreaGuidesPage() {
 
       {/* Search and Filters */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-[#141414] rounded-lg border border-[#333333] p-6 mb-8">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-8">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
-                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#a3a3a3]" />
+                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-primary" />
                 <input
                   type="text"
                   placeholder="Search Dubai areas..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-[#262626] border border-[#333333] rounded-lg text-[#f5f5f5] focus:ring-2 focus:ring-[#d4af37] focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
                 />
               </div>
             </div>
@@ -129,7 +128,7 @@ export default function AreaGuidesPage() {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-4 py-3 bg-[#262626] border border-[#333333] rounded-lg text-[#f5f5f5] focus:ring-2 focus:ring-[#d4af37] focus:border-transparent"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 text-slate-900 rounded-xl focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
               >
                 <option value="All">All Categories</option>
                 <option value="Marina">Waterfront</option>
@@ -144,14 +143,14 @@ export default function AreaGuidesPage() {
         {/* Area Categories */}
         <div className="grid md:grid-cols-3 gap-6 mb-12">
           {areaCategories.map((category, index) => (
-            <div key={index} className="bg-[#141414] rounded-lg border border-[#333333] p-6 hover:border-[#d4af37] transition-colors">
-              <category.icon className="h-12 w-12 text-[#d4af37] mb-4" />
-              <h3 className="text-xl font-bold mb-3">{category.title}</h3>
-              <p className="text-[#a3a3a3] mb-4">{category.description}</p>
+            <div key={index} className="bg-white rounded-2xl border border-slate-200 p-6 hover:border-primary/40 hover:shadow-lg transition-all duration-300 shadow-sm">
+              <category.icon className="h-12 w-12 text-primary mb-4" />
+              <h3 className="text-xl font-bold text-secondary mb-3">{category.title}</h3>
+              <p className="text-slate-600 mb-4 leading-relaxed">{category.description}</p>
               <div className="space-y-2">
                 {category.areas.map((area, idx) => (
-                  <div key={idx} className="flex items-center text-sm">
-                    <MapPinIcon className="h-4 w-4 text-[#d4af37] mr-2" />
+                  <div key={idx} className="flex items-center text-sm text-slate-500">
+                    <MapPinIcon className="h-4 w-4 text-primary mr-2" />
                     <span>{area}</span>
                   </div>
                 ))}
@@ -163,43 +162,44 @@ export default function AreaGuidesPage() {
         {/* Areas Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredAreas.map((area, index) => (
-            <div key={index} className="bg-[#141414] rounded-lg border border-[#333333] overflow-hidden hover:border-[#d4af37] transition-colors">
-              <div className="h-48 bg-[#262626] relative">
+            <div key={index} className="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:border-primary/40 hover:shadow-lg transition-all duration-300 shadow-sm group">
+              <div className="h-48 bg-slate-100 relative">
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <MapPinIcon className="h-16 w-16 text-[#d4af37]" />
+                  <MapPinIcon className="h-16 w-16 text-primary" />
                 </div>
-                <div className="absolute top-4 right-4 bg-[#d4af37] text-[#1a1a1a] px-2 py-1 rounded text-sm font-semibold">
-                  {area.rating} ★
+                <div className="absolute top-4 right-4 bg-primary text-secondary px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1 shadow-sm">
+                  <StarIcon className="h-3 w-3" />
+                  {area.rating}
                 </div>
               </div>
 
               <div className="p-6">
-                <h3 className="text-xl font-bold mb-2">{area.name}</h3>
-                <p className="text-[#a3a3a3] mb-4">{area.description}</p>
+                <h3 className="text-xl font-bold text-secondary mb-2 group-hover:text-primary transition-colors">{area.name}</h3>
+                <p className="text-slate-600 mb-4 leading-relaxed">{area.description}</p>
 
                 <div className="mb-4">
-                  <div className="text-[#d4af37] font-semibold">{area.avgPrice}</div>
-                  <div className="text-[#a3a3a3] text-sm">Average Property Price</div>
+                  <div className="text-primary font-bold text-lg">{area.avgPrice}</div>
+                  <div className="text-slate-500 text-sm">Average Property Price</div>
                 </div>
 
                 <div className="mb-4">
-                  <div className="text-sm text-[#a3a3a3] mb-2">Key Highlights:</div>
+                  <div className="text-sm text-slate-500 mb-2">Key Highlights:</div>
                   <div className="flex flex-wrap gap-2">
                     {area.highlights.map((highlight, idx) => (
-                      <span key={idx} className="bg-[#262626] text-xs px-2 py-1 rounded">
+                      <span key={idx} className="bg-slate-100 text-slate-700 text-xs px-3 py-1 rounded-full border border-slate-200">
                         {highlight}
                       </span>
                     ))}
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between text-sm text-[#a3a3a3] mb-4">
+                <div className="flex items-center justify-between text-sm text-slate-500 mb-4">
                   <span>{area.properties} properties available</span>
                 </div>
 
                 <Link
                   href={`/properties?location=${encodeURIComponent(area.name)}`}
-                  className="w-full bg-[#d4af37] hover:bg-[#b8941f] text-[#1a1a1a] font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center"
+                  className="w-full bg-primary hover:bg-primary/90 text-secondary font-bold py-3 px-4 rounded-xl transition-all flex items-center justify-center shadow-sm hover:shadow-md"
                 >
                   Explore Properties
                   <ArrowRightIcon className="h-4 w-4 ml-2" />
@@ -211,9 +211,9 @@ export default function AreaGuidesPage() {
 
         {filteredAreas.length === 0 && (
           <div className="text-center py-12">
-            <MapPinIcon className="h-16 w-16 text-[#a3a3a3] mx-auto mb-4" />
-            <h3 className="text-xl font-bold mb-2">No areas found</h3>
-            <p className="text-[#a3a3a3]">Try adjusting your search criteria</p>
+            <MapPinIcon className="h-16 w-16 text-slate-400 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-secondary mb-2">No areas found</h3>
+            <p className="text-slate-500">Try adjusting your search criteria</p>
           </div>
         )}
       </div>

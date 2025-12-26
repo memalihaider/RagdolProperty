@@ -3,11 +3,8 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { XMarkIcon } from '@heroicons/react/24/outline'
-import { mockProperties } from '@/lib/mock-data'
 
 export interface ValuationData {
-  property_id?: string
-  property_title?: string
   full_name: string
   email: string
   phone: string
@@ -60,9 +57,7 @@ export default function ValuationModal({
         full_name: '',
         email: '',
         phone: '',
-        message: '',
-        property_id: '',
-        property_title: ''
+        message: ''
       })
     } catch (error) {
       console.error('Error submitting valuation request:', error)
@@ -168,39 +163,6 @@ export default function ValuationModal({
               {errors.email && (
                 <p className="text-red-500 text-xs mt-1">{errors.email}</p>
               )}
-            </div>
-          </div>
-
-          {/* Property Selection */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold text-slate-900">Property Selection</h3>
-
-            <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">
-                Select Property to Value (Optional)
-              </label>
-              <select
-                value={formData.property_id || ''}
-                onChange={(e) => {
-                  const selectedProperty = mockProperties.find(p => p.id === e.target.value)
-                  setFormData(prev => ({
-                    ...prev,
-                    property_id: e.target.value,
-                    property_title: selectedProperty?.title || ''
-                  }))
-                }}
-                className="w-full px-4 py-3 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-primary/50 outline-none transition-all"
-              >
-                <option value="">Select a property...</option>
-                {mockProperties.map((property) => (
-                  <option key={property.id} value={property.id}>
-                    {property.title} - {property.location} ({property.type})
-                  </option>
-                ))}
-              </select>
-              <p className="text-xs text-slate-500 mt-1">
-                Choose a specific property or leave blank to request general valuation services
-              </p>
             </div>
           </div>
 

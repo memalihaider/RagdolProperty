@@ -78,7 +78,7 @@ export default function SnaggingHandoverPage() {
       <div className="relative py-20" style={{ backgroundColor: '#141414' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6" style={{ color: '#f5f5f5' }}>
+            <h1 className="text-4xl md:text-6xl font-bold text-secondary mb-6">
               Snagging & Handover Services
             </h1>
             <p className="text-xl md:text-2xl mb-8" style={{ color: '#f5f5f5', opacity: 0.8 }}>
@@ -129,7 +129,7 @@ export default function SnaggingHandoverPage() {
           <div className="space-y-16">
             {/* Overview */}
             <div className="text-center">
-              <h2 className="text-3xl font-bold mb-6" style={{ color: '#f5f5f5' }}>
+              <h2 className="text-3xl font-bold text-secondary mb-6">
                 Expert Snagging & Property Handover Services
               </h2>
               <p className="text-lg max-w-3xl mx-auto" style={{ color: '#f5f5f5', opacity: 0.8 }}>
@@ -162,7 +162,7 @@ export default function SnaggingHandoverPage() {
 
         {activeTab === 'services' && (
           <div>
-            <h2 className="text-3xl font-bold text-center mb-12" style={{ color: '#f5f5f5' }}>
+            <h2 className="text-3xl font-bold text-secondary text-center mb-12">
               Our Snagging & Handover Services
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -174,7 +174,7 @@ export default function SnaggingHandoverPage() {
                 >
                   <div className="flex items-center mb-4">
                     <service.icon className="h-8 w-8 mr-3" style={{ color: '#d4af37' }} />
-                    <h3 className="text-xl font-semibold" style={{ color: '#f5f5f5' }}>
+                    <h3 className="text-xl font-semibold text-secondary">
                       {service.title}
                     </h3>
                   </div>
@@ -197,7 +197,7 @@ export default function SnaggingHandoverPage() {
 
         {activeTab === 'process' && (
           <div>
-            <h2 className="text-3xl font-bold text-center mb-12" style={{ color: '#f5f5f5' }}>
+            <h2 className="text-3xl font-bold text-secondary text-center mb-12">
               Our Snagging Process
             </h2>
             <div className="space-y-8">
@@ -210,7 +210,7 @@ export default function SnaggingHandoverPage() {
                     {item.step}
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold mb-2" style={{ color: '#f5f5f5' }}>
+                    <h3 className="text-xl font-semibold text-secondary mb-2">
                       {item.title}
                     </h3>
                     <p style={{ color: '#f5f5f5', opacity: 0.8 }}>{item.description}</p>
@@ -223,7 +223,7 @@ export default function SnaggingHandoverPage() {
 
         {activeTab === 'benefits' && (
           <div>
-            <h2 className="text-3xl font-bold text-center mb-12" style={{ color: '#f5f5f5' }}>
+            <h2 className="text-3xl font-bold text-secondary text-center mb-12">
               Why Choose Our Snagging Services?
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -243,7 +243,7 @@ export default function SnaggingHandoverPage() {
 
         {activeTab === 'contact' && (
           <div className="max-w-2xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-8" style={{ color: '#f5f5f5' }}>
+            <h2 className="text-3xl font-bold text-secondary text-center mb-8">
               Book Your Snagging Inspection
             </h2>
             <form className="space-y-6">

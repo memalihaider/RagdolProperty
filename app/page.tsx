@@ -8,6 +8,7 @@ import HeroSearch from '@/components/HeroSearch'
 import HeroImageSlider from '@/components/HeroImageSlider'
 import AgentSlider from '@/components/AgentSlider'
 import { useTranslation } from 'react-i18next'
+import { useState, useRef, useEffect } from 'react'
 import {
   BuildingOffice2Icon,
   HomeIcon,
@@ -651,6 +652,61 @@ export default function HomePage() {
   const rentalProperties = getRentalProperties()
   const newProjects = getNewProjects()
 
+  // Video controls state
+  const [videoStates, setVideoStates] = useState<{[key: number]: {isPlaying: boolean, isMuted: boolean}}>({
+    0: { isPlaying: true, isMuted: true },
+    1: { isPlaying: true, isMuted: true },
+    2: { isPlaying: true, isMuted: true },
+    3: { isPlaying: true, isMuted: true }
+  })
+
+  // Video refs
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([null, null, null, null])
+
+  const togglePlayPause = (index: number) => {
+    setVideoStates(prev => ({
+      ...prev,
+      [index]: { ...prev[index], isPlaying: !prev[index].isPlaying }
+    }))
+  }
+
+  const toggleMute = (index: number) => {
+    setVideoStates(prev => ({
+      ...prev,
+      [index]: { ...prev[index], isMuted: !prev[index].isMuted }
+    }))
+  }
+
+  // Effect to handle video playback
+  useEffect(() => {
+    videoRefs.current.forEach((video, index) => {
+      if (video) {
+        if (videoStates[index]?.isPlaying) {
+          video.play().catch(() => {
+            // Handle play promise rejection (e.g., user interaction required)
+          })
+        } else {
+          video.pause()
+        }
+      }
+    })
+  }, [videoStates])
+
+  // Initial autoplay effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      videoRefs.current.forEach((video, index) => {
+        if (video && videoStates[index]?.isPlaying) {
+          video.play().catch(() => {
+            // Handle autoplay restrictions
+          })
+        }
+      })
+    }, 1000) // Small delay to ensure videos are loaded
+
+    return () => clearTimeout(timer)
+  }, [])
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Landing Section with Image Slider */}
@@ -668,7 +724,7 @@ export default function HomePage() {
                   {t('homepage.premiumRealEstate')}
                 </h2>
                 <h1 className="text-2xl sm:text-3xl md:text-5xl font-black tracking-tight text-white drop-shadow-2xl leading-tight">
-                  {t('homepage.findYourDreamHome')}
+                  Find Your <span className="text-primary">Dream Home</span>
                 </h1>
                 <p className="text-base sm:text-xl md:text-2xl text-white/90 max-w-3xl mx-auto leading-relaxed font-medium drop-shadow-lg px-4 sm:px-0">
                   {t('homepage.discoverExclusiveProperties')}
@@ -719,8 +775,8 @@ export default function HomePage() {
               <h2 className="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4">
                 {t('homepage.visualExperience')}
               </h2>
-              <h3 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
-                {t('homepage.propertyShowcase')}
+              <h3 className="text-3xl sm:text-4xl md:text-5xl font-black text-secondary tracking-tight">
+                Property <span className="text-primary">Showcase</span>
               </h3>
             </div>
             <p className="text-slate-500 font-medium max-w-md text-sm sm:text-base">
@@ -735,10 +791,16 @@ export default function HomePage() {
               { title: 'Marina View', loc: 'Dubai Marina', vid: 'v1764843481/WhatsApp_Video_2025-11-29_at_12.19.32_jm5ups.mp4' },
               { title: 'Modern Townhouse', loc: 'Emirates Hills', vid: 'v1764843447/WhatsApp_Video_2025-11-29_at_12.18.06_e0j4gz.mp4' }
             ].map((reel, i) => (
-              <div key={i} className="relative aspect-9/16 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl group cursor-pointer animate-slide-up" style={{ animationDelay: `${i * 100}ms` }}>
+              <div key={i} className="relative aspect-9/16 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl group cursor-pointer animate-slide-up" style={{ animationDelay: `${i * 100}ms` }} onClick={() => togglePlayPause(i)}>
                 <video
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                  autoPlay muted loop playsInline
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  autoPlay={false}
+                  muted={videoStates[i]?.isMuted}
+                  loop={false}
+                  playsInline
+                  ref={(el) => {
+                    videoRefs.current[i] = el
+                  }}
                 >
                   <source src={`https://res.cloudinary.com/thenprogrammer/video/upload/${reel.vid}`} type="video/mp4" />
                 </video>
@@ -746,9 +808,52 @@ export default function HomePage() {
                   <h4 className="text-white font-bold text-base sm:text-lg">{reel.title}</h4>
                   <p className="text-white/70 text-sm font-medium">{reel.loc}</p>
                 </div>
+
+                {/* Video Controls */}
+                <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <button
+                    onClick={() => togglePlayPause(i)}
+                    className="h-10 w-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/30 hover:bg-white/30 transition-colors"
+                  >
+                    {videoStates[i]?.isPlaying ? (
+                      <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                        <path d="M6 4h4v16H6V4zM14 4h4v16h-4V4z"/>
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                      </svg>
+                    )}
+                  </button>
+
+                  <button
+                    onClick={() => toggleMute(i)}
+                    className="h-10 w-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/30 hover:bg-white/30 transition-colors"
+                  >
+                    {videoStates[i]?.isMuted ? (
+                      <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                        <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                      </svg>
+                    )}
+                  </button>
+                </div>
+
+                {/* Play/Pause Overlay */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <div className="h-12 w-12 sm:h-16 sm:w-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/30">
-                    <svg className="w-6 h-6 sm:w-8 sm:h-8 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    {videoStates[i]?.isPlaying ? (
+                      <svg className="w-6 h-6 sm:w-8 sm:h-8 fill-current" viewBox="0 0 24 24">
+                        <path d="M6 4h4v16H6V4zM14 4h4v16h-4V4z"/>
+                      </svg>
+                    ) : (
+                      <svg className="w-6 h-6 sm:w-8 sm:h-8 fill-current" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                      </svg>
+                    )}
                   </div>
                 </div>
               </div>
@@ -761,8 +866,8 @@ export default function HomePage() {
       <section className="py-16 sm:py-24 bg-white">
         <div className="container-custom">
           <div className="text-center mb-12 sm:mb-16 px-4 sm:px-0">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif text-secondary mb-4 sm:mb-6">
-              {t('homepage.trustedPartners')}
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-secondary tracking-tight mb-4 sm:mb-6">
+              <span className="text-secondary">Trusted</span> <span className="text-primary">Partners</span>
             </h2>
             <p className="text-lg sm:text-xl text-slate-600 max-w-3xl mx-auto">
               {t('homepage.collaborateWithDevelopers')}
@@ -844,7 +949,7 @@ export default function HomePage() {
             <h2 className="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4">
               {t('homepage.exclusiveSelection')}
             </h2>
-            <h3 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
+            <h3 className="text-4xl md:text-5xl font-black text-secondary tracking-tight">
               {t('homepage.propertiesFor')} <span className="text-primary">{t('homepage.buyText')}</span>
             </h3>
           </div>
@@ -863,7 +968,7 @@ export default function HomePage() {
             <h2 className="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4">
               {t('homepage.rentalCollection')}
             </h2>
-            <h3 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
+            <h3 className="text-4xl md:text-5xl font-black text-secondary tracking-tight">
               {t('homepage.propertiesFor')} <span className="text-primary">{t('homepage.rentText')}</span>
             </h3>
           </div>
@@ -883,7 +988,7 @@ export default function HomePage() {
               <h2 className="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4">
                 {t('homepage.futureLiving')}
               </h2>
-              <h3 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
+              <h3 className="text-4xl md:text-5xl font-black text-secondary tracking-tight">
                 {t('homepage.newText')} <span className="text-primary">{t('homepage.projectsText')}</span>
               </h3>
             </div>
@@ -926,7 +1031,7 @@ export default function HomePage() {
             <h2 className="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4">
               Prime Locations
             </h2>
-            <h3 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
+            <h3 className="text-4xl md:text-5xl font-black text-secondary tracking-tight">
               Explore <span className="text-primary">Popular Areas</span>
             </h3>
           </div>
@@ -995,8 +1100,8 @@ export default function HomePage() {
                 <h2 className="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4">
                   Our Excellence
                 </h2>
-                <h3 className="text-3xl sm:text-4xl md:text-6xl font-black tracking-tight mb-6 sm:mb-8">
-                  Why Choose RAGDOL?
+                <h3 className="text-3xl sm:text-4xl md:text-6xl font-black text-secondary tracking-tight mb-6 sm:mb-8">
+                  Why Choose <span className="text-primary">RAGDOL?</span>
                 </h3>
                 <p className="text-lg sm:text-xl text-slate-400 leading-relaxed font-medium">
                   We combine deep market knowledge with a personalized approach to help you find the perfect property in Dubai's competitive market.
@@ -1040,8 +1145,8 @@ export default function HomePage() {
             <h2 className="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4">
               {t('homepage.clientStories')}
             </h2>
-            <h3 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
-              {t('homepage.whatOurClientsSay')}
+            <h3 className="text-3xl sm:text-4xl md:text-5xl font-black text-secondary tracking-tight">
+              What Our <span className="text-primary">Clients Say</span>
             </h3>
           </div>
           
@@ -1094,7 +1199,7 @@ export default function HomePage() {
               <h2 className="text-primary font-bold tracking-[0.2em] uppercase text-sm mb-4">
                 Market Insights
               </h2>
-              <h3 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
+              <h3 className="text-4xl md:text-5xl font-black text-secondary tracking-tight">
                 Latest <span className="text-primary">News & Articles</span>
               </h3>
             </div>

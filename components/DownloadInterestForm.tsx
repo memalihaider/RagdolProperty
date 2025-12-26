@@ -106,7 +106,7 @@ export default function DownloadInterestForm({
         <div className="sticky top-0 bg-white border-b border-slate-100 p-6 rounded-t-[2.5rem]">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-black text-slate-900">
+              <h2 className="text-2xl font-black text-secondary">
                 {downloadType === 'floor_plan' ? 'Download Floor Plan' : 'Download Brochure'}
               </h2>
               <p className="text-slate-600 mt-1">{propertyTitle}</p>
@@ -124,7 +124,7 @@ export default function DownloadInterestForm({
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Personal Information */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold text-slate-900">Personal Information</h3>
+            <h3 className="text-lg font-bold text-secondary">Personal Information</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -200,7 +200,7 @@ export default function DownloadInterestForm({
 
           {/* Professional Information */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold text-slate-900">Professional Information</h3>
+            <h3 className="text-lg font-bold text-secondary">Professional Information</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -247,7 +247,7 @@ export default function DownloadInterestForm({
 
           {/* Property Interest */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold text-slate-900">Property Interest</h3>
+            <h3 className="text-lg font-bold text-secondary">Property Interest</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>

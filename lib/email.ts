@@ -168,16 +168,17 @@ export async function sendAdminNotification(
       </html>
     `
   } else if (type === 'valuation') {
-    subject = `New Valuation Request from ${data.name}`
+    subject = `New Valuation Request from ${data.name || data.full_name}`
     html = `
       <html>
         <body style="font-family: Arial, sans-serif; color: #333;">
           <h2>New Property Valuation Request</h2>
-          <p><strong>Customer:</strong> ${data.name}</p>
+          <p><strong>Customer:</strong> ${data.name || data.full_name}</p>
           <p><strong>Email:</strong> ${data.email}</p>
           <p><strong>Phone:</strong> ${data.phone}</p>
-          <p><strong>Property Type:</strong> ${data.propertyType}</p>
-          <p><strong>Location:</strong> ${data.location}</p>
+          ${data.propertyType ? `<p><strong>Property Type:</strong> ${data.propertyType}</p>` : ''}
+          ${data.location ? `<p><strong>Location:</strong> ${data.location}</p>` : ''}
+          ${data.message ? `<p><strong>Message:</strong></p><p>${data.message}</p>` : ''}
           <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
           <p><a href="${baseUrl}/admin/dashboard" style="background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block;">View in Admin Panel</a></p>
         </body>
